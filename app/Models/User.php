@@ -136,12 +136,10 @@ class User extends Authenticatable
     protected static function booted()
 {
     static::creating(function ($user) {
-        // Find the last numeric ID to determine the next number
         $lastUser = \App\Models\User::orderBy('id', 'desc')->first();
         $nextId = $lastUser ? ($lastUser->id + 1) : 1;
-
-        // Logic for HGNL00010001
-        // We pad the number to 8 digits (e.g., 00010001)
+        
+        // This ensures new users get the same format as your imported ones
         $user->member_id = 'HGNL' . str_pad($nextId + 10000, 8, '0', STR_PAD_LEFT);
     });
 }
