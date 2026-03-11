@@ -7,3 +7,13 @@
 /storage/framework/sessions/*
 /storage/framework/views/*
 /public/storage
+.env
+public/storage
+storage/*.key
+/vendor/
+/bootstrap/cache/*.php
+/public/hot
+/public/storage
+/storage/framework/cache/data/*
+/storage/framework/views/*.php
+/storage/framework/sessions/*
