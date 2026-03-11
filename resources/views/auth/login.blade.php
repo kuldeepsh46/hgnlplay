@@ -152,7 +152,7 @@
         <div class="brand">
             <div class="logo">
                 <a href="/">
-                    <img src="/storage/logo.jpeg" alt="Himalaya Trading">git statusgit status
+                    <img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading">git statusgit status
                 </a>
             </div>
             <h1>Himalaya <span class="brand-green">Trading</span></h1>

@@ -536,7 +536,7 @@
         <div class="container nav">
             <div class="brand">
                 <div class="logo">
-                  <a href="/#home" ><img src="/storage/logo.png" alt="Himalaya Trading"></a>
+                  <a href="/#home" ><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading"></a>
                 </div>
                
             </div>
@@ -679,7 +679,7 @@
         <div class="container footer-top">
             <div class="f-brand">
                 <div class="logo">
-                    <a href="/#home" ><img src="/storage/logo.png" alt="Himalaya Trading"></a>
+                    <a href="/#home" ><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading"></a>
                 </div>
                 <!-- <h4 style="margin:12px 0 8px">Himalaya <span class="brand-green">Trading</span></h4> -->
                 <p>

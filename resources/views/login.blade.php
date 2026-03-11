@@ -159,7 +159,7 @@
   <div class="login-container">
 <div class="brand">
                 <div class="logo">
-                    <img src="/storage/logo.png" alt="Himalaya Trading">
+                    <img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading">
                 </div>
                 <h1>Himalaya <span class="brand-green">Trading</span></h1>
             </div>

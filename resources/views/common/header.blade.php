@@ -1,12 +1,12 @@
 <!-- Sidebar -->
 <div class="mobile-header">
-    <div class="logo"><img src="/storage/logo.jpeg" alt="Himalaya Trading">
+    <div class="logo"><img src="{{ asset('assets/images/logo.jpeg') }}" alt="Himalaya Trading">
         <!-- <h1>Himalaya <span class="brand-green">Trading</span></h1> -->
     </div>
     <div class="toggle-btn" id="toggleBtn">☰</div>
 </div>
 <aside class="sidebar" id="sidebar">
-    <div class="logo"><img src="/storage/logo.jpeg" alt="Himalaya Trading">
+    <div class="logo"><img src="{{ asset('assets/images/logo.jpeg') }}" alt="Himalaya Trading">
         <!-- <h1>Himalaya <span class="brand-green">Trading</span></h1> -->
     </div>
     <div class="toggle-btn" id="toggleBtnd">☰</div>

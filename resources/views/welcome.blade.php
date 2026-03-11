@@ -1635,7 +1635,7 @@ padding-top: 20px;
         <div class="container nav">
             <div class="brand">
                 <div class="logo">
-                   <a href="/#home" ><img src="/storage/logo.png" alt="Himalaya Trading"></a>
+                   <a href="/#home" ><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading"></a>
                 </div>
                 <!-- <h1>Himalaya <span class="brand-green">Trading</span></h1> -->
             </div>
@@ -1709,7 +1709,8 @@ padding-top: 20px;
             <!-- RIGHT IMAGE COLLAGE -->
             <div class="hero-images">
                 <img class="img-main"
-                    src="/storage/fb.avif"
+                    {{-- src="/storage/fb.avif" --}}
+                    src="{{ asset('assets/images/fb.avif') }}"
                     alt="Business team">
 
                 <img class="img-top"
@@ -1829,7 +1830,7 @@ padding-top: 20px;
             <!-- Member 1 -->
             <div class="team-card">
                 <div class="team-img">
-                    <img src="/storage/kapil.png" alt="Kapil Bhardwaj">
+                    <img src="{{ asset('assets/images/kapil.png') }}" alt="Kapil Bhardwaj">
                 </div>
                 <h4 class="team-name">KAPIL BHARDWAJ</h4>
                 <p class="team-role">DIRECTOR</p>
@@ -1838,7 +1839,7 @@ padding-top: 20px;
             <!-- Member 2 -->
             <div class="team-card">
                 <div class="team-img">
-                    <img src="/storage/isro.png" alt="Isro Thakur">
+                    <img src="{{ asset('assets/images/isro.png') }}" alt="Isro Thakur">
                 </div>
                 <h4 class="team-name">ISRO THAKUR</h4>
                 <p class="team-role">CEO</p>
@@ -1847,7 +1848,7 @@ padding-top: 20px;
             <!-- Member 3 -->
             <div class="team-card">
                 <div class="team-img">
-                    <img src="/storage/sonu.png" alt="Sonu Kapoor">
+                    <img src="{{ asset('assets/images/sonu.png') }}" alt="Sonu Kapoor">
                 </div>
                 <h4 class="team-name">SONU KAPOOR</h4>
                 <p class="team-role">DIRECTOR</p>
@@ -2231,7 +2232,7 @@ padding-top: 20px;
         <div class="container footer-top">
             <div class="f-brand">
                 <div class="logo">
-                   <a href="/#home" ><img src="/storage/logo.png" alt="Himalaya Trading"></a>
+                   <a href="/#home" ><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading"></a>
                 </div>
                 <!-- <h4 style="margin:12px 0 8px">Himalaya <span class="brand-green">Trading</span></h4> -->
                 <p>
