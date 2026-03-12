@@ -57,7 +57,7 @@ function getChildren($node){
 function nodeBox($node){
     if(!$node){
         return '<div class="node node-blank">
-            <img src="'.asset('public/storage/r1.png').'">
+            <img src="'.asset('assets/images/r1.png').'">
             <span>Blank</span>
         </div>';
     }
@@ -67,7 +67,7 @@ function nodeBox($node){
     if(($node['investment_count'] ?? 0) >= 3) $color='node-green';
 
     return '<div class="node '.$color.'">
-        <img src="'.($node['image'] ?? asset('public/storage/r1.png')).'">
+        <img src="'.($node['image'] ?? asset('assets/images/r1.png')).'">
         <span>'.$node['username'].'</span>
     </div>';
 }

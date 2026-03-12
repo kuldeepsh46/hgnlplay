@@ -26,7 +26,7 @@ function buildSponsorTree($userId, $level){
         'name'  => $user->username ?? $user->email,
         'image' => $user->image
             ? asset('storage/'.$user->image)
-            : asset('public/storage/r1.png'),
+            : asset('assets/images/r1.png'),
         'children' => $children->map(fn($c) =>
             buildSponsorTree($c->id, $level - 1)
         )->toArray(),

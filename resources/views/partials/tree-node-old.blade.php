@@ -74,56 +74,56 @@ function uname($node){
 {{-- ================= LEVEL 1 ================= --}}
 <tr>
     <td colspan="8">
-        {!! userBox(asset('public/storage/r1.png'), uname($node), 'red') !!}
+        {!! userBox(asset('assets/images/r1.png'), uname($node), 'red') !!}
     </td>
 </tr>
 
 <tr>
     <td colspan="8">
-        <img src="{{ asset('public/storage/garph01.png') }}" class="graph" style="width:360px">
+        <img src="{{ asset('assets/images/graph01.png') }}" class="graph" style="width:360px">
     </td>
 </tr>
 
 {{-- ================= LEVEL 2 ================= --}}
 <tr>
     <td colspan="4">
-        {!! userBox(asset('/storage/g1.png'), uname($node['left'] ?? null), 'green') !!}
+        {!! userBox(asset('assets/images/r1.png'), uname($node['left'] ?? null), 'green') !!}
     </td>
     <td colspan="4">
-        {!! userBox(asset('/storage/r1.png'), uname($node['right'] ?? null), 'red') !!}
+        {!! userBox(asset('assets/images/r1.png'), uname($node['right'] ?? null), 'red') !!}
     </td>
 </tr>
 
 <tr>
     <td colspan="4">
-        <img src="{{ asset('/storage/garph01.png') }}" class="graph" style="width:180px">
+        <img src="{{ asset('assets/images/graph01.png') }}" class="graph" style="width:180px">
     </td>
     <td colspan="4">
-        <img src="{{ asset('/storage/garph01.png') }}" class="graph" style="width:180px">
+        <img src="{{ asset('assets/images/graph01.png') }}" class="graph" style="width:180px">
     </td>
 </tr>
 
 {{-- ================= LEVEL 3 ================= --}}
 <tr>
     <td colspan="2">
-        {!! userBox(asset('public/storage/r1.png'), uname($node['left']['left'] ?? null), 'red') !!}
+        {!! userBox(asset('assets/images/r1.png'), uname($node['left']['left'] ?? null), 'red') !!}
     </td>
     <td colspan="2">
-        {!! userBox(asset('/storage/g1.png'), uname($node['left']['right'] ?? null), 'green') !!}
+        {!! userBox(asset('assets/images/g1.png'), uname($node['left']['right'] ?? null), 'green') !!}
     </td>
     <td colspan="2">
-        {!! userBox(asset('/storage/r1.png'), uname($node['right']['left'] ?? null), 'red') !!}
+        {!! userBox(asset('assets/images/r1.png'), uname($node['right']['left'] ?? null), 'red') !!}
     </td>
     <td colspan="2">
-        {!! userBox(asset('/storage/g1.png'), uname($node['right']['right'] ?? null), 'green') !!}
+        {!! userBox(asset('assets/images/g1.png'), uname($node['right']['right'] ?? null), 'green') !!}
     </td>
 </tr>
 
 <tr>
-    <td colspan="2"><img src="{{ asset('public/storage/garph01.png') }}" class="graph" style="width:100px"></td>
-    <td colspan="2"><img src="{{ asset('public/storage/garph01.png') }}" class="graph" style="width:100px"></td>
-    <td colspan="2"><img src="{{ asset('public/storage/garph01.png') }}" class="graph" style="width:100px"></td>
-    <td colspan="2"><img src="{{ asset('public/storage/garph01.png') }}" class="graph" style="width:100px"></td>
+    <td colspan="2"><img src="{{ asset('assets/images/graph01.png') }}" class="graph" style="width:100px"></td>
+    <td colspan="2"><img src="{{ asset('assets/images/graph01.png') }}" class="graph" style="width:100px"></td>
+    <td colspan="2"><img src="{{ asset('assets/images/graph01.png') }}" class="graph" style="width:100px"></td>
+    <td colspan="2"><img src="{{ asset('assets/images/graph01.png') }}" class="graph" style="width:100px"></td>
 </tr>
 
 {{-- ================= LEVEL 4 ================= --}}
@@ -144,7 +144,7 @@ $level4 = [
 @foreach($level4 as $n)
 <td>
     {!! userBox(
-        asset('public/storage/y1.png'),
+        asset('assets/images/loy1go.png'),
         uname($n),
         $n ? 'green' : 'black'
     ) !!}

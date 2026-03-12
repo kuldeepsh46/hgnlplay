@@ -516,7 +516,7 @@
                 return '
             <div style="padding: 20px 0; opacity: 0.2;">
                 <img src="' .
-                    asset('storage/y1.png') .
+                    asset('assets/images/y1.png') .
                     '" style="width:40px;"><br>
                 <span style="font-size: 10px; color: #999; font-weight: bold;">EMPTY</span>
             </div>';
@@ -524,7 +524,7 @@
 
             // Logic: Green (g1) if is_active is true, otherwise Red (r1) for pending/zero investment
             $image =
-                isset($item['is_active']) && $item['is_active'] ? asset('storage/g1.png') : asset('storage/r1.png');
+                isset($item['is_active']) && $item['is_active'] ? asset('assets/images/g1.png') : asset('assets/images/r1.png');
 
             $url = route('team.tree', ['user_id' => $item['id']]);
             $pkgAmount = number_format($item['personal_investment'] ?? 0, 2);
