@@ -17,3 +17,7 @@ storage/*.key
 /storage/framework/cache/data/*
 /storage/framework/views/*.php
 /storage/framework/sessions/*
+/bootstrap/cache/*.php
+/storage/framework/cache/data/*
+/storage/framework/views/*.php
+/storage/framework/sessions/*

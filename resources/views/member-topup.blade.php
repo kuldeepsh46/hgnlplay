@@ -223,7 +223,12 @@ nav[aria-label="Pagination Navigation"] span[aria-disabled="true"] {
     <h2>New Topup</h2>
     <form method="POST" action="{{ route('member.topup.store') }}">
         @csrf
-        <div class="form-group"><label>User Email</label><input type="email" name="email" required></div>
+        {{-- <div class="form-group"><label>User Email</label><input type="email" name="email" required></div>
+         --}}
+         <div class="form-group">
+    <label>Member ID</label>
+    <input type="text" name="member_id" placeholder="e.g. HGNL00010109" required>
+</div>
         <div class="form-group">
             <label>Package</label>
             <select name="package_id" id="packageSelect" required>
@@ -307,7 +312,8 @@ nav[aria-label="Pagination Navigation"] span[aria-disabled="true"] {
         <tbody>
             @forelse($walletTransactions as $index => $t)
             @php
-            $toUser = DB::table('users')->where('id', $t->user_id)->value('email');
+            // $toUser = DB::table('users')->where('id', $t->user_id)->value('email');
+            $toUser = DB::table('users')->where('id', $t->user_id)->value('member_id');
             $packageName = DB::table('packages')->where('id', $t->package_id)->value('name');
             @endphp
             <tr>

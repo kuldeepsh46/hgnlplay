@@ -44,20 +44,22 @@ class User extends Authenticatable
     /**
      * Automatic Member ID Generation
      */
-    protected static function boot()
-    {
-        parent::boot();
+  protected static function boot()
+{
+    parent::boot();
 
-        static::creating(function ($user) {
-            // Use max('id') to find the highest ID currently in the table
-            $maxId = DB::table('users')->max('id') ?? 0;
-            $nextId = $maxId + 1;
+    static::creating(function ($user) {
+        // 1. Use a transaction-safe way to get the ID
+        // We add 1 to the current max ID
+        $nextId = (DB::table('users')->max('id') ?? 0) + 1;
 
-            // Format: HGNL + (10000 + next ID)
-            // Example: If next ID is 1, member_id becomes HGNL10001
-            $user->member_id = 'HGNL' . ($nextId + 10000);
-        });
-    }
+        // 2. Padding (Optional but Recommended)
+        // If you want HGNL00010110 instead of HGNL10110, use str_pad
+        $formattedId = str_pad($nextId + 10000, 8, '0', STR_PAD_LEFT);
+
+        $user->member_id = 'HGNL' . $formattedId;
+    });
+}
 
     /* --- Relationships --- */
 
