@@ -333,7 +333,7 @@ div#app {
             <!--  -->
             <div class="Qr-sec" id="qr-payment-box" style="display:none; margin-top:12px;">
                 <div  >
-                    <img id="qr-image" src="/uploads/scanner.jpeg" alt="QR Payment"
+                    <img id="qr-image" src="{{ asset('assets/images/scanner.jpeg') }}" alt="QR Payment"
                         style=" border-radius:8px; border:1px solid #333;">
 
                     <p style="margin-top:8px; font-size:13px; color:var(--muted);">
