@@ -171,60 +171,59 @@ class TreeController extends Controller
     //     ];
     // }
     private function buildTree($userIdOrMemberId)
-{
-    // 1. Updated Search Logic: Find user by member_id OR internal id
-    $user = User::with('orders.package')
-        ->where('member_id', $userIdOrMemberId)
-        ->orWhere('id', $userIdOrMemberId)
-        ->first();
+    {
+        // 1. Updated Search Logic: Find user by member_id OR internal id
+        $user = User::with('orders.package')->where('member_id', $userIdOrMemberId)->orWhere('id', $userIdOrMemberId)->first();
 
-    if (!$user) return [
-        'id' => null, 
-        'member_id' => null,
-        'total_business' => 0, 
-        'total_contributors' => 0
-    ];
+        if (!$user) {
+            return [
+                'id' => null,
+                'member_id' => null,
+                'total_business' => 0,
+                'total_contributors' => 0,
+            ];
+        }
 
-    // 2. Calculate this specific user's investment
-    $personalInvestment = $user->orders->sum(function($order) {
-        // Updated to use order amount as we discussed earlier for accuracy
-        return $order->amount ?? 0;
-    });
+        // 2. Calculate this specific user's investment
+        $personalInvestment = $user->orders->sum(function ($order) {
+            // Updated to use order amount as we discussed earlier for accuracy
+            return $order->amount ?? 0;
+        });
 
-    // 3. Get Children Data (Recursive calls stay the same)
-    $leftUser = User::where('placement_id', $user->id)->where('position', 'left')->first();
-    $rightUser = User::where('placement_id', $user->id)->where('position', 'right')->first();
+        // 3. Get Children Data (Recursive calls stay the same)
+        $leftUser = User::where('placement_id', $user->id)->where('position', 'left')->first();
+        $rightUser = User::where('placement_id', $user->id)->where('position', 'right')->first();
 
-    $leftNode = $leftUser ? $this->buildTree($leftUser->id) : null;
-    $rightNode = $rightUser ? $this->buildTree($rightUser->id) : null;
+        $leftNode = $leftUser ? $this->buildTree($leftUser->id) : null;
+        $rightNode = $rightUser ? $this->buildTree($rightUser->id) : null;
 
-    // 4. Calculate Totals for THIS node based on children
-    $leftBranchTotal = $leftNode ? ($leftNode['personal_investment'] + $leftNode['total_business']) : 0;
-    $rightBranchTotal = $rightNode ? ($rightNode['personal_investment'] + $rightNode['total_business']) : 0;
+        // 4. Calculate Totals for THIS node based on children
+        $leftBranchTotal = $leftNode ? $leftNode['personal_investment'] + $leftNode['total_business'] : 0;
+        $rightBranchTotal = $rightNode ? $rightNode['personal_investment'] + $rightNode['total_business'] : 0;
 
-    $leftBranchContributors = $leftNode ? ($leftNode['is_contributor'] + $leftNode['total_contributors']) : 0;
-    $rightBranchContributors = $rightNode ? ($rightNode['is_contributor'] + $rightNode['total_contributors']) : 0;
+        $leftBranchContributors = $leftNode ? $leftNode['is_contributor'] + $leftNode['total_contributors'] : 0;
+        $rightBranchContributors = $rightNode ? $rightNode['is_contributor'] + $rightNode['total_contributors'] : 0;
 
-    return [
-        'id' => $user->id,
-        'member_id' => $user->member_id, // Added member_id to the array
-        'username' => $user->username,
-        'personal_investment' => $personalInvestment,
-        'is_active' => ($personalInvestment > 0),
-        'is_contributor' => ($personalInvestment > 0 ? 1 : 0),
-        
-        'total_business_left' => $leftBranchTotal,
-        'total_contributors_left' => $leftBranchContributors,
-        'total_business_right' => $rightBranchTotal,
-        'total_contributors_right' => $rightBranchContributors,
+        return [
+            'id' => $user->id,
+            'member_id' => $user->member_id, // Added member_id to the array
+            'username' => $user->username,
+            'personal_investment' => $personalInvestment,
+            'is_active' => $personalInvestment > 0,
+            'is_contributor' => $personalInvestment > 0 ? 1 : 0,
 
-        'left' => $leftNode,
-        'right' => $rightNode,
-        
-        'total_business' => $leftBranchTotal + $rightBranchTotal, 
-        'total_contributors' => $leftBranchContributors + $rightBranchContributors
-    ];
-}
+            'total_business_left' => $leftBranchTotal,
+            'total_contributors_left' => $leftBranchContributors,
+            'total_business_right' => $rightBranchTotal,
+            'total_contributors_right' => $rightBranchContributors,
+
+            'left' => $leftNode,
+            'right' => $rightNode,
+
+            'total_business' => $leftBranchTotal + $rightBranchTotal,
+            'total_contributors' => $leftBranchContributors + $rightBranchContributors,
+        ];
+    }
 
     // Helper to count people on each side
     private function getBranchCountRecursive($userId)
@@ -264,16 +263,105 @@ class TreeController extends Controller
         ];
     }
 
+    // public function list()
+    // {
+    //     $user = Auth::user();
+
+    //     // Get all downline users recursively (any depth)
+    //     // $teamMembers = $user->allDescendants();
+    //     // $teamMembers = $user->allDescendants()->sortBy('created_at');
+    //     $teamMembers = $user->allDescendants()->reject(fn($member) => $member->id == 27)->sortBy('created_at');
+
+    //     return view('team.list', compact('user', 'teamMembers'));
+    // }
+
+    // public function list()
+    // {
+    //     $user = Auth::user();
+    //     $allDownliners = [];
+
+    //     // 1. Identify your two direct entry points into the tree (Level 1)
+    //     $leftRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first();
+
+    //     $rightRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first();
+
+    //     // 2. Explore the Left Subtree - Force every descendant to be labeled 'left'
+    //     if ($leftRoot) {
+    //         $this->crawlAndLabel($leftRoot, 'left', $allDownliners);
+    //     }
+
+    //     // 3. Explore the Right Subtree - Force every descendant to be labeled 'right'
+    //     if ($rightRoot) {
+    //         $this->crawlAndLabel($rightRoot, 'right', $allDownliners);
+    //     }
+
+    //     // 4. Convert to collection, apply your specific filter (reject ID 27), and sort
+    //     $teamMembers = collect($allDownliners)->reject(fn($member) => $member->id == 27)->sortBy('created_at');
+
+    //     return view('team.list', compact('user', 'teamMembers'));
+    // }
     public function list()
     {
-        $user = Auth::user();
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $allDownliners = [];
 
-        // Get all downline users recursively (any depth)
-        // $teamMembers = $user->allDescendants();
-        // $teamMembers = $user->allDescendants()->sortBy('created_at');
-        $teamMembers = $user->allDescendants()->reject(fn($member) => $member->id == 27)->sortBy('created_at');
+        // 1. MANUALLY FIND THE TWO GATEKEEPERS
+        $leftBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first();
+
+        $rightBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first();
+
+        // 2. FORCE THE LEFT SIDE
+        if ($leftRoot = $leftBranchRoot) {
+            $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
+        }
+
+        // 3. FORCE THE RIGHT SIDE
+        if ($rightRoot = $rightBranchRoot) {
+            $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
+        }
+
+        // 4. PREPARE THE COLLECTION
+        $teamMembers = collect($allDownliners)->reject(fn($m) => $m->id == 27)->sortBy('created_at');
 
         return view('team.list', compact('user', 'teamMembers'));
+    }
+
+    /**
+     * STRICT CRAWLER
+     */
+    private function crawlAndForceSide($node, $side, &$list)
+    {
+        // We overwrite the 'position' property in the object memory
+        // so the Blade sees 'left' or 'right' regardless of the DB value.
+        $node->position = $side;
+        $list[] = $node;
+
+        // Get EVERY child of this node
+        $children = \App\Models\User::where('placement_id', $node->id)->get();
+
+        foreach ($children as $child) {
+            // We pass the parent's $side (the forced one) to the child
+            $this->crawlAndForceSide($child, $side, $list);
+        }
+    }
+    /**
+     * Recursive helper to ensure descendants inherit the branch side
+     */
+    private function crawlAndLabel($node, $side, &$list)
+    {
+        // We attach a dynamic property 'team_side' to the object
+        // This is what your Blade should use: {{ $member->team_side }}
+        $node->team_side = $side;
+        $list[] = $node;
+
+        // Find children where this node is the placement_id
+        $children = \App\Models\User::where('placement_id', $node->id)->get();
+
+        foreach ($children as $child) {
+            // Crucial: We pass the SAME $side down.
+            // A 'left' child of a 'right' parent remains 'right' for the root user.
+            $this->crawlAndLabel($child, $side, $list);
+        }
     }
 
     private function buildLevels($userId, $level = 0, &$levels = [])
