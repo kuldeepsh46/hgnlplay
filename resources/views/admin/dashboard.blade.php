@@ -132,6 +132,9 @@ body{
       <a href="{{ route('admin.support') }}" style="text-decoration:none;color:inherit;display:block;">
         <li>🆘 <span>Support Request</span></li>
       </a>
+      {{-- <a href="{{ route('admin.settings') }}" style="text-decoration:none;color:inherit;display:block;">
+        <li>🆘 <span>Settings</span></li>
+      </a> --}}
     @endif
     <a href="{{ route('logout') }}" id="logout-link" style="text-decoration:none;color:inherit;display:block;">
       <li>🚪 <span>Logout</span></li>

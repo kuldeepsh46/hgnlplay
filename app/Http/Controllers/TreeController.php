@@ -444,17 +444,63 @@ class TreeController extends Controller
         return view('team.direct-referral', compact('directs'));
     }
 
+    // public function totalDownline()
+    // {
+    //     $userId = Auth::id();
+    //     $downlineIds = [];
+
+    //     $this->collectDownline($userId, $downlineIds);
+
+    //     $users = User::whereIn('id', $downlineIds)->get();
+
+    //     return view('team.total-downline', compact('users'));
+    // }
     public function totalDownline()
-    {
-        $userId = Auth::id();
-        $downlineIds = [];
+{
+    $user = Auth::user();
+    $allDownliners = [];
 
-        $this->collectDownline($userId, $downlineIds);
+    // 1. Identify the roots of YOUR two main branches
+    $leftBranchRoot = User::where('placement_id', $user->id)
+                        ->where('position', 'left')
+                        ->first();
 
-        $users = User::whereIn('id', $downlineIds)->get();
+    $rightBranchRoot = User::where('placement_id', $user->id)
+                         ->where('position', 'right')
+                         ->first();
 
-        return view('team.total-downline', compact('users'));
+    // 2. Explore the Left side (Force 'left' tag)
+    if ($leftBranchRoot) {
+        $this->crawlAndTag($leftBranchRoot, 'left', $allDownliners);
     }
+
+    // 3. Explore the Right side (Force 'right' tag)
+    if ($rightBranchRoot) {
+        $this->crawlAndTag($rightBranchRoot, 'right', $allDownliners);
+    }
+
+    // 4. Convert to collection for the view
+    $users = collect($allDownliners);
+
+    return view('team.total-downline', compact('users'));
+}
+
+/**
+ * Recursive helper to assign the branch side relative to YOU
+ */
+private function crawlAndTag($node, $side, &$list)
+{
+    // We set a dynamic property 'team_side' so the blade 
+    // knows which branch they are in relative to YOU.
+    $node->team_side = $side; 
+    $list[] = $node;
+
+    $children = User::where('placement_id', $node->id)->get();
+
+    foreach ($children as $child) {
+        $this->crawlAndTag($child, $side, $list);
+    }
+}
 
     private function collectDownline($userId, &$downlineIds)
     {

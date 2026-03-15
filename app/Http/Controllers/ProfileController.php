@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Setting;
+
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-
 
 class ProfileController extends Controller
 {
@@ -17,7 +18,7 @@ class ProfileController extends Controller
         $user = Auth::user();
         return view('profile', compact('user'));
     }
-     public function edit()
+    public function edit()
     {
         $user = Auth::user();
         return view('profile.edit', compact('user'));
@@ -36,7 +37,7 @@ class ProfileController extends Controller
             'address' => 'nullable|string',
         ]);
 
-        $user->update($request->only(['name', 'mobile', 'city', 'state', 'pan_number', 'address', 'pincode', 'dob', 'account_number', 'account_holder_name', 'bank_name', 'branch_name', 'bank_address', 'ifsc_code', 'nominee_name', 'relation', 'nominee_dob', 'nominee_gender' ]));
+        $user->update($request->only(['name', 'mobile', 'city', 'state', 'pan_number', 'address', 'pincode', 'dob', 'account_number', 'account_holder_name', 'bank_name', 'branch_name', 'bank_address', 'ifsc_code', 'nominee_name', 'relation', 'nominee_dob', 'nominee_gender']));
 
         return redirect()->route('profile')->with('success', 'Profile updated successfully.');
     }
@@ -49,7 +50,7 @@ class ProfileController extends Controller
 
     public function uploadKyc(Request $request)
     {
-                // dd($request()->all());
+        // dd($request()->all());
 
         $request->validate([
             'id_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
@@ -109,11 +110,8 @@ class ProfileController extends Controller
 
         $user->update($data);
 
-
         return back()->with('success', 'KYC documents uploaded successfully!');
     }
-
-
 
     public function updatePassword(Request $request)
     {
@@ -139,61 +137,56 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         // recent requests for the table
-        $requests = DB::table('fund_requests')
-            ->where('user_id', $user->id)
-            ->orderByDesc('id')
-            ->get();
-
-        return view('wallet-fund-request', compact('user', 'requests'));
+        $requests = DB::table('fund_requests')->where('user_id', $user->id)->orderByDesc('id')->get();
+        $qr_image = Setting::where('id', 1)->value('qr_scanner_img');
+        return view('wallet-fund-request', compact('user', 'requests', 'qr_image'));
     }
 
     public function storeWalletFundRequest(Request $r)
     {
         $r->validate([
-            'amount'            => 'required|numeric|min:1',
-            'deposit_date'      => 'required|date',
-            'payment_mode'      => 'required|string',
-            'bank_name'         => 'nullable|string',
-            'account_number'    => 'nullable|string',
-            'transaction_remark'=> 'nullable|string',
-            'attachment'        => 'nullable|file',
+            'amount' => 'required|numeric|min:1',
+            'deposit_date' => 'required|date',
+            'payment_mode' => 'required|string',
+            'bank_name' => 'nullable|string',
+            'account_number' => 'nullable|string',
+            'transaction_remark' => 'nullable|string',
+            'attachment' => 'nullable|file',
         ]);
 
         $user = Auth::user();
 
         // If form fields empty, fall back to user's saved bank details
-        $bankName       = $r->filled('bank_name') ? $r->bank_name : $user->bank_name;
-        $accountNumber  = $r->filled('account_number') ? $r->account_number : $user->account_number;
+        $bankName = $r->filled('bank_name') ? $r->bank_name : $user->bank_name;
+        $accountNumber = $r->filled('account_number') ? $r->account_number : $user->account_number;
 
         // upload file to public/uploads/fund_requests
         $path = null;
         if ($r->hasFile('attachment')) {
             $dir = public_path('uploads/fund_requests');
-            if (!is_dir($dir)) { @mkdir($dir, 0755, true); }
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
             $file = $r->file('attachment');
-            $filename = time().'_'.$file->getClientOriginalName();
+            $filename = time() . '_' . $file->getClientOriginalName();
             $file->move($dir, $filename);
-            $path = 'public/uploads/fund_requests/'.$filename;
+            $path = 'public/uploads/fund_requests/' . $filename;
         }
 
         DB::table('fund_requests')->insert([
-            'user_id'            => $user->id,
-            'amount'             => $r->amount,
-            'deposit_date'       => $r->deposit_date,
-            'payment_mode'       => $r->payment_mode,
-            'bank_name'          => $bankName,         // saved to fund_requests
-            'account_number'     => $accountNumber,    // saved to fund_requests
+            'user_id' => $user->id,
+            'amount' => $r->amount,
+            'deposit_date' => $r->deposit_date,
+            'payment_mode' => $r->payment_mode,
+            'bank_name' => $bankName, // saved to fund_requests
+            'account_number' => $accountNumber, // saved to fund_requests
             'transaction_remark' => $r->transaction_remark,
-            'attachment'         => $path,
-            'status'             => 'pending',
-            'created_at'         => now(),
-            'updated_at'         => now(),
+            'attachment' => $path,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return back()->with('success', 'Fund request submitted successfully!');
     }
-
-
-
-
 }

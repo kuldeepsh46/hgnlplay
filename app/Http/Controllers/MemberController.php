@@ -17,7 +17,7 @@ class MemberController extends Controller
 
     public function store(Request $request)
     {
-         $request->validate([
+        $request->validate([
             'username' => 'required|unique:users,username',
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -25,9 +25,8 @@ class MemberController extends Controller
             'password' => 'required|min:6|confirmed',
             'position' => 'required|in:left,right',
             'state' => 'required|string|max:100',
-
         ]);
-           $sponsor = Auth::user();
+        $sponsor = Auth::user();
         $leg = $request->position; // left or right
         $placementId = $sponsor->id;
 
@@ -97,9 +96,7 @@ class MemberController extends Controller
         $current = User::find($userId);
 
         while (true) {
-            $child = User::where('placement_id', $current->id)
-                        ->where('position', $leg)
-                        ->first();
+            $child = User::where('placement_id', $current->id)->where('position', $leg)->first();
 
             if (!$child) {
                 return $current->id; // found available placement
@@ -108,5 +105,4 @@ class MemberController extends Controller
             $current = $child;
         }
     }
-
 }

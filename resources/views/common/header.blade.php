@@ -117,6 +117,9 @@
         <a href="{{ route('admin.lucky.index') }}" style="text-decoration:none;color:inherit;display:block;">
             <li class="{{ Request::routeIs('admin.lucky.index') ? 'active' : '' }}">🎁 <span>Lucky Draw</span></li>
         </a>
+        <a href="{{ route('admin.settings') }}" style="text-decoration:none;color:inherit;display:block;">
+            <li class="{{ Request::routeIs('') ? 'active' : '' }}">🎁 <span>Settings</span></li>
+        </a>
         @endif
 
 

@@ -139,8 +139,10 @@ body{
 </style>
 
 @php
-    $leftCount = $users->where('position', 'left')->count();
-    $rightCount = $users->where('position', 'right')->count();
+    // $leftCount = $users->where('position', 'left')->count();
+    // $rightCount = $users->where('position', 'right')->count();
+    $leftCount = $users->where('team_side', 'left')->count();
+    $rightCount = $users->where('team_side', 'right')->count();
 @endphp
 <!-- ===== HEADER ===== -->
 <div class="page-header">
@@ -159,7 +161,7 @@ body{
 <div class="team-grid">
 
 @forelse($users as $key => $user)
-  <div class="team-card" data-position="{{ strtolower($user->position) }}">
+  {{-- <div class="team-card" data-position="{{ strtolower($user->position) }}">
 
     <!-- LEFT -->
     <div class="tc-left">
@@ -181,7 +183,29 @@ body{
       {{ ucfirst($user->position) }}
     </span>
 
-  </div>
+  </div> --}}
+
+  <div class="team-card" data-position="{{ strtolower($user->team_side) }}">
+
+    <div class="tc-left">
+      <div class="tc-index">{{ $key+1 }}</div>
+      <div>
+        <div class="tc-name">{{ $user->username }}</div>
+        <div class="tc-username">{{ $user->name }}</div>
+      </div>
+    </div>
+
+    <div class="tc-center">
+      <span class="tc-label">Placement ID</span>
+      <span class="tc-value">{{ $user->placement_id }}</span>
+    </div>
+
+    {{-- Changed from $user->position to $user->team_side --}}
+    <span class="position {{ strtolower($user->team_side) }}">
+      {{ ucfirst($user->team_side) }}
+    </span>
+
+</div>
 @empty
   <div class="empty">No team members found.</div>
 @endforelse

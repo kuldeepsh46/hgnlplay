@@ -330,8 +330,8 @@ div#app {
     
             </div>
 
-            <!--  -->
-            <div class="Qr-sec" id="qr-payment-box" style="display:none; margin-top:12px;">
+            
+            {{-- <div class="Qr-sec" id="qr-payment-box" style="display:none; margin-top:12px;">
                 <div  >
                     <img id="qr-image" src="{{ asset('assets/images/scanner.jpeg') }}" alt="QR Payment"
                         style=" border-radius:8px; border:1px solid #333;">
@@ -340,8 +340,38 @@ div#app {
                         Scan this QR code and make payment. Further fill this form and submit it.
                     </p>
                 </div>
-            </div>
-            <!--  -->
+            </div> --}}
+
+            <div class="Qr-sec" id="qr-payment-box" style="display:none; margin-top:15px; text-align: center;">
+    <div style="
+        display: inline-block;
+        background: #ffffff; 
+        padding: 16px; 
+        border-radius: 20px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        border: 1px solid #e1e8ed;
+    ">
+        {{-- Inner container for the image --}}
+        <div style="background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid #edf2f7;">
+            <img id="qr-image" 
+                 src="{{ $qr_image ? asset($qr_image) : asset('assets/images/scanner.jpeg') }}" 
+                 alt="QR Payment"
+                 style="width: 200px; height: 200px; display: block; object-fit: contain; border-radius: 6px;">
+        </div>
+
+        {{-- Payment Footer Label --}}
+        <div style="margin-top: 12px; border-top: 1px dashed #cbd5e0; padding-top: 10px;">
+            <span style="color: #1a202c; font-weight: 800; font-size: 14px; letter-spacing: 1px;">SCAN & PAY</span>
+            <p style="margin: 2px 0 0 0; font-size: 10px; color: #718096; font-weight: 600;">OFFICIAL GATEWAY</p>
+        </div>
+    </div>
+
+    {{-- Instructions --}}
+    <p style="margin-top:12px; font-size:13px; color:var(--muted); line-height: 1.5; max-width: 280px; margin-left: auto; margin-right: auto;">
+        <i class="fas fa-info-circle" style="color: var(--accent);"></i> 
+        Scan this QR code and make payment. Then, fill out this form with the correct transaction details and submit.
+    </p>
+</div>
             
         </div>
        
