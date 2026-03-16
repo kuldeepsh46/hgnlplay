@@ -764,7 +764,7 @@ class TopupController extends Controller
         }
         // ✅ DIRECT COMMISSION — ONLY ON FIRST EMI
         // dd($user);
-        if ($user->investment_count >= 1) {
+        if ($user->investment_count = 1) {
             $sponsor = DB::table('users')->where('id', $user->sponsor_id)->first();
 
             if ($sponsor) {
