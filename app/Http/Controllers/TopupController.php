@@ -738,33 +738,33 @@ class TopupController extends Controller
         }
 
         // // ✅ 1️⃣ DIRECT COMMISSION (10%) - To immediate sponsor
-        $sponsor = DB::table('users')->where('id', $user->placement_id)->first();
-        if ($sponsor) {
-            // Ensure wallet exists
-            DB::table('wallets')->updateOrInsert(
-                ['user_id' => $sponsor->id],
-                ['updated_at' => now()]
-            );
+        // $sponsor = DB::table('users')->where('id', $user->placement_id)->first();
+        // if ($sponsor) {
+        //     // Ensure wallet exists
+        //     DB::table('wallets')->updateOrInsert(
+        //         ['user_id' => $sponsor->id],
+        //         ['updated_at' => now()]
+        //     );
 
-            // Add 10% commission to sponsor wallet
-            DB::table('wallets')->where('user_id', $sponsor->id)
-                ->increment('balance', $commission);
+        //     // Add 10% commission to sponsor wallet
+        //     DB::table('wallets')->where('user_id', $sponsor->id)
+        //         ->increment('balance', $commission);
 
-            // Record transaction
-            DB::table('transactions')->insert([
-                'user_id' => $sponsor->id,
-                'type' => 'Credit',
-                'amount' => $commission,
-                'remarks' => "Direct 10% Commission from {$user->username} (₹{$amount})",
-                'created_at' => now(),
-            ]);
+        //     // Record transaction
+        //     DB::table('transactions')->insert([
+        //         'user_id' => $sponsor->id,
+        //         'type' => 'Credit',
+        //         'amount' => $commission,
+        //         'remarks' => "Direct 10% Commission from {$user->username} (₹{$amount})",
+        //         'created_at' => now(),
+        //     ]);
 
-            // ✅ 3️⃣ CHECK FOR PAIR COMPLETION BONUS
-            $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
-        }
+        //     // ✅ 3️⃣ CHECK FOR PAIR COMPLETION BONUS
+        //     $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
+        // }
         // ✅ DIRECT COMMISSION — ONLY ON FIRST EMI
         // dd($user);
-        if ($user->investment_count = 1) {
+        if ($user->investment_count >= 1) {
             $sponsor = DB::table('users')->where('id', $user->sponsor_id)->first();
 
             if ($sponsor) {
@@ -781,6 +781,7 @@ class TopupController extends Controller
                     'remarks' => "Direct 10% Commission from {$user->username} (₹{$amount})",
                     'created_at' => now(),
                 ]);
+                $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
             }
         }
 
