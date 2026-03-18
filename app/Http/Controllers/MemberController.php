@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Mail\WelcomeMemberMail;
+use Illuminate\Support\Facades\Mail;
 
 class MemberController extends Controller
 {
@@ -38,7 +40,7 @@ class MemberController extends Controller
         } elseif ($leg === 'right' && $rightChild) {
             $placementId = $this->findLastAvailable($rightChild->id, 'right');
         }
-
+        // $encryptedPassword = Hash::make($request->password);
         $member = User::create([
             'username' => $request->username,
             'name' => $request->name,
@@ -87,6 +89,7 @@ class MemberController extends Controller
 
         // // Assign role
         // $member->assignRole('customer');
+        Mail::to($member->email)->send(new WelcomeMemberMail($member, $request->password));
 
         return redirect()->route('member.register')->with('success', 'Member registered successfully!');
     }
