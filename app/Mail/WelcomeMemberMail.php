@@ -43,7 +43,7 @@ class WelcomeMemberMail extends Mailable
             view: 'emails.welcome-member', // Make sure this file exists!
             with: [
                 'userName' => $this->user->name,
-                'userEmail' => $this->user->email,
+                'member_id' => $this->user->member_id,
                 'userPassword' => $this->password,
             ],
         );

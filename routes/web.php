@@ -15,7 +15,8 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\SettingsController;
-
+use App\Mail\WelcomeMemberMail;
+use App\Models\User;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -144,4 +145,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/lucky', [LuckyAdminController::class, 'index'])->name('admin.lucky.index');
     Route::get('/lucky/{cycle}/vouchers', [LuckyAdminController::class, 'vouchers'])->name('admin.lucky.vouchers');
     Route::post('/lucky/declare-winner', [LuckyAdminController::class, 'declareWinner'])->name('admin.lucky.declare');
+});
+Route::get('/mail-preview', function () {
+    $user = User::first(); // Grab a user from your database
+    return new WelcomeMemberMail($user, 'Shimla@46');
 });
