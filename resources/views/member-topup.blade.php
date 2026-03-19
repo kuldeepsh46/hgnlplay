@@ -172,6 +172,18 @@
             background: #0f1620;
             color: #fff;
         }
+
+        #member_status {
+            padding: 5px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        #member_name_display {
+            border: 2px solid #2563eb;
+            font-weight: bold;
+            color: #1e293b;
+        }
     </style>
 
     <div class="header">
@@ -238,34 +250,63 @@
     </div> --}}
 
     <div class="card">
-    <h2>New Topup</h2>
-    <form method="POST" action="{{ route('member.topup.store') }}" id="topupForm">
-        @csrf
-        <div class="form-group">
-            <label>Member ID</label>
-            <input type="text" name="member_id" id="member_id_input" placeholder="e.g. HGNL00010109" required>
-        </div>
-        <div class="form-group">
-            <label>Package</label>
-            <select name="package_id" id="packageSelect" required>
-                <option value="">-- Select Package --</option>
-                @foreach ($packages as $p)
-                    <option value="{{ $p->id }}" data-amount="{{ $p->amount }}">{{ $p->name }} — ₹{{ $p->amount }}</option>
-                @endforeach
-            </select>
-            {{-- REMOVED hidden final_amount to prevent validation errors --}}
-            <div id="priceBreakdown" style="margin-top:10px;font-size:14px;color:var(--accent);font-weight:600;"></div>
-        </div>
-        <div class="form-group">
-            <label>Payment By</label>
-            <select name="payment_by" required>
-                <option value="Wallet">Wallet</option>
-                <option value="Online">Online</option>
-            </select>
-        </div>
-        <button type="submit" class="btn" style="width:100%">Submit Payment</button>
-    </form>
-</div>
+        <h2>New Topup</h2>
+        <form method="POST" action="{{ route('member.topup.store') }}" id="topupForm">
+            @csrf
+            {{-- <div class="form-group">
+                <label>Member ID</label>
+                <input type="text" name="member_id" id="member_id_input" placeholder="e.g. HGNL00010109" required>
+            </div> --}}
+
+            {{-- <div class="form-group">
+                <label>Member ID</label>
+                <input type="text" name="member_id" id="member_id_input" placeholder="e.g. HGNL00010125" required
+                    autocomplete="off">
+                <div id="member_status" style="margin-top:5px; font-size:13px; font-weight:600;"></div>
+            </div> --}}
+
+            <div class="form-group">
+                <label>Member ID</label>
+                <input type="text" name="member_id" id="member_id_input" value="{{ old('member_id') }}"
+                    style="border: 1px solid {{ $errors->has('member_id') ? 'red' : '#ccc' }};"
+                    placeholder="e.g. HGNL00010125" required>
+
+                @error('member_id')
+                    <div style="color: #dc3545; font-size: 13px; margin-top: 5px; font-weight: 600;">
+                        {{ $message }}
+                    </div>
+                @enderror
+
+                <div id="member_status" style="margin-top:5px; font-size:13px; font-weight:600;"></div>
+            </div>
+
+            <div class="form-group" id="name_group" style="display:none;">
+                <label>Member Name</label>
+                <input type="text" id="member_name_display" class="form-control" readonly
+                    style="background-color: #f0f0f0;">
+            </div>
+            <div class="form-group">
+                <label>Package</label>
+                <select name="package_id" id="packageSelect" required>
+                    <option value="">-- Select Package --</option>
+                    @foreach ($packages as $p)
+                        <option value="{{ $p->id }}" data-amount="{{ $p->amount }}">{{ $p->name }} —
+                            ₹{{ $p->amount }}</option>
+                    @endforeach
+                </select>
+                {{-- REMOVED hidden final_amount to prevent validation errors --}}
+                <div id="priceBreakdown" style="margin-top:10px;font-size:14px;color:var(--accent);font-weight:600;"></div>
+            </div>
+            <div class="form-group">
+                <label>Payment By</label>
+                <select name="payment_by" required>
+                    <option value="Wallet">Wallet</option>
+                    <option value="Online">Online</option>
+                </select>
+            </div>
+            <button type="submit" class="btn" style="width:100%">Submit Payment</button>
+        </form>
+    </div>
 
     <div class="card">
         <h2>Your Wallet Balance</h2>
@@ -374,42 +415,53 @@
         </div>
     </div>
 
-<script>
-    // ✅ Keep UI logic only - Backend will handle the actual math for safety
-    const investmentCount = {{ (int)$user->investment_count }};
-    const registrationFee = investmentCount === 0 ? 100 : 0;
-    const packageSelect = document.getElementById('packageSelect');
-    const priceBreakdown = document.getElementById('priceBreakdown');
-    const memberIdInput = document.getElementById('member_id_input');
+    <script>
+        // ✅ Keep UI logic only - Backend will handle the actual math for safety
+        const investmentCount = {{ (int) $user->investment_count }};
+        const registrationFee = investmentCount === 0 ? 100 : 0;
+        const packageSelect = document.getElementById('packageSelect');
+        const priceBreakdown = document.getElementById('priceBreakdown');
+        const memberIdInput = document.getElementById('member_id_input');
 
-    function updatePriceDisplay() {
-        const selectedOption = packageSelect.options[packageSelect.selectedIndex];
+        function updatePriceDisplay() {
+            const selectedOption = packageSelect.options[packageSelect.selectedIndex];
 
-        if (!selectedOption || !selectedOption.value) {
-            priceBreakdown.innerHTML = '';
-            return;
+            if (!selectedOption || !selectedOption.value) {
+                priceBreakdown.innerHTML = '';
+                return;
+            }
+
+            const baseAmount = parseFloat(selectedOption.dataset.amount) || 0;
+            const totalAmount = baseAmount + registrationFee;
+
+            let breakdown = `Payable Amount: ₹${totalAmount.toLocaleString('en-IN')}`;
+            if (registrationFee > 0) {
+                breakdown +=
+                    ` <span style="color:var(--muted); font-weight:400; font-size:12px;">(Includes ₹100 Reg. Fee)</span>`;
+            }
+            priceBreakdown.innerHTML = breakdown;
         }
 
-        const baseAmount = parseFloat(selectedOption.dataset.amount) || 0;
-        const totalAmount = baseAmount + registrationFee;
+        packageSelect.addEventListener('change', updatePriceDisplay);
+        memberIdInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+        document.addEventListener('DOMContentLoaded', updatePriceDisplay);
 
-        let breakdown = `Payable Amount: ₹${totalAmount.toLocaleString('en-IN')}`;
-        if (registrationFee > 0) {
-            breakdown += ` <span style="color:var(--muted); font-weight:400; font-size:12px;">(Includes ₹100 Reg. Fee)</span>`;
+        // Modal Logic
+        const passwordModal = document.getElementById("passwordModal");
+
+        function openModal() {
+            passwordModal.style.display = "flex";
         }
-        priceBreakdown.innerHTML = breakdown;
-    }
 
-    packageSelect.addEventListener('change', updatePriceDisplay);
-    memberIdInput.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-    document.addEventListener('DOMContentLoaded', updatePriceDisplay);
-
-    // Modal Logic
-    const passwordModal = document.getElementById("passwordModal");
-    function openModal() { passwordModal.style.display = "flex"; }
-    function closeModal() { passwordModal.style.display = "none"; }
-    window.onclick = function(e) { if (e.target === passwordModal) closeModal(); };
-</script>
+        function closeModal() {
+            passwordModal.style.display = "none";
+        }
+        window.onclick = function(e) {
+            if (e.target === passwordModal) closeModal();
+        };
+    </script>
     {{-- <script>
         // ✅ Configuration
         const investmentCount = {{ $user->investment_count }};
@@ -485,4 +537,128 @@
             document.getElementById('logout-form').submit();
         });
     </script> --}}
+
+
+    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const idInput = $('#member_id_input');
+            const statusDiv = $('#member_status');
+            const nameGroup = $('#name_group');
+            const nameDisplay = $('#member_name_display');
+            const submitBtn = $('#submitBtn');
+
+            // Updated for HGNL00010125 format
+            const ID_LENGTH = 12;
+
+            idInput.on('input propertychange', function() {
+                // Force uppercase for consistency (HGNL vs hgnl)
+                let val = $(this).val().trim().toUpperCase();
+                $(this).val(val);
+
+                if (val.length === ID_LENGTH) {
+                    validateMember(val);
+                } else {
+                    // Clear status if they backspace or change the ID
+                    statusDiv.html('');
+                    resetValidation();
+                }
+            });
+
+            function validateMember(memberId) {
+                statusDiv.html('<span style="color:#2563eb;">Checking Database...</span>');
+
+                $.ajax({
+                    url: "{{ route('member.check-id') }}",
+                    method: "GET",
+                    data: {
+                        member_id: memberId
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            statusDiv.html('<span style="color:green;">✔ Member Found: ' + response
+                                .name + '</span>');
+                            nameDisplay.val(response.name);
+                            nameGroup.slideDown(); // Smoothly show the name field
+                            submitBtn.prop('disabled', false); // Unlock the button
+                        } else {
+                            statusDiv.html('<span style="color:red;">✘ Invalid Member ID</span>');
+                            resetValidation();
+                        }
+                    },
+                    error: function() {
+                        statusDiv.html('<span style="color:red;">Connection Error</span>');
+                        resetValidation();
+                    }
+                });
+            }
+
+            function resetValidation() {
+                nameGroup.hide();
+                nameDisplay.val('');
+                submitBtn.prop('disabled', true);
+            }
+        });
+    </script> --}}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            console.log("Script Loaded & Ready"); // Debug log
+
+            const idInput = $('#member_id_input');
+            const statusDiv = $('#member_status');
+            const nameGroup = $('#name_group');
+            const nameDisplay = $('#member_name_display');
+            const submitBtn = $('button[type="submit"]'); // Targets your submit button
+
+            const ID_LENGTH = 12;
+
+            idInput.on('input propertychange', function() {
+                let val = $(this).val().trim().toUpperCase();
+                $(this).val(val);
+
+                console.log("Current Length: " + val.length); // Debug log
+
+                if (val.length === ID_LENGTH) {
+                    validateMember(val);
+                } else {
+                    statusDiv.html('');
+                    nameGroup.hide();
+                    submitBtn.prop('disabled', true);
+                }
+            });
+
+            function validateMember(memberId) {
+                statusDiv.html('<span style="color:blue;">Searching...</span>');
+
+                $.ajax({
+                    url: "{{ route('member.check-id') }}",
+                    method: "GET",
+                    data: {
+                        member_id: memberId
+                    },
+                    success: function(response) {
+                        console.log("Server Response:", response); // Debug log
+
+                        if (response.success) {
+                            // This is where the magic happens:
+                            statusDiv.html('<span style="color:green;">✔ Member Verified</span>');
+                            nameDisplay.val(response.name);
+                            nameGroup.show(); // Make sure this isn't hidden by CSS
+                            submitBtn.prop('disabled', false);
+                        } else {
+                            statusDiv.html('<span style="color:red;">✘ Invalid ID</span>');
+                            nameGroup.hide();
+                            submitBtn.prop('disabled', true);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("AJAX Error:", xhr.responseText);
+                        statusDiv.html('<span style="color:red;">Server Error</span>');
+                    }
+                });
+            }
+        });
+    </script>
 @endsection

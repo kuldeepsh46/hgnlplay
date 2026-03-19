@@ -401,6 +401,13 @@ class TopupController extends Controller
             'package_id' => 'required|integer|exists:packages,id',
             'payment_by' => 'required|string',
         ]);
+        $member = \App\Models\User::where('member_id', $r->member_id)->first();
+
+        if (!$member) {
+            return back()
+                ->withInput()
+                ->withErrors(['member_id' => 'The provided Member ID is invalid or does not exist.']);
+        }
 
         $currentUser = Auth::user();
         $receiver = DB::table('users')->where('member_id', $memberId)->first();

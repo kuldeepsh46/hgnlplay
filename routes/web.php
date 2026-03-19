@@ -100,7 +100,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/member-topup', [TopupController::class, 'index'])->name('member.topup');
     Route::post('/member-topup/store', [TopupController::class, 'store'])->name('member.topup.store');
-
+    Route::get('/member/check-id', [MemberController::class, 'checkId'])->name('member.check-id');
     Route::get('/mailbox', [MailboxController::class, 'index'])->name('mailbox');
     Route::post('/mailbox/send', [MailboxController::class, 'store'])->name('mailbox.send');
     Route::get('/mailbox/reply/{id}', [MailboxController::class, 'getReply'])->name('mailbox.reply');

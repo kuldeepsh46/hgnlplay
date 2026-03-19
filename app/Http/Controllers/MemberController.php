@@ -108,4 +108,17 @@ class MemberController extends Controller
             $current = $child;
         }
     }
+    public function checkId(Request $request)
+    {
+        $member = \App\Models\User::where('member_id', $request->member_id)->first();
+
+        if ($member) {
+            return response()->json([
+                'success' => true,
+                'name' => $member->name,
+            ]);
+        }
+
+        return response()->json(['success' => false]);
+    }
 }
