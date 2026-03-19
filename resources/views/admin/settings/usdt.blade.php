@@ -152,7 +152,7 @@
             <div class="col-md-6">
                 <div class="card"
                     style="background: var(--card); border: 1px solid #1f2832; border-radius: var(--radius); padding: 20px;">
-                    <h3 style="color: var(--accent); margin-top: 0;">Payment QR Scanner</h3>
+                    <h3 style="color: var(--accent); margin-top: 0;">USDT QR Scanner</h3>
                     <p style="color: var(--muted); font-size: 14px;">Upload the QR code that users will see on their fund
                         request page.</p>
 
@@ -164,7 +164,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('admin.settings.updateQR', 1) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.settings.updateQR', 2) }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         {{-- <div class="form-group" style="margin-bottom: 16px;">
@@ -234,25 +234,25 @@
     </div>
 @endsection
 <script>
-    function openFullView() {
-        const modal = document.getElementById("qrFullModal");
-        const sourceImg = document.getElementById("qr-source");
-        const targetImg = document.getElementById("qr-large-display");
-
-        if (sourceImg && targetImg) {
-            targetImg.src = sourceImg.src;
-            modal.style.display = "block";
-            document.body.style.overflow = "hidden"; // Prevent scrolling
-        }
+function openFullView() {
+    const modal = document.getElementById("qrFullModal");
+    const sourceImg = document.getElementById("qr-source");
+    const targetImg = document.getElementById("qr-large-display");
+    
+    if(sourceImg && targetImg) {
+        targetImg.src = sourceImg.src;
+        modal.style.display = "block";
+        document.body.style.overflow = "hidden"; // Prevent scrolling
     }
+}
 
-    function closeFullView() {
-        document.getElementById("qrFullModal").style.display = "none";
-        document.body.style.overflow = "auto"; // Re-enable scrolling
-    }
+function closeFullView() {
+    document.getElementById("qrFullModal").style.display = "none";
+    document.body.style.overflow = "auto"; // Re-enable scrolling
+}
 
-    // Close on Esc
-    document.addEventListener('keydown', function(e) {
-        if (e.key === "Escape") closeFullView();
-    });
+// Close on Esc
+document.addEventListener('keydown', function(e) {
+    if (e.key === "Escape") closeFullView();
+});
 </script>

@@ -138,8 +138,12 @@ class ProfileController extends Controller
 
         // recent requests for the table
         $requests = DB::table('fund_requests')->where('user_id', $user->id)->orderByDesc('id')->get();
-        $qr_image = Setting::where('id', 1)->value('qr_scanner_img');
-        return view('wallet-fund-request', compact('user', 'requests', 'qr_image'));
+        // $qr_image = Setting::where('id', 1)->value('qr_scanner_img');
+        // return view('wallet-fund-request', compact('user', 'requests', 'qr_image'));
+        $upi_qr = Setting::where('id', 1)->value('qr_scanner_img');
+        $usdt_qr = Setting::where('id', 2)->value('qr_scanner_img');
+
+        return view('wallet-fund-request', compact('user', 'requests', 'upi_qr', 'usdt_qr'));
     }
 
     public function storeWalletFundRequest(Request $r)

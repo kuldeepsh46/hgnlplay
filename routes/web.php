@@ -58,8 +58,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/support/reply/{id}', [SupportController::class, 'reply'])->name('admin.support.reply');
     Route::get('/support/message/{id}', [SupportController::class, 'getMessage'])->name('admin.support.message');
 
-    Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings');
-    Route::post('/admin/update-scanner', [SettingsController::class, 'updateScanner'])->name('updateQrScanner');
+    // Route::get('/settings/qr', [SettingsController::class, 'index'])->name('admin.settings.qr');
+    // Route::get('/settings/usdt', [SettingsController::class, 'usdt'])->name('admin.settings.usdt');
+    // Route::post('/admin/settings/update-qr/{id}', [App\Http\Controllers\AdminController::class, 'updateScanner'])
+    // ->name('admin.settings.updateQR');
+    // Route::post('/admin/update-scanner', [SettingsController::class, 'updateScanner'])->name('updateQrScanner');
+    // Route to show the settings page (General view)
+    Route::get('/admin/settings/qr/{id}', [SettingsController::class, 'index'])->name('admin.settings.viewQR');
+
+    // Route to handle the upload
+    Route::post('/admin/settings/update-qr/{id}', [SettingsController::class, 'updateScanner'])->name('admin.settings.updateQR');
 });
 
 Route::get('/register-mlm', [\App\Http\Controllers\Mlm\RegisterController::class, 'show'])->name('mlm.register');
