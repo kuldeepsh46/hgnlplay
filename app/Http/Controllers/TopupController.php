@@ -480,6 +480,7 @@ class TopupController extends Controller
     }
     private function checkAndDistributePairCompletionBonus($sponsor, $amount)
     {
+        // dd($sponsor, $amount);
         DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
 
         // 🔹 Get FULL left subtree
@@ -508,10 +509,10 @@ class TopupController extends Controller
         }
 
         $totalPairsPossible = min(count($leftQueue), count($rightQueue));
-
         $alreadyPaid = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus from%')->count();
+// dd($totalPairsPossible, $alreadyPaid);
 
-        if ($alreadyPaid >= $totalPairsPossible) {
+        if ($alreadyPaid > $totalPairsPossible) {
             return;
         }
 
@@ -773,7 +774,8 @@ class TopupController extends Controller
         // dd($user);
         if ($user->investment_count >= 1) {
             $sponsor = DB::table('users')->where('id', $user->sponsor_id)->first();
-
+// dd($sponsor);
+                $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
             if ($sponsor) {
                 $commission = $amount * 0.1;
 
