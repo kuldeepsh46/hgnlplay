@@ -746,6 +746,10 @@ class TopupController extends Controller
     private function distributeCommission($userId, $amount)
     {
         $commission = $amount * 0.1; // 10% commission
+        if ($amount >= 50000) {
+            $commission = $amount * 0.05; // 10% commission
+        }
+
         $user = DB::table('users')->find($userId);
         // dd($user);
         if (!$user) {
@@ -784,7 +788,11 @@ class TopupController extends Controller
             // dd($sponsor);
             $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
             if ($sponsor) {
-                $commission = $amount * 0.1;
+                // $commission = $amount * 0.1;
+                $commission = $amount * 0.1; // 10% commission
+        if ($amount >= 50000) {
+            $commission = $amount * 0.05; // 10% commission
+        }
 
                 DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
 
@@ -819,7 +827,11 @@ class TopupController extends Controller
             }
 
             // 10% commission for indirect sales
-            $indirectCommission = $amount * 0.1;
+            // $indirectCommission = $amount * 0.1;
+            $indirectCommission = $amount * 0.1; // 10% indirectCommission
+        if ($amount >= 50000) {
+            $indirectCommission = $amount * 0.05; // 10% indirectCommission
+        }
 
             // Ensure wallet exists
             DB::table('wallets')->updateOrInsert(['user_id' => $upline->id], ['updated_at' => now()]);
