@@ -434,6 +434,13 @@ class TopupController extends Controller
             // A. Deduct from Wallet
             DB::table('wallets')->where('user_id', $currentUser->id)->decrement('balance', $finalAmount);
 
+            DB::table('transactions')->insert([
+                'user_id' => $currentUser->id,
+                'type' => 'Debit',
+                'amount' => $finalAmount,
+                'remarks' => 'EMI payment for ' . $receiver->username,
+                'created_at' => now(),
+            ]);
             // B. Create Order
             DB::table('orders')->insert([
                 'user_id' => $receiver->id,
@@ -510,7 +517,7 @@ class TopupController extends Controller
 
         $totalPairsPossible = min(count($leftQueue), count($rightQueue));
         $alreadyPaid = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus from%')->count();
-// dd($totalPairsPossible, $alreadyPaid);
+        // dd($totalPairsPossible, $alreadyPaid);
 
         if ($alreadyPaid > $totalPairsPossible) {
             return;
@@ -774,8 +781,8 @@ class TopupController extends Controller
         // dd($user);
         if ($user->investment_count >= 1) {
             $sponsor = DB::table('users')->where('id', $user->sponsor_id)->first();
-// dd($sponsor);
-                $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
+            // dd($sponsor);
+            $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
             if ($sponsor) {
                 $commission = $amount * 0.1;
 
