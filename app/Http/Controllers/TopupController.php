@@ -291,57 +291,53 @@ class TopupController extends Controller
         $newTotal = $currentCount + $incrementValue;
 
         // --- Start: PACKAGE LIMIT & LOCK-IN LOGIC ---
-        //     $currentCount = $receiver->investment_count ?? 0;
-        // $packageAmount = (float) $package->amount;
+        $currentCount = $receiver->investment_count ?? 0;
+        $packageAmount = (float) $package->amount;
 
-        // // 1. Normalize Existing Order Amount (Subtract 100 if it was the first payment)
-        // $existingOrder = DB::table('orders')
-        //     ->where('user_id', $receiver->id)
-        //     ->first();
+        // 1. Normalize Existing Order Amount (Subtract 100 if it was the first payment)
+        $existingOrder = DB::table('orders')->where('user_id', $receiver->id)->first();
 
-        // if ($existingOrder) {
-        //     $existingBaseAmount = (float) $existingOrder->amount;
+        if ($existingOrder) {
+            $existingBaseAmount = (float) $existingOrder->amount;
 
-        //     // If the first order was 1100, 7100, etc., treat it as 1000, 7000 for comparison
-        //     $normalizedExisting = ($existingBaseAmount % 1000 == 100)
-        //         ? $existingBaseAmount - 100
-        //         : $existingBaseAmount;
+            // If the first order was 1100, 7100, etc., treat it as 1000, 7000 for comparison
+            $normalizedExisting = $existingBaseAmount % 1000 == 100 ? $existingBaseAmount - 100 : $existingBaseAmount;
 
-        //     if ($normalizedExisting != $packageAmount) {
-        //         return back()->with('error', "Member is locked to the ₹{$normalizedExisting} package. Cannot top up with ₹{$packageAmount}.");
-        //     }
-        // }
+            if ($normalizedExisting != $packageAmount) {
+                return back()->with('error', "Member is locked to the ₹{$normalizedExisting} package. Cannot top up with ₹{$packageAmount}.");
+            }
+        }
 
-        // // 2. Define Max Top-ups for each specific Amount (Base Amounts)
-        // $maxLimit = match ($packageAmount) {
-        //     1000.0  => 16,
-        //     7000.0  => 2,
-        //     13000.0 => 1,
-        //     50000.0 => 1,
-        //     100000.0 => 1,
-        //     default => 0,
-        // };
+        // 2. Define Max Top-ups for each specific Amount (Base Amounts)
+        $maxLimit = match ($packageAmount) {
+            1000.0 => 16,
+            7000.0 => 2,
+            13000.0 => 1,
+            50000.0 => 1,
+            100000.0 => 1,
+            default => 0,
+        };
 
-        // if ($maxLimit === 0) {
-        //     return back()->with('error', "Invalid package. Only 1k (16x), 7k (2x), 13k (1x), 50k (1x), or 100k (1x) are allowed.");
-        // }
+        if ($maxLimit === 0) {
+            return back()->with('error', 'Invalid package. Only 1k (16x), 7k (2x), 13k (1x), 50k (1x), or 100k (1x) are allowed.');
+        }
 
-        // // 3. Calculate Increment (Package 1=1, 2=8, 3=16)
-        // $packageId = (int) $package->id;
-        // $incrementValue = match ($packageId) {
-        //     1 => 1,
-        //     2 => 8,
-        //     3 => 16,
-        //     default => 1,
-        // };
+        // 3. Calculate Increment (Package 1=1, 2=8, 3=16)
+        $packageId = (int) $package->id;
+        $incrementValue = match ($packageId) {
+            1 => 1,
+            2 => 8,
+            3 => 16,
+            default => 1,
+        };
 
-        // $newTotal = $currentCount + $incrementValue;
+        $newTotal = $currentCount + $incrementValue;
 
-        // // 4. Enforce the specific Limit Check
-        // if ($newTotal > $maxLimit) {
-        //     $remaining = max(0, $maxLimit - $currentCount);
-        //     return back()->with('error', "Limit reached for ₹{$packageAmount}. Remaining: {$remaining}. This selection adds {$incrementValue}.");
-        // }
+        // 4. Enforce the specific Limit Check
+        if ($newTotal > $maxLimit) {
+            $remaining = max(0, $maxLimit - $currentCount);
+            return back()->with('error', "Limit reached for ₹{$packageAmount}. Remaining: {$remaining}. This selection adds {$incrementValue}.");
+        }
         // --- END: PACKAGE LIMIT & LOCK-IN LOGIC ---
 
         // ✅ 1. Check EMI/Investment limit (max 16)
@@ -359,8 +355,9 @@ class TopupController extends Controller
             $limit = 1; // Default fallback
         }
 
-        $currentCount = $receiver->emi_status ?? 0;
+        $currentCount = $receiver->investment_count ?? 0;
         $incrementValue = 1; // Assuming 1 package = 1 EMI entry
+        // dd($currentCount, $incrementValue);
         $newTotal = $currentCount + $incrementValue;
 
         // 2. Updated Validation Condition
@@ -461,65 +458,62 @@ class TopupController extends Controller
             return back()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
-private function checkAndDistributePairCompletionBonus($sponsor, $amount)
-{
-    if (!$sponsor) return;
+    private function checkAndDistributePairCompletionBonus($sponsor, $amount)
+    {
+        if (!$sponsor) {
+            return;
+        }
 
-    // 1. Get TOTAL Volume from both sides
-    // Even if they only have 1 package, we sum the subtree in case there are many users
-    $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
-    $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
+        // 1. Get TOTAL Volume from both sides
+        // Even if they only have 1 package, we sum the subtree in case there are many users
+        $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
+        $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
 
-    if (empty($leftUsers) || empty($rightUsers)) return;
+        if (empty($leftUsers) || empty($rightUsers)) {
+            return;
+        }
 
-//     $leftTotalVolume = collect($leftUsers)->sum('package_amount'); 
-// $rightTotalVolume = collect($rightUsers)->sum('package_amount');
-// 1. Get the IDs of all users in the left and right subtrees
-$leftUserIds = collect($leftUsers)->pluck('id')->toArray();
-$rightUserIds = collect($rightUsers)->pluck('id')->toArray();
+        //     $leftTotalVolume = collect($leftUsers)->sum('package_amount');
+        // $rightTotalVolume = collect($rightUsers)->sum('package_amount');
+        // 1. Get the IDs of all users in the left and right subtrees
+        $leftUserIds = collect($leftUsers)->pluck('id')->toArray();
+        $rightUserIds = collect($rightUsers)->pluck('id')->toArray();
 
-// 2. Sum the 'amount' from the orders table for those specific users
-// This ensures we get ₹50,000 if that is what they actually paid.
-$leftTotalVolume = DB::table('orders')
-    ->whereIn('user_id', $leftUserIds)
-    ->sum('amount');
+        // 2. Sum the 'amount' from the orders table for those specific users
+        // This ensures we get ₹50,000 if that is what they actually paid.
+        $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount');
 
-$rightTotalVolume = DB::table('orders')
-    ->whereIn('user_id', $rightUserIds)
-    ->sum('amount');
-    // 2. The Matching Math
-    // If Left Child has 50k and Right Child has 50k, Match = 50,000
-    $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
-    // dd($currentMaxMatch);
+        $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount');
+        // 2. The Matching Math
+        // If Left Child has 50k and Right Child has 50k, Match = 50,000
+        $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
+        // dd($currentMaxMatch);
 
-    // 3. Subtract what was ALREADY paid to this sponsor
-    $totalPaidBonus = DB::table('transactions')
-        ->where('user_id', $sponsor->id)
-        ->where('remarks', 'like', 'Pair Completion Bonus%')
-        ->sum('amount');
+        // 3. Subtract what was ALREADY paid to this sponsor
+        $totalPaidBonus = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
 
-    $alreadyMatchedVolume = $totalPaidBonus * 10;
+        $alreadyMatchedVolume = $totalPaidBonus * 10;
 
-    // 4. Calculate the Difference
-    $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
+        // 4. Calculate the Difference
+        $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
 
-    // 5. Pay the 10% Bonus
-    if ($newVolumeToPay >= 1000) { 
-        $pairBonus = $newVolumeToPay * 0.10;
+        // 5. Pay the 10% Bonus
+        if ($newVolumeToPay >= 1000) {
+            $pairBonus = $newVolumeToPay * 0.1;
 
-        DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay) {
-            DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+            DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay) {
+                DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
 
-            DB::table('transactions')->insert([
-                'user_id' => $sponsor->id,
-                'type' => 'Credit',
-                'amount' => $pairBonus,
-                'remarks' => "Pair Completion Bonus: Matched ₹" . number_format($newVolumeToPay) . " volume (10% Bonus)",
-                'created_at' => now(),
-            ]);
-        });
+                DB::table('transactions')->insert([
+                    'user_id' => $sponsor->id,
+                    'type' => 'Credit',
+                    'amount' => $pairBonus,
+                    'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToPay) . ' volume (10% Bonus)',
+                    'created_at' => now(),
+                ]);
+            });
+        }
     }
-}
     // private function checkAndDistributePairCompletionBonus($sponsor, $amount)
     // {
     //     // dd($sponsor, $amount);
