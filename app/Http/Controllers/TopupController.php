@@ -366,8 +366,11 @@ class TopupController extends Controller
         }
 
         // ✅ 10. Distribute 50% commission
-        if (method_exists($this, 'distributeCommission')) {
-            $this->distributeCommission($receiver->id, $package->amount);
+        if ($currentCount == 0) {
+
+            if (method_exists($this, 'distributeCommission')) {
+                $this->distributeCommission($receiver->id, $package->amount);
+            }
         }
 
         DB::commit();
