@@ -248,202 +248,341 @@ class TopupController extends Controller
     //     }
     // }
 
-
-
-
-
     public function store(Request $r)
-{
-    // 1. Validate using member_id instead of email
-    $r->validate([
-        'member_id' => 'required|string|exists:users,member_id',
-        'package_id' => 'required|integer|exists:packages,id',
-        'payment_by' => 'required|string',
-    ]);
-
-    $currentUser = Auth::user();
-    $memberId = strtoupper(trim($r->member_id));
-
-    // 2. Fetch data using member_id
-    // Note: We use the Model \App\Models\User to ensure the reward functions work correctly
-    $receiver = \App\Models\User::where('member_id', $memberId)->first();
-    $package = DB::table('packages')->where('id', $r->package_id)->first();
-    $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
-
-    if (!$receiver) {
-        return back()->with('error', 'Member not found.');
-    }
-
-    // 3. INTERNAL FINAL AMOUNT CALCULATION (Fixes the "Top-up not happening" issue)
-    $currentCount = $receiver->investment_count ?? 0;
-    $registrationFee = ($currentCount == 0) ? 100 : 0;
-    $finalAmount = (float) $package->amount + $registrationFee;
-
-    // 4. Calculate increment value based on package_id
-    $packageId = (int) $r->package_id;
-    $incrementValue = match ($packageId) {
-        1 => 1,
-        2 => 8,
-        3 => 16,
-        default => 0,
-    };
-
-    $newTotal = $currentCount + $incrementValue;
-
-    // ✅ 1. Check EMI/Investment limit (max 16)
-    if ($receiver->emi_status === 'completed' || $newTotal > 16) {
-        $remaining = max(0, 16 - $currentCount);
-        return back()->with('error', "Cannot exceed 16 EMIs limit. You can only add {$remaining} more EMI(s). This package adds {$incrementValue} EMI(s).");
-    }
-
-    // ✅ 2. Wallet balance validation
-    if (!$wallet || $wallet->balance < $finalAmount) {
-        return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
-    }
-
-    // ✅ 3. Lucky Service logic for specialized packages
-    if (in_array($packageId, [4, 5])) {
-        \App\Services\LuckyService::createCycleIfNotExists($receiver->id, $packageId);
-    }
-
-    DB::beginTransaction();
-    try {
-        // ✅ 4. Deduct wallet balance
-        DB::table('wallets')
-            ->where('user_id', $currentUser->id)
-            ->update([
-                'balance' => $wallet->balance - $finalAmount,
-                'updated_at' => now(),
-            ]);
-
-        // ✅ 5. Record debit transaction
-        DB::table('transactions')->insert([
-            'user_id' => $currentUser->id,
-            'type' => 'Debit',
-            'amount' => $finalAmount,
-            'remarks' => 'EMI payment for ' . $receiver->username . " ({$memberId})",
-            'created_at' => now(),
+    {
+        // 1. Validate using member_id instead of email
+        $r->validate([
+            'member_id' => 'required|string|exists:users,member_id',
+            'package_id' => 'required|integer|exists:packages,id',
+            'payment_by' => 'required|string',
         ]);
 
-        // ✅ 6. Record order (as EMI)
-        DB::table('orders')->insert([
-            'user_id' => $receiver->id,
-            'from_user_id' => $currentUser->id,
-            'package_id' => $package->id,
-            'amount' => $finalAmount,
-            'payment_by' => $r->payment_by,
-            'status' => 'completed',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $currentUser = Auth::user();
+        $memberId = strtoupper(trim($r->member_id));
 
-        // ✅ 7. Update investment_count and status
-        DB::table('users')
-            ->where('id', $receiver->id)
-            ->update([
-                'investment_count' => $newTotal,
-                'emi_status' => $newTotal >= 16 ? 'completed' : 'ongoing',
-                'updated_at' => now(),
-            ]);
+        // 2. Fetch data using member_id
+        // Note: We use the Model \App\Models\User to ensure the reward functions work correctly
+        $receiver = \App\Models\User::where('member_id', $memberId)->first();
+        $package = DB::table('packages')->where('id', $r->package_id)->first();
+        $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
 
-        // ✅ 8. Trigger pair bonus check for ALL uplines (The part missing in the new function)
-        $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
-
-        while ($sponsor) {
-            if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
-                $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount);
-            }
-
-            if (empty($sponsor->placement_id)) {
-                break;
-            }
-            $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
+        if (!$receiver) {
+            return back()->with('error', 'Member not found.');
         }
 
-        // ✅ 9. Trigger reward once all 16 EMIs are completed
-        if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
-            $this->rewardAfterFullEmi($receiver);
-        }
+        // 3. INTERNAL FINAL AMOUNT CALCULATION (Fixes the "Top-up not happening" issue)
+        $currentCount = $receiver->investment_count ?? 0;
+        $registrationFee = $currentCount == 0 ? 100 : 0;
+        $finalAmount = (float) $package->amount + $registrationFee;
 
-        // ✅ 10. Distribute 50% commission
-        if ($currentCount == 0) {
+        // 4. Calculate increment value based on package_id
+        $packageId = (int) $r->package_id;
 
-            if (method_exists($this, 'distributeCommission')) {
-                $this->distributeCommission($receiver->id, $package->amount);
-            }
-        }
-
-        DB::commit();
-
-        // ✅ 11. Success messages
-        $successMessage = match ($packageId) {
-            4, 5 => "Congratulations! You have successfully paid ₹{$finalAmount} for Member {$memberId}. Vouchers have been issued.",
-            default => "EMI #{$newTotal} paid successfully! ₹{$finalAmount} deducted from your wallet for Member {$memberId}.",
+        $packageAmount = (float) $package->amount;
+        $incrementValue = match ($packageAmount) {
+            1000.0 => 1,
+            7000.0 => 7,
+            13000.0 => 13,
+            50000.0 => 50,
+            100000.0 => 100,
+            default => floor($packageAmount / 1000),
         };
 
-        return back()->with('success', $successMessage);
+        $newTotal = $currentCount + $incrementValue;
 
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+        // --- Start: PACKAGE LIMIT & LOCK-IN LOGIC ---
+        //     $currentCount = $receiver->investment_count ?? 0;
+        // $packageAmount = (float) $package->amount;
+
+        // // 1. Normalize Existing Order Amount (Subtract 100 if it was the first payment)
+        // $existingOrder = DB::table('orders')
+        //     ->where('user_id', $receiver->id)
+        //     ->first();
+
+        // if ($existingOrder) {
+        //     $existingBaseAmount = (float) $existingOrder->amount;
+
+        //     // If the first order was 1100, 7100, etc., treat it as 1000, 7000 for comparison
+        //     $normalizedExisting = ($existingBaseAmount % 1000 == 100)
+        //         ? $existingBaseAmount - 100
+        //         : $existingBaseAmount;
+
+        //     if ($normalizedExisting != $packageAmount) {
+        //         return back()->with('error', "Member is locked to the ₹{$normalizedExisting} package. Cannot top up with ₹{$packageAmount}.");
+        //     }
+        // }
+
+        // // 2. Define Max Top-ups for each specific Amount (Base Amounts)
+        // $maxLimit = match ($packageAmount) {
+        //     1000.0  => 16,
+        //     7000.0  => 2,
+        //     13000.0 => 1,
+        //     50000.0 => 1,
+        //     100000.0 => 1,
+        //     default => 0,
+        // };
+
+        // if ($maxLimit === 0) {
+        //     return back()->with('error', "Invalid package. Only 1k (16x), 7k (2x), 13k (1x), 50k (1x), or 100k (1x) are allowed.");
+        // }
+
+        // // 3. Calculate Increment (Package 1=1, 2=8, 3=16)
+        // $packageId = (int) $package->id;
+        // $incrementValue = match ($packageId) {
+        //     1 => 1,
+        //     2 => 8,
+        //     3 => 16,
+        //     default => 1,
+        // };
+
+        // $newTotal = $currentCount + $incrementValue;
+
+        // // 4. Enforce the specific Limit Check
+        // if ($newTotal > $maxLimit) {
+        //     $remaining = max(0, $maxLimit - $currentCount);
+        //     return back()->with('error', "Limit reached for ₹{$packageAmount}. Remaining: {$remaining}. This selection adds {$incrementValue}.");
+        // }
+        // --- END: PACKAGE LIMIT & LOCK-IN LOGIC ---
+
+        // ✅ 1. Check EMI/Investment limit (max 16)
+        $amount = $r->input('amount');
+        // $receiver = User::find($r->input('user_id'));
+
+        // 1. Define the dynamic EMI limits
+        if ($amount == 1000) {
+            $limit = 16;
+        } elseif ($amount == 7000) {
+            $limit = 2;
+        } elseif (in_array($amount, [13000, 50000, 100000])) {
+            $limit = 1;
+        } else {
+            $limit = 1; // Default fallback
+        }
+
+        $currentCount = $receiver->emi_status ?? 0;
+        $incrementValue = 1; // Assuming 1 package = 1 EMI entry
+        $newTotal = $currentCount + $incrementValue;
+
+        // 2. Updated Validation Condition
+        if ($newTotal > $limit) {
+            $remaining = max(0, $limit - $currentCount);
+
+            // Dynamic error message based on the specific package limit
+            return back()->with('error', "Limit Exceeded for ₹{$amount} package. " . "This package allows a maximum of {$limit} EMI(s). " . "You can only add {$remaining} more.");
+        }
+
+        // ✅ 2. Wallet balance validation
+        if (!$wallet || $wallet->balance < $finalAmount) {
+            return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
+        }
+
+        // ✅ 3. Lucky Service logic for specialized packages
+        if (in_array($packageId, [4, 5])) {
+            \App\Services\LuckyService::createCycleIfNotExists($receiver->id, $packageId);
+        }
+
+        DB::beginTransaction();
+        try {
+            // ✅ 4. Deduct wallet balance
+            DB::table('wallets')
+                ->where('user_id', $currentUser->id)
+                ->update([
+                    'balance' => $wallet->balance - $finalAmount,
+                    'updated_at' => now(),
+                ]);
+
+            // ✅ 5. Record debit transaction
+            DB::table('transactions')->insert([
+                'user_id' => $currentUser->id,
+                'type' => 'Debit',
+                'amount' => $finalAmount,
+                'remarks' => 'EMI payment for ' . $receiver->username . " ({$memberId})",
+                'created_at' => now(),
+            ]);
+
+            // ✅ 6. Record order (as EMI)
+            DB::table('orders')->insert([
+                'user_id' => $receiver->id,
+                'from_user_id' => $currentUser->id,
+                'package_id' => $package->id,
+                'amount' => $finalAmount,
+                'payment_by' => $r->payment_by,
+                'status' => 'completed',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // ✅ 7. Update investment_count and status
+            DB::table('users')
+                ->where('id', $receiver->id)
+                ->update([
+                    'investment_count' => $newTotal,
+                    'emi_status' => $newTotal >= 16 ? 'completed' : 'ongoing',
+                    'updated_at' => now(),
+                ]);
+
+            // ✅ 8. Trigger pair bonus check for ALL uplines (The part missing in the new function)
+            $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
+
+            while ($sponsor) {
+                if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
+                    $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount);
+                }
+
+                if (empty($sponsor->placement_id)) {
+                    break;
+                }
+                $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
+            }
+
+            // ✅ 9. Trigger reward once all 16 EMIs are completed
+            if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
+                $this->rewardAfterFullEmi($receiver);
+            }
+
+            // ✅ 10. Distribute 50% commission
+            if ($currentCount == 0) {
+                if (method_exists($this, 'distributeCommission')) {
+                    $this->distributeCommission($receiver->id, $package->amount);
+                }
+            }
+
+            DB::commit();
+
+            // ✅ 11. Success messages
+            $successMessage = match ($packageId) {
+                4, 5 => "Congratulations! You have successfully paid ₹{$finalAmount} for Member {$memberId}. Vouchers have been issued.",
+                default => "EMI #{$newTotal} paid successfully! ₹{$finalAmount} deducted from your wallet for Member {$memberId}.",
+            };
+
+            return back()->with('success', $successMessage);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+        }
     }
-}
+private function checkAndDistributePairCompletionBonus($sponsor, $amount)
+{
+    if (!$sponsor) return;
 
-    private function checkAndDistributePairCompletionBonus($sponsor, $amount)
-    {
-        // dd($sponsor, $amount);
-        DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
+    // 1. Get TOTAL Volume from both sides
+    // Even if they only have 1 package, we sum the subtree in case there are many users
+    $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
+    $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
 
-        // 🔹 Get FULL left subtree
-        $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
+    if (empty($leftUsers) || empty($rightUsers)) return;
 
-        // 🔹 Get FULL right subtree
-        $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
+//     $leftTotalVolume = collect($leftUsers)->sum('package_amount'); 
+// $rightTotalVolume = collect($rightUsers)->sum('package_amount');
+// 1. Get the IDs of all users in the left and right subtrees
+$leftUserIds = collect($leftUsers)->pluck('id')->toArray();
+$rightUserIds = collect($rightUsers)->pluck('id')->toArray();
 
-        if (empty($leftUsers) || empty($rightUsers)) {
-            return;
-        }
+// 2. Sum the 'amount' from the orders table for those specific users
+// This ensures we get ₹50,000 if that is what they actually paid.
+$leftTotalVolume = DB::table('orders')
+    ->whereIn('user_id', $leftUserIds)
+    ->sum('amount');
 
-        // 🔹 Expand users by EMI count
-        $leftQueue = [];
-        foreach ($leftUsers as $user) {
-            for ($i = 0; $i < $user->investment_count; $i++) {
-                $leftQueue[] = $user;
-            }
-        }
+$rightTotalVolume = DB::table('orders')
+    ->whereIn('user_id', $rightUserIds)
+    ->sum('amount');
+    // 2. The Matching Math
+    // If Left Child has 50k and Right Child has 50k, Match = 50,000
+    $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
+    // dd($currentMaxMatch);
 
-        $rightQueue = [];
-        foreach ($rightUsers as $user) {
-            for ($i = 0; $i < $user->investment_count; $i++) {
-                $rightQueue[] = $user;
-            }
-        }
+    // 3. Subtract what was ALREADY paid to this sponsor
+    $totalPaidBonus = DB::table('transactions')
+        ->where('user_id', $sponsor->id)
+        ->where('remarks', 'like', 'Pair Completion Bonus%')
+        ->sum('amount');
 
-        $totalPairsPossible = min(count($leftQueue), count($rightQueue));
-        $alreadyPaid = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus from%')->count();
-        // dd($totalPairsPossible, $alreadyPaid);
+    $alreadyMatchedVolume = $totalPaidBonus * 10;
 
-        if ($alreadyPaid > $totalPairsPossible) {
-            return;
-        }
+    // 4. Calculate the Difference
+    $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
 
-        for ($i = $alreadyPaid; $i < $totalPairsPossible; $i++) {
-            $leftChild = $leftQueue[$i];
-            $rightChild = $rightQueue[$i];
+    // 5. Pay the 10% Bonus
+    if ($newVolumeToPay >= 1000) { 
+        $pairBonus = $newVolumeToPay * 0.10;
 
-            $pairBonus = $amount * 0.1;
-
+        DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay) {
             DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
 
             DB::table('transactions')->insert([
                 'user_id' => $sponsor->id,
                 'type' => 'Credit',
                 'amount' => $pairBonus,
-                'remarks' => "Pair Completion Bonus from {$leftChild->username} and {$rightChild->username} (₹{$amount})",
+                'remarks' => "Pair Completion Bonus: Matched ₹" . number_format($newVolumeToPay) . " volume (10% Bonus)",
                 'created_at' => now(),
             ]);
-        }
+        });
     }
+}
+    // private function checkAndDistributePairCompletionBonus($sponsor, $amount)
+    // {
+    //     // dd($sponsor, $amount);
+    //     DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
+
+    //     // 🔹 Get FULL left subtree
+    //     $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
+
+    //     // 🔹 Get FULL right subtree
+    //     $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
+    //     // dd($leftUsers, $rightUsers);
+    //     if (empty($leftUsers) || empty($rightUsers)) {
+    //         return;
+    //     }
+    //     // 🔹 1. Calculate Total Points in each subtree (1 point per ₹1000)
+    //     $leftPoints = collect($leftUsers)->sum('investment_count');
+    //     $rightPoints = collect($rightUsers)->sum('investment_count');
+    //     // dd($leftPoints, $rightPoints);
+    //     // 🔹 2. Calculate Pairs and Check History
+    //     $totalPairsPossible = min($leftPoints, $rightPoints);
+    //     // dd($totalPairsPossible);
+    //     // Check total bonus already paid (Total Bonus Amount / 100)
+    //     // 10% of 1000 = 100, so each matched point = ₹100 bonus
+    //     $totalBonusPaid = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
+    //     // dd($totalBonusPaid);
+    //     $alreadyPaidPoints = $totalBonusPaid / 100;
+    //     // dd($totalPairsPossible, $alreadyPaidPoints);
+    //     // 🔹 3. Distribute New Points (One transaction for all new volume)
+    //     $leftVolume = collect($leftUsers)->sum('investment_count') * 1000;
+    //     $rightVolume = collect($rightUsers)->sum('investment_count') * 1000;
+
+    //     // 4. Determine the Match (Example: Left 13k vs Right 1k = 1k Match)
+    //     $totalMatchedPossible = min($leftVolume, $rightVolume);
+
+    //     // 5. Calculate Volume already paid out
+    //     // Since Bonus = 10% of Volume, then Volume = Bonus Paid * 10
+    //     $totalBonusPaid = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
+
+    //     $alreadyMatchedVolume = $totalBonusPaid * 10;
+    //     if ($totalPairsPossible > $alreadyPaidPoints) {
+    //         // $newPoints = $totalPairsPossible - $alreadyPaidPoints;
+    //         // $totalPairBonus = $newPoints * 100;
+
+    //         $newVolumeToMatch = $totalMatchedPossible - $alreadyMatchedVolume;
+
+    //         // Bonus is exactly 10% of the new match
+    //         $pairBonus = $newVolumeToMatch * 0.1;
+
+    //         DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToMatch) {
+    //             // Update Wallet
+    //             DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+
+    //             // Record Transaction
+    //             DB::table('transactions')->insert([
+    //                 'user_id' => $sponsor->id,
+    //                 'type' => 'Credit',
+    //                 'amount' => $pairBonus,
+    //                 'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToMatch) . ' volume (10% Bonus)',
+    //                 'created_at' => now(),
+    //             ]);
+    //         });
+    //     }
+    // }
 
     private function getFullSubtreeUsers($rootId, $side)
     {

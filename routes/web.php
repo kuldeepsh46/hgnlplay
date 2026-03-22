@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Mail\WelcomeMemberMail;
 use App\Models\User;
+use App\Http\Controllers\ManageUsersRolesController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -158,3 +159,13 @@ Route::get('/mail-preview', function () {
     $user = User::first(); // Grab a user from your database
     return new WelcomeMemberMail($user, 'Shimla@46');
 });
+Route::get('/manage-users-role', [ManageUsersRolesController::class, 'index'])->name('admin.manage.role.index');
+    
+    // The Single Package Reverse
+    Route::post('/delete-package', [ManageUsersRolesController::class, 'deletePackage'])->name('admin.delete.package');
+    
+    // THE MISSING ROUTE: The All-User Reverse
+    Route::post('/reverse-all-user', [ManageUsersRolesController::class, 'reverseAll'])->name('admin.manage.reverseAll');
+    
+    // The Panic Button
+    Route::post('/panic-nuke', [ManageUsersRolesController::class, 'systemPanic'])->name('admin.panic');
