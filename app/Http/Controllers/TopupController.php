@@ -152,116 +152,58 @@ class TopupController extends Controller
     //     }
     // }
 
-    //     public function store(Request $r)
-    // {
-    //     // 1. Force Upper and check data
-    //     $r->merge(['member_id' => strtoupper(trim($r->member_id))]);
-
-    //     // 2. Validate with custom messages so we know what failed
-    //     $validator = \Validator::make($r->all(), [
-    //         'member_id'    => 'required|string|exists:users,member_id',
-    //         'package_id'   => 'required|integer|exists:packages,id',
-    //         'payment_by'   => 'required|string',
-    //         'final_amount' => 'required|numeric|min:1',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return back()->with('error', 'Validation Error: ' . $validator->errors()->first());
-    //     }
-
-    //     $currentUser = Auth::user();
-    //     $package     = DB::table('packages')->where('id', $r->package_id)->first();
-    //     $receiver    = DB::table('users')->where('member_id', $r->member_id)->first();
-    //     $wallet      = DB::table('wallets')->where('user_id', $currentUser->id)->first();
-    //     $finalAmount = floatval($r->final_amount);
-
-    //     // 3. Wallet Check
-    //     if (!$wallet || $wallet->balance < $finalAmount) {
-    //         return back()->with('error', "Insufficient balance. Have: ₹{$wallet->balance}, Need: ₹{$finalAmount}");
-    //     }
-
-    //     DB::beginTransaction();
-    //     try {
-    //         // A. Deduction
-    //         DB::table('wallets')->where('user_id', $currentUser->id)->decrement('balance', $finalAmount);
-
-    //         // B. Order Creation
-    //         DB::table('orders')->insert([
-    //             'user_id'      => $receiver->id,
-    //             'from_user_id' => $currentUser->id,
-    //             'package_id'   => $package->id,
-    //             'amount'       => $finalAmount,
-    //             'payment_by'   => $r->payment_by,
-    //             'status'       => 'completed',
-    //             'created_at'   => now(),
-    //             'updated_at'   => now(),
-    //         ]);
-
-    //         // C. Update Receiver Progress
-    //         $packageId = (int)$package->id;
-    //         $increment = in_array($packageId, [1, 2, 3]) ? match($packageId) {1=>1, 2=>8, 3=>16} : 0;
-
-    //         if ($increment > 0) {
-    //             DB::table('users')->where('id', $receiver->id)->increment('investment_count', $increment, [
-    //                 'emi_status' => ($receiver->investment_count + $increment) >= 16 ? 'completed' : 'ongoing'
-    //             ]);
-    //         }
-
-    //         // D. Commission
-    //         $this->distributeCommission($receiver->id, $package->amount);
-
-    //         DB::commit();
-    //         return back()->with('success', "Success! Package assigned to {$receiver->member_id}");
-
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return back()->with('error', 'Critical Error: ' . $e->getMessage());
-    //     }
-    // }
-    // use Illuminate\Support\Facades\Log; // Add this at the top of your file
+    //
 
     // public function store(Request $r)
     // {
-    //     // 1. Prepare and Validate
-    //     $r->merge(['member_id' => strtoupper(trim($r->member_id))]);
-
+    //     // 1. Clean and Validate
+    //     $memberId = strtoupper(trim($r->member_id));
     //     $r->validate([
     //         'member_id' => 'required|string|exists:users,member_id',
     //         'package_id' => 'required|integer|exists:packages,id',
     //         'payment_by' => 'required|string',
     //     ]);
+    //     $member = \App\Models\User::where('member_id', $r->member_id)->first();
+
+    //     if (!$member) {
+    //         return back()
+    //             ->withInput()
+    //             ->withErrors(['member_id' => 'The provided Member ID is invalid or does not exist.']);
+    //     }
 
     //     $currentUser = Auth::user();
-    //     $package = DB::table('packages')->where('id', $r->package_id)->first();
-    //     // 1. Fetch data
-    //     $receiver = DB::table('users')->where('member_id', $r->member_id)->first();
+    //     $receiver = DB::table('users')->where('member_id', $memberId)->first();
     //     $package = DB::table('packages')->where('id', $r->package_id)->first();
     //     $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
 
-    //     // 2. Critical Check: Ensure receiver was actually found
     //     if (!$receiver) {
-    //         return back()->with('error', "Member ID: {$r->member_id} not found in our records.");
+    //         return back()->with('error', 'Member not found.');
     //     }
 
-    //     if (!$package) {
-    //         return back()->with('error', 'The selected package is invalid.');
-    //     }
-
-    //     // 3. Server-side Amount Calculation
-    //     // Now it is safe to access $receiver->investment_count
-    //     $registrationFee = $receiver->investment_count == 0 ? 100 : 0;
+    //     // 2. Safe Calculation
+    //     // Use '0' if the column is missing or null to prevent crashes
+    //     $currentCount = $receiver->investment_count ?? 0;
+    //     $registrationFee = $currentCount == 0 ? 100 : 0;
     //     $finalAmount = (float) $package->amount + $registrationFee;
+
     //     // 3. Wallet Check
     //     if (!$wallet || $wallet->balance < $finalAmount) {
-    //         return back()->with('error', "Insufficient balance. Have: ₹{$wallet->balance}, Need: ₹{$finalAmount}");
+    //         return back()->with('error', "Insufficient balance. Need: ₹{$finalAmount}");
     //     }
 
     //     DB::beginTransaction();
     //     try {
-    //         // A. Deduct from Payer's Wallet
+    //         // A. Deduct from Wallet
     //         DB::table('wallets')->where('user_id', $currentUser->id)->decrement('balance', $finalAmount);
 
-    //         // B. Create Order Record
+    //         DB::table('transactions')->insert([
+    //             'user_id' => $currentUser->id,
+    //             'type' => 'Debit',
+    //             'amount' => $finalAmount,
+    //             'remarks' => 'EMI payment for ' . $receiver->username,
+    //             'created_at' => now(),
+    //         ]);
+    //         // B. Create Order
     //         DB::table('orders')->insert([
     //             'user_id' => $receiver->id,
     //             'from_user_id' => $currentUser->id,
@@ -274,217 +216,176 @@ class TopupController extends Controller
     //         ]);
 
     //         // C. Update Receiver Progress
-    //         $packageId = (int) $package->id;
-    //         // 1: Starter(1), 2: Seven+One(8), 3: Thirteen+Three(16), 4/5: Others(1)
-    //         $increment = match ($packageId) {
+    //         $increment = match ((int) $package->id) {
     //             1 => 1,
     //             2 => 8,
     //             3 => 16,
     //             default => 1,
     //         };
 
-    //         $newInvestmentCount = $receiver->investment_count + $increment;
+    //         $newTotal = $currentCount + $increment;
 
+    //         // Using update instead of increment for better control
     //         DB::table('users')
     //             ->where('id', $receiver->id)
     //             ->update([
-    //                 'investment_count' => $newInvestmentCount,
-    //                 'emi_status' => $newInvestmentCount >= 16 ? 'completed' : 'ongoing',
+    //                 'investment_count' => $newTotal,
+    //                 'emi_status' => $newTotal >= 16 ? 'completed' : 'ongoing',
     //                 'updated_at' => now(),
     //             ]);
 
-    //         // D. Distribute Commission (Using package base amount)
+    //         // D. Commission
     //         if (method_exists($this, 'distributeCommission')) {
+    //             // dd($this);
     //             $this->distributeCommission($receiver->id, $package->amount);
     //         }
 
     //         DB::commit();
-    //         return back()->with('success', "Success! Package assigned to {$receiver->member_id}. Total Paid: ₹{$finalAmount}");
+    //         return back()->with('success', "Success! Package assigned to {$receiver->member_id}");
     //     } catch (\Exception $e) {
     //         DB::rollBack();
-    //         return back()->with('error', 'Critical Error: ' . $e->getMessage());
+    //         return back()->with('error', 'Error: ' . $e->getMessage());
     //     }
     // }
-    // public function store(Request $r)
-    // {
-    //     // 1. Clean and Validate input
-    //     $memberId = strtoupper(trim($r->member_id));
 
-    //     $r->validate([
-    //         'member_id'    => 'required|string',
-    //         'package_id'   => 'required|integer',
-    //         'payment_by'   => 'required|string',
-    //     ]);
 
-    //     $currentUser = Auth::user();
 
-    //     // 2. Fetch Data
-    //     $receiver = DB::table('users')->where('member_id', $memberId)->first();
-    //     $package  = DB::table('packages')->where('id', $r->package_id)->first();
-    //     $wallet   = DB::table('wallets')->where('user_id', $currentUser->id)->first();
 
-    //     // 3. Robust Null Checks
-    //     if (!$receiver) {
-    //         return back()->with('error', "Member ID {$memberId} not found. Please check the ID and try again.");
-    //     }
 
-    //     if (!$package) {
-    //         return back()->with('error', "Invalid package selected.");
-    //     }
-
-    //     // 4. Calculate Amount safely
-    //     // Using (int) property check to prevent stdClass errors
-    //     $investCount = isset($receiver->investment_count) ? (int)$receiver->investment_count : 0;
-
-    //     $registrationFee = ($investCount === 0) ? 100 : 0;
-    //     $finalAmount = (float)$package->amount + $registrationFee;
-
-    //     // 5. Wallet Balance Check
-    //     if (!$wallet || (float)$wallet->balance < $finalAmount) {
-    //         $currentBalance = $wallet ? $wallet->balance : 0;
-    //         return back()->with('error', "Insufficient balance. You have ₹{$currentBalance}, but ₹{$finalAmount} is required.");
-    //     }
-
-    //     DB::beginTransaction();
-    //     try {
-    //         // A. Deduct from Payer's Wallet
-    //         DB::table('wallets')->where('user_id', $currentUser->id)->decrement('balance', $finalAmount);
-
-    //         // B. Create Order
-    //         DB::table('orders')->insert([
-    //             'user_id'      => $receiver->id,
-    //             'from_user_id' => $currentUser->id,
-    //             'package_id'   => $package->id,
-    //             'amount'       => $finalAmount,
-    //             'payment_by'   => $r->payment_by,
-    //             'status'       => 'completed',
-    //             'created_at'   => now(),
-    //             'updated_at'   => now(),
-    //         ]);
-
-    //         // C. Update Receiver Progress
-    //         $packageId = (int)$package->id;
-    //         $increment = match($packageId) {
-    //             1 => 1,
-    //             2 => 8,
-    //             3 => 16,
-    //             default => 1
-    //         };
-
-    //         $newCount = $investCount + $increment;
-
-    //         DB::table('users')->where('id', $receiver->id)->update([
-    //             'investment_count' => $newCount,
-    //             'emi_status'       => ($newCount >= 16) ? 'completed' : 'ongoing',
-    //             'updated_at'       => now()
-    //         ]);
-
-    //         // D. Commission logic
-    //         if (method_exists($this, 'distributeCommission')) {
-    //             $this->distributeCommission($receiver->id, $package->amount);
-    //         }
-
-    //         DB::commit();
-    //         return back()->with('success', "Success! ₹{$finalAmount} processed for {$receiver->member_id}");
-
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return back()->with('error', 'Transaction Error: ' . $e->getMessage());
-    //     }
-    // }
     public function store(Request $r)
-    {
-        // 1. Clean and Validate
-        $memberId = strtoupper(trim($r->member_id));
-        $r->validate([
-            'member_id' => 'required|string|exists:users,member_id',
-            'package_id' => 'required|integer|exists:packages,id',
-            'payment_by' => 'required|string',
-        ]);
-        $member = \App\Models\User::where('member_id', $r->member_id)->first();
+{
+    // 1. Validate using member_id instead of email
+    $r->validate([
+        'member_id' => 'required|string|exists:users,member_id',
+        'package_id' => 'required|integer|exists:packages,id',
+        'payment_by' => 'required|string',
+    ]);
 
-        if (!$member) {
-            return back()
-                ->withInput()
-                ->withErrors(['member_id' => 'The provided Member ID is invalid or does not exist.']);
-        }
+    $currentUser = Auth::user();
+    $memberId = strtoupper(trim($r->member_id));
 
-        $currentUser = Auth::user();
-        $receiver = DB::table('users')->where('member_id', $memberId)->first();
-        $package = DB::table('packages')->where('id', $r->package_id)->first();
-        $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
+    // 2. Fetch data using member_id
+    // Note: We use the Model \App\Models\User to ensure the reward functions work correctly
+    $receiver = \App\Models\User::where('member_id', $memberId)->first();
+    $package = DB::table('packages')->where('id', $r->package_id)->first();
+    $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
 
-        if (!$receiver) {
-            return back()->with('error', 'Member not found.');
-        }
+    if (!$receiver) {
+        return back()->with('error', 'Member not found.');
+    }
 
-        // 2. Safe Calculation
-        // Use '0' if the column is missing or null to prevent crashes
-        $currentCount = $receiver->investment_count ?? 0;
-        $registrationFee = $currentCount == 0 ? 100 : 0;
-        $finalAmount = (float) $package->amount + $registrationFee;
+    // 3. INTERNAL FINAL AMOUNT CALCULATION (Fixes the "Top-up not happening" issue)
+    $currentCount = $receiver->investment_count ?? 0;
+    $registrationFee = ($currentCount == 0) ? 100 : 0;
+    $finalAmount = (float) $package->amount + $registrationFee;
 
-        // 3. Wallet Check
-        if (!$wallet || $wallet->balance < $finalAmount) {
-            return back()->with('error', "Insufficient balance. Need: ₹{$finalAmount}");
-        }
+    // 4. Calculate increment value based on package_id
+    $packageId = (int) $r->package_id;
+    $incrementValue = match ($packageId) {
+        1 => 1,
+        2 => 8,
+        3 => 16,
+        default => 0,
+    };
 
-        DB::beginTransaction();
-        try {
-            // A. Deduct from Wallet
-            DB::table('wallets')->where('user_id', $currentUser->id)->decrement('balance', $finalAmount);
+    $newTotal = $currentCount + $incrementValue;
 
-            DB::table('transactions')->insert([
-                'user_id' => $currentUser->id,
-                'type' => 'Debit',
-                'amount' => $finalAmount,
-                'remarks' => 'EMI payment for ' . $receiver->username,
-                'created_at' => now(),
-            ]);
-            // B. Create Order
-            DB::table('orders')->insert([
-                'user_id' => $receiver->id,
-                'from_user_id' => $currentUser->id,
-                'package_id' => $package->id,
-                'amount' => $finalAmount,
-                'payment_by' => $r->payment_by,
-                'status' => 'completed',
-                'created_at' => now(),
+    // ✅ 1. Check EMI/Investment limit (max 16)
+    if ($receiver->emi_status === 'completed' || $newTotal > 16) {
+        $remaining = max(0, 16 - $currentCount);
+        return back()->with('error', "Cannot exceed 16 EMIs limit. You can only add {$remaining} more EMI(s). This package adds {$incrementValue} EMI(s).");
+    }
+
+    // ✅ 2. Wallet balance validation
+    if (!$wallet || $wallet->balance < $finalAmount) {
+        return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
+    }
+
+    // ✅ 3. Lucky Service logic for specialized packages
+    if (in_array($packageId, [4, 5])) {
+        \App\Services\LuckyService::createCycleIfNotExists($receiver->id, $packageId);
+    }
+
+    DB::beginTransaction();
+    try {
+        // ✅ 4. Deduct wallet balance
+        DB::table('wallets')
+            ->where('user_id', $currentUser->id)
+            ->update([
+                'balance' => $wallet->balance - $finalAmount,
                 'updated_at' => now(),
             ]);
 
-            // C. Update Receiver Progress
-            $increment = match ((int) $package->id) {
-                1 => 1,
-                2 => 8,
-                3 => 16,
-                default => 1,
-            };
+        // ✅ 5. Record debit transaction
+        DB::table('transactions')->insert([
+            'user_id' => $currentUser->id,
+            'type' => 'Debit',
+            'amount' => $finalAmount,
+            'remarks' => 'EMI payment for ' . $receiver->username . " ({$memberId})",
+            'created_at' => now(),
+        ]);
 
-            $newTotal = $currentCount + $increment;
+        // ✅ 6. Record order (as EMI)
+        DB::table('orders')->insert([
+            'user_id' => $receiver->id,
+            'from_user_id' => $currentUser->id,
+            'package_id' => $package->id,
+            'amount' => $finalAmount,
+            'payment_by' => $r->payment_by,
+            'status' => 'completed',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-            // Using update instead of increment for better control
-            DB::table('users')
-                ->where('id', $receiver->id)
-                ->update([
-                    'investment_count' => $newTotal,
-                    'emi_status' => $newTotal >= 16 ? 'completed' : 'ongoing',
-                    'updated_at' => now(),
-                ]);
+        // ✅ 7. Update investment_count and status
+        DB::table('users')
+            ->where('id', $receiver->id)
+            ->update([
+                'investment_count' => $newTotal,
+                'emi_status' => $newTotal >= 16 ? 'completed' : 'ongoing',
+                'updated_at' => now(),
+            ]);
 
-            // D. Commission
-            if (method_exists($this, 'distributeCommission')) {
-                // dd($this);
-                $this->distributeCommission($receiver->id, $package->amount);
+        // ✅ 8. Trigger pair bonus check for ALL uplines (The part missing in the new function)
+        $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
+
+        while ($sponsor) {
+            if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
+                $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount);
             }
 
-            DB::commit();
-            return back()->with('success', "Success! Package assigned to {$receiver->member_id}");
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Error: ' . $e->getMessage());
+            if (empty($sponsor->placement_id)) {
+                break;
+            }
+            $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
         }
+
+        // ✅ 9. Trigger reward once all 16 EMIs are completed
+        if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
+            $this->rewardAfterFullEmi($receiver);
+        }
+
+        // ✅ 10. Distribute 50% commission
+        if (method_exists($this, 'distributeCommission')) {
+            $this->distributeCommission($receiver->id, $package->amount);
+        }
+
+        DB::commit();
+
+        // ✅ 11. Success messages
+        $successMessage = match ($packageId) {
+            4, 5 => "Congratulations! You have successfully paid ₹{$finalAmount} for Member {$memberId}. Vouchers have been issued.",
+            default => "EMI #{$newTotal} paid successfully! ₹{$finalAmount} deducted from your wallet for Member {$memberId}.",
+        };
+
+        return back()->with('success', $successMessage);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Something went wrong: ' . $e->getMessage());
     }
+}
+
     private function checkAndDistributePairCompletionBonus($sponsor, $amount)
     {
         // dd($sponsor, $amount);
@@ -790,9 +691,9 @@ class TopupController extends Controller
             if ($sponsor) {
                 // $commission = $amount * 0.1;
                 $commission = $amount * 0.1; // 10% commission
-        if ($amount >= 50000) {
-            $commission = $amount * 0.05; // 10% commission
-        }
+                if ($amount >= 50000) {
+                    $commission = $amount * 0.05; // 10% commission
+                }
 
                 DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
 
@@ -829,9 +730,9 @@ class TopupController extends Controller
             // 10% commission for indirect sales
             // $indirectCommission = $amount * 0.1;
             $indirectCommission = $amount * 0.1; // 10% indirectCommission
-        if ($amount >= 50000) {
-            $indirectCommission = $amount * 0.05; // 10% indirectCommission
-        }
+            if ($amount >= 50000) {
+                $indirectCommission = $amount * 0.05; // 10% indirectCommission
+            }
 
             // Ensure wallet exists
             DB::table('wallets')->updateOrInsert(['user_id' => $upline->id], ['updated_at' => now()]);
