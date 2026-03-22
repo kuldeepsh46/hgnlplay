@@ -2,7 +2,7 @@
 @section('title', 'Superadmin Control')
 
 <style>
-    .pagination {
+    /* .pagination {
     display: flex;
     justify-content: center;
     list-style: none;
@@ -45,7 +45,7 @@
 .pagination svg {
     width: 20px !important;
     height: 20px !important;
-}
+} */
 
 /* Hide the "Showing X to Y" text that Laravel sometimes forces */
 nav div.hidden {
