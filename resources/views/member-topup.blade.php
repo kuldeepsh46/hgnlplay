@@ -602,7 +602,7 @@
     </script> --}}
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
+    {{-- <script>
         $(document).ready(function() {
             console.log("Script Loaded & Ready"); // Debug log
 
@@ -660,5 +660,76 @@
                 });
             }
         });
-    </script>
+    </script> --}}
+    <script>
+    $(document).ready(function() {
+        console.log("Dynamic Script Loaded");
+
+        const idInput = $('#member_id_input');
+        const statusDiv = $('#member_status');
+        const nameGroup = $('#name_group');
+        const nameDisplay = $('#member_name_display');
+        const submitBtn = $('button[type="submit"]');
+
+        // Define your range
+        const MIN_LEN = 8;
+        const MAX_LEN = 12;
+        let typingTimer; // Timer identifier
+        const doneTypingInterval = 500; // Wait 0.5 seconds after user stops typing
+
+        idInput.on('input propertychange', function() {
+            let val = $(this).val().trim().toUpperCase();
+            $(this).val(val);
+            
+            clearTimeout(typingTimer); // Reset timer on every keystroke
+
+            // 1. If too short, just reset the UI
+            if (val.length < MIN_LEN) {
+                statusDiv.html('');
+                nameGroup.hide();
+                submitBtn.prop('disabled', true);
+                return;
+            }
+
+            // 2. If within or above range, start the countdown to validate
+            if (val.length >= MIN_LEN && val.length <= MAX_LEN) {
+                statusDiv.html('<span style="color:orange;">Typing...</span>');
+                typingTimer = setTimeout(function() {
+                    validateMember(val);
+                }, doneTypingInterval);
+            } 
+            
+            // 3. If they exceed the max, you can either stop them or let the server fail
+            if (val.length > MAX_LEN) {
+                statusDiv.html('<span style="color:red;">ID Too Long</span>');
+                submitBtn.prop('disabled', true);
+            }
+        });
+
+        function validateMember(memberId) {
+            statusDiv.html('<span style="color:blue;">🔍 Scanning System...</span>');
+
+            $.ajax({
+                url: "{{ route('member.check-id') }}",
+                method: "GET",
+                data: { member_id: memberId },
+                success: function(response) {
+                    if (response.success) {
+                        statusDiv.html('<span style="color:green; font-weight:bold;">✔ Verified: ' + response.name + '</span>');
+                        nameDisplay.val(response.name);
+                        nameGroup.show();
+                        submitBtn.prop('disabled', false);
+                    } else {
+                        statusDiv.html('<span style="color:red;">✘ Record Not Found</span>');
+                        nameGroup.hide();
+                        submitBtn.prop('disabled', true);
+                    }
+                },
+                error: function() {
+                    statusDiv.html('<span style="color:red;">Connection Error</span>');
+                }
+            });
+        }
+    });
+</script>
 @endsection

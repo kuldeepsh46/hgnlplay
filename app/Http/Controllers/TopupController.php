@@ -478,8 +478,21 @@ class TopupController extends Controller
 
         // 2. Sum the 'amount' from the orders table for those specific users
         // This ensures we get ₹50,000 if that is what they actually paid.
-        $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount');
-        $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount');
+
+
+
+        $leftOrderCount = DB::table('orders')->whereIn('user_id', $leftUserIds)->count();
+        $leftRawSum = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount');
+        $leftTotalVolume = $leftRawSum - ($leftOrderCount * 100);
+        $rightOrderCount = DB::table('orders')->whereIn('user_id', $rightUserIds)->count();
+        $rightRawSum = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount');
+        $rightTotalVolume = $rightRawSum - ($rightOrderCount * 100);
+        $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
+
+
+
+        // $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount');
+        // $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount');
         // 2. The Matching Math
         // If Left Child has 50k and Right Child has 50k, Match = 50,000
         $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
@@ -510,69 +523,6 @@ class TopupController extends Controller
             });
         }
     }
-    // private function checkAndDistributePairCompletionBonus($sponsor, $amount)
-    // {
-    //     // dd($sponsor, $amount);
-    //     DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
-
-    //     // 🔹 Get FULL left subtree
-    //     $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
-
-    //     // 🔹 Get FULL right subtree
-    //     $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
-    //     // dd($leftUsers, $rightUsers);
-    //     if (empty($leftUsers) || empty($rightUsers)) {
-    //         return;
-    //     }
-    //     // 🔹 1. Calculate Total Points in each subtree (1 point per ₹1000)
-    //     $leftPoints = collect($leftUsers)->sum('investment_count');
-    //     $rightPoints = collect($rightUsers)->sum('investment_count');
-    //     // dd($leftPoints, $rightPoints);
-    //     // 🔹 2. Calculate Pairs and Check History
-    //     $totalPairsPossible = min($leftPoints, $rightPoints);
-    //     // dd($totalPairsPossible);
-    //     // Check total bonus already paid (Total Bonus Amount / 100)
-    //     // 10% of 1000 = 100, so each matched point = ₹100 bonus
-    //     $totalBonusPaid = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
-    //     // dd($totalBonusPaid);
-    //     $alreadyPaidPoints = $totalBonusPaid / 100;
-    //     // dd($totalPairsPossible, $alreadyPaidPoints);
-    //     // 🔹 3. Distribute New Points (One transaction for all new volume)
-    //     $leftVolume = collect($leftUsers)->sum('investment_count') * 1000;
-    //     $rightVolume = collect($rightUsers)->sum('investment_count') * 1000;
-
-    //     // 4. Determine the Match (Example: Left 13k vs Right 1k = 1k Match)
-    //     $totalMatchedPossible = min($leftVolume, $rightVolume);
-
-    //     // 5. Calculate Volume already paid out
-    //     // Since Bonus = 10% of Volume, then Volume = Bonus Paid * 10
-    //     $totalBonusPaid = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
-
-    //     $alreadyMatchedVolume = $totalBonusPaid * 10;
-    //     if ($totalPairsPossible > $alreadyPaidPoints) {
-    //         // $newPoints = $totalPairsPossible - $alreadyPaidPoints;
-    //         // $totalPairBonus = $newPoints * 100;
-
-    //         $newVolumeToMatch = $totalMatchedPossible - $alreadyMatchedVolume;
-
-    //         // Bonus is exactly 10% of the new match
-    //         $pairBonus = $newVolumeToMatch * 0.1;
-
-    //         DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToMatch) {
-    //             // Update Wallet
-    //             DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
-
-    //             // Record Transaction
-    //             DB::table('transactions')->insert([
-    //                 'user_id' => $sponsor->id,
-    //                 'type' => 'Credit',
-    //                 'amount' => $pairBonus,
-    //                 'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToMatch) . ' volume (10% Bonus)',
-    //                 'created_at' => now(),
-    //             ]);
-    //         });
-    //     }
-    // }
 
     private function getFullSubtreeUsers($rootId, $side)
     {
@@ -601,52 +551,52 @@ class TopupController extends Controller
         return $result;
     }
 
-    private function OLDcheckAndDistributePairCompletionBonusMAYANKOLD($sponsor, $amount)
-    {
-        // Get left & right direct children
-        $left = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'left')->first();
+    // private function OLDcheckAndDistributePairCompletionBonusMAYANKOLD($sponsor, $amount)
+    // {
+    //     // Get left & right direct children
+    //     $left = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'left')->first();
 
-        $right = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'right')->first();
+    //     $right = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'right')->first();
 
-        // Both legs must exist
-        if (!$left || !$right) {
-            return;
-        }
+    //     // Both legs must exist
+    //     if (!$left || !$right) {
+    //         return;
+    //     }
 
-        // Both must have paid SAME EMI number
-        if ($left->investment_count != $right->investment_count) {
-            return;
-        }
+    //     // Both must have paid SAME EMI number
+    //     if ($left->investment_count != $right->investment_count) {
+    //         return;
+    //     }
 
-        $emiNumber = $left->investment_count;
+    //     $emiNumber = $left->investment_count;
 
-        // Prevent duplicate pair bonus for same EMI
-        $alreadyPaid = DB::table('transactions')
-            ->where([
-                'user_id' => $sponsor->id,
-                'remarks' => "Pair Bonus EMI #{$emiNumber}",
-            ])
-            ->first();
+    //     // Prevent duplicate pair bonus for same EMI
+    //     $alreadyPaid = DB::table('transactions')
+    //         ->where([
+    //             'user_id' => $sponsor->id,
+    //             'remarks' => "Pair Bonus EMI #{$emiNumber}",
+    //         ])
+    //         ->first();
 
-        if ($alreadyPaid) {
-            return;
-        }
+    //     if ($alreadyPaid) {
+    //         return;
+    //     }
 
-        // Calculate pair bonus (10%)
-        $pairBonus = $amount * 0.1;
+    //     // Calculate pair bonus (10%)
+    //     $pairBonus = $amount * 0.1;
 
-        // Credit sponsor wallet
-        DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+    //     // Credit sponsor wallet
+    //     DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
 
-        // Record transaction
-        DB::table('transactions')->insert([
-            'user_id' => $sponsor->id,
-            'type' => 'Credit',
-            'amount' => $pairBonus,
-            'remarks' => "Pair Completion Bonus from {$leftChild->username} and {$rightChild->username} (₹{$amount})",
-            'created_at' => now(),
-        ]);
-    }
+    //     // Record transaction
+    //     DB::table('transactions')->insert([
+    //         'user_id' => $sponsor->id,
+    //         'type' => 'Credit',
+    //         'amount' => $pairBonus,
+    //         'remarks' => "Pair Completion Bonus from {$leftChild->username} and {$rightChild->username} (₹{$amount})",
+    //         'created_at' => now(),
+    //     ]);
+    // }
 
     private function pickExtremeAtDepth($users, $depth, $extreme = 'leftmost')
     {
@@ -889,89 +839,89 @@ class TopupController extends Controller
     /**
      * Pair Completion Bonus - When both left and right legs have paid
      */
-    private function checkAndDistributePairCompletionBonusTOOOLD($sponsor, $amount)
-    {
-        $left = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'left')->first();
+    // private function checkAndDistributePairCompletionBonusTOOOLD($sponsor, $amount)
+    // {
+    //     $left = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'left')->first();
 
-        $right = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'right')->first();
+    //     $right = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'right')->first();
 
-        if (!$left || !$right) {
-            return;
-        }
+    //     if (!$left || !$right) {
+    //         return;
+    //     }
 
-        // ❗ BOTH must have paid SAME EMI
-        if ($left->investment_count != $right->investment_count) {
-            return;
-        }
+    //     // ❗ BOTH must have paid SAME EMI
+    //     if ($left->investment_count != $right->investment_count) {
+    //         return;
+    //     }
 
-        $emiNumber = $left->investment_count;
+    //     $emiNumber = $left->investment_count;
 
-        // ❗ Check if this EMI pair bonus already paid
-        $alreadyPaid = DB::table('transactions')
-            ->where([
-                'user_id' => $sponsor->id,
-                'remarks' => "Pair Bonus EMI #{$emiNumber}",
-            ])
-            ->first();
+    //     // ❗ Check if this EMI pair bonus already paid
+    //     $alreadyPaid = DB::table('transactions')
+    //         ->where([
+    //             'user_id' => $sponsor->id,
+    //             'remarks' => "Pair Bonus EMI #{$emiNumber}",
+    //         ])
+    //         ->first();
 
-        if ($alreadyPaid) {
-            return;
-        }
+    //     if ($alreadyPaid) {
+    //         return;
+    //     }
 
-        // ✅ PAY PAIR BONUS
-        $pairBonus = $amount * 0.1;
+    //     // ✅ PAY PAIR BONUS
+    //     $pairBonus = $amount * 0.1;
 
-        DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+    //     DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
 
-        DB::table('transactions')->insert([
-            'user_id' => $sponsor->id,
-            'type' => 'Credit',
-            'amount' => $pairBonus,
-            'remarks' => "Pair Completion Bonus from {$leftChild->username} and {$rightChild->username} (₹{$amount})",
-            'created_at' => now(),
-        ]);
-    }
+    //     DB::table('transactions')->insert([
+    //         'user_id' => $sponsor->id,
+    //         'type' => 'Credit',
+    //         'amount' => $pairBonus,
+    //         'remarks' => "Pair Completion Bonus from {$leftChild->username} and {$rightChild->username} (₹{$amount})",
+    //         'created_at' => now(),
+    //     ]);
+    // }
 
-    private function checkAndDistributePairCompletionBonusOLD($sponsor, $amount)
-    {
-        // Get both legs of the sponsor
-        $leftChild = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'left')->first();
+    // private function checkAndDistributePairCompletionBonusOLD($sponsor, $amount)
+    // {
+    //     // Get both legs of the sponsor
+    //     $leftChild = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'left')->first();
 
-        $rightChild = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'right')->first();
+    //     $rightChild = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'right')->first();
 
-        // Check if BOTH legs exist AND both have made at least 1 investment
-        if (!$leftChild || !$rightChild) {
-            return;
-        }
-        if ($leftChild->investment_count < 1 || $rightChild->investment_count < 1) {
-            return;
-        }
+    //     // Check if BOTH legs exist AND both have made at least 1 investment
+    //     if (!$leftChild || !$rightChild) {
+    //         return;
+    //     }
+    //     if ($leftChild->investment_count < 1 || $rightChild->investment_count < 1) {
+    //         return;
+    //     }
 
-        // ✅ Check if pair bonus already given (to avoid duplicate payments)
-        $alreadyGiven = DB::table('transactions')
-            ->where([
-                'user_id' => $sponsor->id,
-            ])
-            ->where('remarks', 'like', 'Pair Completion Bonus%')
-            ->first();
+    //     // ✅ Check if pair bonus already given (to avoid duplicate payments)
+    //     $alreadyGiven = DB::table('transactions')
+    //         ->where([
+    //             'user_id' => $sponsor->id,
+    //         ])
+    //         ->where('remarks', 'like', 'Pair Completion Bonus%')
+    //         ->first();
 
-        if ($alreadyGiven) {
-            return;
-        }
+    //     if ($alreadyGiven) {
+    //         return;
+    //     }
 
-        // ✅ Pay pair bonus (10% of current EMI amount)
-        $pairBonus = $amount * 0.1;
+    //     // ✅ Pay pair bonus (10% of current EMI amount)
+    //     $pairBonus = $amount * 0.1;
 
-        DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+    //     DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
 
-        DB::table('transactions')->insert([
-            'user_id' => $sponsor->id,
-            'type' => 'Credit',
-            'amount' => $pairBonus,
-            'remarks' => "Pair Completion Bonus from {$leftChild->username} and {$rightChild->username} (₹{$amount})",
-            'created_at' => now(),
-        ]);
-    }
+    //     DB::table('transactions')->insert([
+    //         'user_id' => $sponsor->id,
+    //         'type' => 'Credit',
+    //         'amount' => $pairBonus,
+    //         'remarks' => "Pair Completion Bonus from {$leftChild->username} and {$rightChild->username} (₹{$amount})",
+    //         'created_at' => now(),
+    //     ]);
+    // }
 
     private static function rewardAfterFullEmi($user)
     {
