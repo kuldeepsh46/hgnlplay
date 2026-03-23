@@ -274,7 +274,7 @@ class TopupController extends Controller
         $currentCount = $receiver->investment_count ?? 0;
         $registrationFee = $currentCount == 0 ? 100 : 0;
         $finalAmount = (float) $package->amount + $registrationFee;
-        dd($registrationFee, $finalAmount);
+        // dd($registrationFee, $finalAmount);
 
         // 4. Calculate increment value based on package_id
         $packageId = (int) $r->package_id;
