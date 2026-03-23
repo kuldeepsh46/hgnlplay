@@ -142,7 +142,7 @@ class User extends Authenticatable
         $nextId = $lastUser ? ($lastUser->id + 1) : 1;
         
         // This ensures new users get the same format as your imported ones
-        $user->member_id = 'HGNL' . str_pad($nextId + 10000, 8, '0', STR_PAD_LEFT);
+        $user->member_id = 'HGNL' . (1000 + $nextId);
     });
 }
 }

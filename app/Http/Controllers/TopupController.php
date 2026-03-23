@@ -274,6 +274,7 @@ class TopupController extends Controller
         $currentCount = $receiver->investment_count ?? 0;
         $registrationFee = $currentCount == 0 ? 100 : 0;
         $finalAmount = (float) $package->amount + $registrationFee;
+        dd($registrationFee, $finalAmount);
 
         // 4. Calculate increment value based on package_id
         $packageId = (int) $r->package_id;
@@ -472,17 +473,12 @@ class TopupController extends Controller
         if (empty($leftUsers) || empty($rightUsers)) {
             return;
         }
-
-        //     $leftTotalVolume = collect($leftUsers)->sum('package_amount');
-        // $rightTotalVolume = collect($rightUsers)->sum('package_amount');
-        // 1. Get the IDs of all users in the left and right subtrees
         $leftUserIds = collect($leftUsers)->pluck('id')->toArray();
         $rightUserIds = collect($rightUsers)->pluck('id')->toArray();
 
         // 2. Sum the 'amount' from the orders table for those specific users
         // This ensures we get ₹50,000 if that is what they actually paid.
         $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount');
-
         $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount');
         // 2. The Matching Math
         // If Left Child has 50k and Right Child has 50k, Match = 50,000

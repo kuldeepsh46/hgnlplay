@@ -12,8 +12,12 @@ class ManageUsersRolesController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
-
+        // $search = $request->input('search');
+$search = $request->input('search');
+$user = DB::table('users')
+    ->where('member_id', 'LIKE', "%{$search}%")
+    ->orWhere('username', 'LIKE', "%{$search}%")
+    ->first();
         // Always paginate all users for the second tab
         $allUsers = DB::table('users')->select('id', 'username', 'member_id', 'investment_count', 'emi_status')->latest()->paginate(15)->withQueryString();
 
