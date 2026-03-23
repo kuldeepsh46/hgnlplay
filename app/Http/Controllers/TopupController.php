@@ -271,10 +271,11 @@ class TopupController extends Controller
         }
 
         // 3. INTERNAL FINAL AMOUNT CALCULATION (Fixes the "Top-up not happening" issue)
+        // dd($receiver->investment_count);
         $currentCount = $receiver->investment_count ?? 0;
         $registrationFee = $currentCount == 0 ? 100 : 0;
         $finalAmount = (float) $package->amount + $registrationFee;
-        // dd($registrationFee, $finalAmount);
+        // dd($currentCount, $registrationFee, $finalAmount);
 
         // 4. Calculate increment value based on package_id
         $packageId = (int) $r->package_id;

@@ -219,35 +219,6 @@
     </div>
 
 
-    {{-- <div class="card">
-        <h2>New Topup</h2>
-        <form method="POST" action="{{ route('member.topup.store') }}" id="topupForm">
-            @csrf
-            <div class="form-group">
-                <label>Member ID</label>
-                <input type="text" name="member_id" id="member_id_input" placeholder="e.g. HGNL00010109" required>
-            </div>
-            <div class="form-group">
-                <label>Package</label>
-                <select name="package_id" id="packageSelect" required>
-                    <option value="">-- Select Package --</option>
-                    @foreach ($packages as $p)
-                        <option value="{{ $p->id }}" data-amount="{{ $p->amount }}">{{ $p->name }} —
-                            ₹{{ $p->amount }}</option>
-                    @endforeach
-                </select>
-                <input type="hidden" name="final_amount" id="finalAmount" value="0">
-                <div id="priceBreakdown" style="margin-top:10px;font-size:13px;color:var(--muted);"></div>
-            </div>
-            <div class="form-group"><label>Payment By</label>
-                <select name="payment_by" required>
-                    <option value="Wallet">Wallet</option>
-                    <option value="Online">Online</option>
-                </select>
-            </div>
-            <button type="submit" class="btn">Submit</button>
-        </form>
-    </div> --}}
 
     <div class="card">
         <h2>New Topup</h2>
@@ -268,8 +239,8 @@
             <div class="form-group">
                 <label>Member ID</label>
                 <input type="text" name="member_id" id="member_id_input" value="{{ old('member_id') }}"
-                    style="border: 1px solid {{ $errors->has('member_id') ? 'red' : '#ccc' }};"
-                    placeholder="e.g. HGNL1041" required>
+                    style="border: 1px solid {{ $errors->has('member_id') ? 'red' : '#ccc' }};" placeholder="e.g. HGNL1041"
+                    required>
 
                 @error('member_id')
                     <div style="color: #dc3545; font-size: 13px; margin-top: 5px; font-weight: 600;">
@@ -417,13 +388,29 @@
 
     <script>
         // ✅ Keep UI logic only - Backend will handle the actual math for safety
-        const investmentCount = {{ (int) $user->investment_count }};
-        const registrationFee = investmentCount === 0 ? 100 : 0;
+        // let currentMemberFee = 0;
+        // const investmentCount = {{ (int) $user->investment_count }};
+        // console.log(investmentCount)
+        // const registrationFee = investmentCount === 0 ? 100 : 0;
+        
+    </script>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+
+
+
+            let investmentCount = {{ (int) $user->investment_count }};
         const packageSelect = document.getElementById('packageSelect');
         const priceBreakdown = document.getElementById('priceBreakdown');
         const memberIdInput = document.getElementById('member_id_input');
 
-        function updatePriceDisplay() {
+        function updatePriceDisplay(investmentCount) {
+            // console.log("coo")
+            const registrationFee = investmentCount === 0 ? 100 : 0;
             const selectedOption = packageSelect.options[packageSelect.selectedIndex];
 
             if (!selectedOption || !selectedOption.value) {
@@ -442,11 +429,11 @@
             priceBreakdown.innerHTML = breakdown;
         }
 
-        packageSelect.addEventListener('change', updatePriceDisplay);
+        packageSelect.addEventListener('change', updatePriceDisplay(investmentCount));
         memberIdInput.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
         });
-        document.addEventListener('DOMContentLoaded', updatePriceDisplay);
+        document.addEventListener('DOMContentLoaded', updatePriceDisplay(investmentCount));
 
         // Modal Logic
         const passwordModal = document.getElementById("passwordModal");
@@ -461,176 +448,56 @@
         window.onclick = function(e) {
             if (e.target === passwordModal) closeModal();
         };
-    </script>
-    {{-- <script>
-        // ✅ Configuration
-        const investmentCount = {{ $user->investment_count }};
-        const registrationFee = investmentCount === 0 ? 100 : 0;
-        const packageSelect = document.getElementById('packageSelect');
-        const priceBreakdown = document.getElementById('priceBreakdown');
-        const finalAmountInput = document.getElementById('finalAmount');
-        const memberIdInput = document.getElementById('member_id_input');
-
-        function updatePriceDisplay() {
-            const selectedOption = packageSelect.options[packageSelect.selectedIndex];
-
-            if (!selectedOption || !selectedOption.value) {
-                priceBreakdown.innerHTML = '';
-                finalAmountInput.value = '0';
-                return;
-            }
-
-            const baseAmount = parseFloat(selectedOption.dataset.amount) || 0;
-            const totalAmount = baseAmount + registrationFee;
-
-            // Update hidden input
-            finalAmountInput.value = totalAmount;
-
-            let breakdown =
-                `<strong>Final Amount: ₹${totalAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</strong>`;
-
-            if (registrationFee > 0) {
-                breakdown +=
-                    `<br/>📋 Base: ₹${baseAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})} + Registration Fee: ₹${registrationFee}`;
-            }
-
-            priceBreakdown.innerHTML = breakdown;
-        }
-
-        // Listen for changes
-        packageSelect.addEventListener('change', updatePriceDisplay);
-        
-        // Auto-uppercase Member ID
-        memberIdInput.addEventListener('input', function() {
-            this.value = this.value.toUpperCase();
-        });
-
-        // Run on page load (handles back button / browser cache)
-        document.addEventListener('DOMContentLoaded', updatePriceDisplay);
-
-        // Pre-submit check
-        document.getElementById('topupForm').addEventListener('submit', function(e) {
-            if (parseFloat(finalAmountInput.value) <= 0) {
-                e.preventDefault();
-                alert("Please select a package.");
-            }
-        });
-
-        // Password Modal logic
-        const passwordModal = document.getElementById("passwordModal");
-        function openModal() { passwordModal.style.display = "flex"; }
-        function closeModal() { passwordModal.style.display = "none"; }
-        window.onclick = function(e) { if (e.target === passwordModal) closeModal(); };
-
-        document.getElementById("passwordForm").addEventListener("submit", function(e) {
-            const newPass = document.getElementById("new_password").value.trim();
-            const confirmPass = document.getElementById("new_password_confirmation").value.trim();
-            if (newPass !== confirmPass) {
-                e.preventDefault();
-                alert("Passwords do not match!");
-            }
-        });
-
-        // Handle Laravel logout securely
-        document.getElementById('logout-link').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('logout-form').submit();
-        });
-    </script> --}}
 
 
-    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            const idInput = $('#member_id_input');
-            const statusDiv = $('#member_status');
-            const nameGroup = $('#name_group');
-            const nameDisplay = $('#member_name_display');
-            const submitBtn = $('#submitBtn');
 
-            // Updated for HGNL00010125 format
-            const ID_LENGTH = 12;
 
-            idInput.on('input propertychange', function() {
-                // Force uppercase for consistency (HGNL vs hgnl)
-                let val = $(this).val().trim().toUpperCase();
-                $(this).val(val);
 
-                if (val.length === ID_LENGTH) {
-                    validateMember(val);
-                } else {
-                    // Clear status if they backspace or change the ID
-                    statusDiv.html('');
-                    resetValidation();
-                }
-            });
-
-            function validateMember(memberId) {
-                statusDiv.html('<span style="color:#2563eb;">Checking Database...</span>');
-
-                $.ajax({
-                    url: "{{ route('member.check-id') }}",
-                    method: "GET",
-                    data: {
-                        member_id: memberId
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            statusDiv.html('<span style="color:green;">✔ Member Found: ' + response
-                                .name + '</span>');
-                            nameDisplay.val(response.name);
-                            nameGroup.slideDown(); // Smoothly show the name field
-                            submitBtn.prop('disabled', false); // Unlock the button
-                        } else {
-                            statusDiv.html('<span style="color:red;">✘ Invalid Member ID</span>');
-                            resetValidation();
-                        }
-                    },
-                    error: function() {
-                        statusDiv.html('<span style="color:red;">Connection Error</span>');
-                        resetValidation();
-                    }
-                });
-            }
-
-            function resetValidation() {
-                nameGroup.hide();
-                nameDisplay.val('');
-                submitBtn.prop('disabled', true);
-            }
-        });
-    </script> --}}
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    {{-- <script>
-        $(document).ready(function() {
-            console.log("Script Loaded & Ready"); // Debug log
+            console.log("Dynamic Script Loaded");
 
             const idInput = $('#member_id_input');
             const statusDiv = $('#member_status');
             const nameGroup = $('#name_group');
             const nameDisplay = $('#member_name_display');
-            const submitBtn = $('button[type="submit"]'); // Targets your submit button
+            const submitBtn = $('button[type="submit"]');
 
-            const ID_LENGTH = 8;
+            // Define your range
+            const MIN_LEN = 8;
+            const MAX_LEN = 12;
+            let typingTimer; // Timer identifier
+            const doneTypingInterval = 500; // Wait 0.5 seconds after user stops typing
 
             idInput.on('input propertychange', function() {
                 let val = $(this).val().trim().toUpperCase();
                 $(this).val(val);
 
-                console.log("Current Length: " + val.length); // Debug log
+                clearTimeout(typingTimer); // Reset timer on every keystroke
 
-                if (val.length === ID_LENGTH) {
-                    validateMember(val);
-                } else {
+                // 1. If too short, just reset the UI
+                if (val.length < MIN_LEN) {
                     statusDiv.html('');
                     nameGroup.hide();
+                    submitBtn.prop('disabled', true);
+                    return;
+                }
+
+                // 2. If within or above range, start the countdown to validate
+                if (val.length >= MIN_LEN && val.length <= MAX_LEN) {
+                    statusDiv.html('<span style="color:orange;">Typing...</span>');
+                    typingTimer = setTimeout(function() {
+                        validateMember(val);
+                    }, doneTypingInterval);
+                }
+
+                // 3. If they exceed the max, you can either stop them or let the server fail
+                if (val.length > MAX_LEN) {
+                    statusDiv.html('<span style="color:red;">ID Too Long</span>');
                     submitBtn.prop('disabled', true);
                 }
             });
 
             function validateMember(memberId) {
-                statusDiv.html('<span style="color:blue;">Searching...</span>');
+                statusDiv.html('<span style="color:blue;">🔍 Scanning System...</span>');
 
                 $.ajax({
                     url: "{{ route('member.check-id') }}",
@@ -639,97 +506,43 @@
                         member_id: memberId
                     },
                     success: function(response) {
-                        console.log("Server Response:", response); // Debug log
-
+                        // if (response.success) {
+                        //     statusDiv.html('<span style="color:green; font-weight:bold;">✔ Verified: ' + response.name + '</span>');
+                        //     nameDisplay.val(response.name);
+                        //     nameGroup.show();
+                        //     submitBtn.prop('disabled', false);
                         if (response.success) {
-                            // This is where the magic happens:
-                            statusDiv.html('<span style="color:green;">✔ Member Verified</span>');
+                            // 🔹 Logic: If count is 0, fee is 100. Otherwise, 0.
+                            const fee = (response.investment_count === 0) ? 100 : 0;
+                            investmentCount = response.investment_count;
+                            updatePriceDisplay(response.investment_count)
+                            // console.log(fee)
+                            statusDiv.html('<span style="color:green;">✔ Verified: ' + response.name +
+                                '</span>');
                             nameDisplay.val(response.name);
-                            nameGroup.show(); // Make sure this isn't hidden by CSS
+
+                            // OPTIONAL: Show the fee to the Admin so they know why the total is higher
+                            if (fee > 0) {
+                                $('#fee_notice').html(
+                                    '<small class="text-warning">+ ₹100 Reg. Fee (New Member)</small>'
+                                ).show();
+                            } else {
+                                $('#fee_notice').hide();
+                            }
+
+                            nameGroup.show();
                             submitBtn.prop('disabled', false);
                         } else {
-                            statusDiv.html('<span style="color:red;">✘ Invalid ID</span>');
+                            statusDiv.html('<span style="color:red;">✘ Record Not Found</span>');
                             nameGroup.hide();
                             submitBtn.prop('disabled', true);
                         }
                     },
-                    error: function(xhr) {
-                        console.error("AJAX Error:", xhr.responseText);
-                        statusDiv.html('<span style="color:red;">Server Error</span>');
+                    error: function() {
+                        statusDiv.html('<span style="color:red;">Connection Error</span>');
                     }
                 });
             }
         });
-    </script> --}}
-    <script>
-    $(document).ready(function() {
-        console.log("Dynamic Script Loaded");
-
-        const idInput = $('#member_id_input');
-        const statusDiv = $('#member_status');
-        const nameGroup = $('#name_group');
-        const nameDisplay = $('#member_name_display');
-        const submitBtn = $('button[type="submit"]');
-
-        // Define your range
-        const MIN_LEN = 8;
-        const MAX_LEN = 12;
-        let typingTimer; // Timer identifier
-        const doneTypingInterval = 500; // Wait 0.5 seconds after user stops typing
-
-        idInput.on('input propertychange', function() {
-            let val = $(this).val().trim().toUpperCase();
-            $(this).val(val);
-            
-            clearTimeout(typingTimer); // Reset timer on every keystroke
-
-            // 1. If too short, just reset the UI
-            if (val.length < MIN_LEN) {
-                statusDiv.html('');
-                nameGroup.hide();
-                submitBtn.prop('disabled', true);
-                return;
-            }
-
-            // 2. If within or above range, start the countdown to validate
-            if (val.length >= MIN_LEN && val.length <= MAX_LEN) {
-                statusDiv.html('<span style="color:orange;">Typing...</span>');
-                typingTimer = setTimeout(function() {
-                    validateMember(val);
-                }, doneTypingInterval);
-            } 
-            
-            // 3. If they exceed the max, you can either stop them or let the server fail
-            if (val.length > MAX_LEN) {
-                statusDiv.html('<span style="color:red;">ID Too Long</span>');
-                submitBtn.prop('disabled', true);
-            }
-        });
-
-        function validateMember(memberId) {
-            statusDiv.html('<span style="color:blue;">🔍 Scanning System...</span>');
-
-            $.ajax({
-                url: "{{ route('member.check-id') }}",
-                method: "GET",
-                data: { member_id: memberId },
-                success: function(response) {
-                    if (response.success) {
-                        statusDiv.html('<span style="color:green; font-weight:bold;">✔ Verified: ' + response.name + '</span>');
-                        nameDisplay.val(response.name);
-                        nameGroup.show();
-                        submitBtn.prop('disabled', false);
-                    } else {
-                        statusDiv.html('<span style="color:red;">✘ Record Not Found</span>');
-                        nameGroup.hide();
-                        submitBtn.prop('disabled', true);
-                    }
-                },
-                error: function() {
-                    statusDiv.html('<span style="color:red;">Connection Error</span>');
-                }
-            });
-        }
-    });
-</script>
+    </script>
 @endsection

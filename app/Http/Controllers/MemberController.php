@@ -108,17 +108,31 @@ class MemberController extends Controller
             $current = $child;
         }
     }
-    public function checkId(Request $request)
-    {
-        $member = \App\Models\User::where('member_id', $request->member_id)->first();
+    // public function checkId(Request $request)
+    // {
+    //     $member = \App\Models\User::where('member_id', $request->member_id)->first();
 
-        if ($member) {
-            return response()->json([
-                'success' => true,
-                'name' => $member->name,
-            ]);
-        }
+    //     if ($member) {
+    //         return response()->json([
+    //             'success' => true,
+    //             'name' => $member->name,
+    //         ]);
+    //     }
 
-        return response()->json(['success' => false]);
+    //     return response()->json(['success' => false]);
+    // }
+    public function checkId(Request $request) {
+    $user = User::where('member_id', $request->member_id)->first();
+
+    if ($user) {
+        return response()->json([
+            'success' => true,
+            'name' => $user->username,
+            // 🔹 Send the target user's count, not the admin's
+            'investment_count' => (int) $user->investment_count 
+        ]);
     }
+
+    return response()->json(['success' => false]);
+}
 }
