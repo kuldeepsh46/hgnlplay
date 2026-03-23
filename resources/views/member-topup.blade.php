@@ -269,7 +269,7 @@
                 <label>Member ID</label>
                 <input type="text" name="member_id" id="member_id_input" value="{{ old('member_id') }}"
                     style="border: 1px solid {{ $errors->has('member_id') ? 'red' : '#ccc' }};"
-                    placeholder="e.g. HGNL00010125" required>
+                    placeholder="e.g. HGNL1041" required>
 
                 @error('member_id')
                     <div style="color: #dc3545; font-size: 13px; margin-top: 5px; font-weight: 600;">
@@ -612,7 +612,7 @@
             const nameDisplay = $('#member_name_display');
             const submitBtn = $('button[type="submit"]'); // Targets your submit button
 
-            const ID_LENGTH = 12;
+            const ID_LENGTH = 8;
 
             idInput.on('input propertychange', function() {
                 let val = $(this).val().trim().toUpperCase();
