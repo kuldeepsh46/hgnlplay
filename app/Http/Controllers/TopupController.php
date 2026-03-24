@@ -509,7 +509,13 @@ class TopupController extends Controller
 
         // 5. Pay the 10% Bonus
         if ($newVolumeToPay >= 1000) {
-            $pairBonus = $newVolumeToPay * 0.1;
+            // dd($amount);
+            $bonusPercentage = 0.1;
+            if ($amount >= 50000) {
+                $bonusPercentage = 0.05;
+            }
+            // dd($bonusPercentage);
+            $pairBonus = $newVolumeToPay * $bonusPercentage;
 
             DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay) {
                 DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
