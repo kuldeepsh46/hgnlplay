@@ -2197,7 +2197,7 @@ padding-top: 20px;
     <!-- Desktop View -->
     <div class="desktop-pdf">
     <iframe 
-        src="{{ asset('storage/HGNLPAY.pdf') }}"
+        src="{{ asset('uploads/HGNLPAY.pdf') }}"
         width="100%"
         height="800"
         style="border:none;border-radius:10px; background-color:#fff;">
@@ -2205,7 +2205,7 @@ padding-top: 20px;
 </div>
 
 <div class="mobile-pdf">
-    <a href="{{ asset('storage/HGNLPAY.pdf') }}" target="_blank" class="pdf-btn">
+    <a href="{{ asset('uploads/HGNLPAY.pdf') }}" target="_blank" class="pdf-btn">
         Open PDF
     </a>
 </div>
