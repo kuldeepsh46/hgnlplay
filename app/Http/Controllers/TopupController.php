@@ -25,229 +25,6 @@ class TopupController extends Controller
         return view('member-topup', compact('user', 'packages', 'wallet', 'walletTransactions'));
     }
 
-    // public function store(Request $r)
-    // {
-    //     $r->validate([
-    //         'email' => 'required|email|exists:users,email',
-    //         'package_id' => 'required|integer|exists:packages,id',
-    //         'payment_by' => 'required|string',
-    //         'final_amount' => 'required|numeric|min:1',
-    //     ]);
-
-    //     $currentUser = Auth::user();
-    //     $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
-    //     $package = DB::table('packages')->where('id', $r->package_id)->first();
-    //     $receiver = DB::table('users')->where('email', $r->email)->first();
-
-    //     // ✅ Use the final_amount from form (includes registration fee if applicable)
-    //     $finalAmount = floatval($r->final_amount);
-
-    //     // ✅ Calculate increment value based on package_id
-    //     $packageId = (int) $r->package_id;
-    //     $incrementValue = match ($packageId) {
-    //         1 => 1,
-    //         2 => 8,
-    //         3 => 16,
-    //         default => 0,
-    //     };
-
-    //     $newCount = ($receiver->investment_count ?? 0) + $incrementValue;
-
-    //     // ✅ 1. Check EMI/Investment limit (max 16) - AFTER calculating new count
-    //     if ($receiver->emi_status === 'completed' || $newCount > 16) {
-    //         $remaining = max(0, 16 - ($receiver->investment_count ?? 0));
-    //         return back()->with('error', "Cannot exceed 16 EMIs limit. You can only add {$remaining} more EMI(s). This package adds {$incrementValue} EMI(s).");
-    //     }
-
-    //     // ✅ 2. Check if an EMI has already been paid this month
-    //     $lastTopup = DB::table('orders')->where('user_id', $receiver->id)->orderByDesc('created_at')->first();
-
-    //     // if ($lastTopup && \Carbon\Carbon::parse($lastTopup->created_at)->isSameMonth(now())) {
-    //     //     return back()->with('error', 'Only one EMI/top-up is allowed per month.');
-    //     // }
-
-    //     // ✅ 3. Wallet balance validation
-    //     if (!$wallet || $wallet->balance < $finalAmount) {
-    //         return back()->with('error', 'Insufficient wallet balance to perform this top-up.');
-    //     }
-
-    //     if (in_array($packageId, [4, 5])) {
-    //         \App\Services\LuckyService::createCycleIfNotExists($receiver->id, $packageId);
-    //     }
-
-    //     DB::beginTransaction();
-    //     try {
-    //         // ✅ 4. Deduct wallet balance (using final amount with registration fee)
-    //         DB::table('wallets')
-    //             ->where('user_id', $currentUser->id)
-    //             ->update([
-    //                 'balance' => $wallet->balance - $finalAmount,
-    //                 'updated_at' => now(),
-    //             ]);
-
-    //         // ✅ 5. Record debit transaction
-    //         DB::table('transactions')->insert([
-    //             'user_id' => $currentUser->id,
-    //             'type' => 'Debit',
-    //             'amount' => $finalAmount,
-    //             'remarks' => 'EMI payment for ' . $receiver->username,
-    //             'created_at' => now(),
-    //         ]);
-
-    //         // ✅ 6. Record order (as EMI)
-    //         DB::table('orders')->insert([
-    //             'user_id' => $receiver->id,
-    //             'from_user_id' => $currentUser->id,
-    //             'package_id' => $package->id,
-    //             'amount' => $finalAmount,
-    //             'payment_by' => $r->payment_by,
-    //             'status' => 'completed',
-    //             'created_at' => now(),
-    //             'updated_at' => now(),
-    //         ]);
-
-    //         // ✅ 7. Update investment_count
-    //         DB::table('users')
-    //             ->where('id', $receiver->id)
-    //             ->update([
-    //                 'investment_count' => $newCount,
-    //                 'emi_status' => $newCount >= 16 ? 'completed' : 'ongoing',
-    //                 'updated_at' => now(),
-    //             ]);
-
-    //         // ✅ Trigger pair bonus check for ALL uplines (Kapil → Isro → ...)
-    //         $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
-
-    //         while ($sponsor) {
-    //             $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount);
-
-    //             if (empty($sponsor->placement_id)) {
-    //                 break;
-    //             }
-    //             $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
-    //         }
-
-    //         // self::checkAndDistributePairBonus($receiver);
-
-    //         // ✅ 8. Trigger reward once all 16 EMIs are completed
-    //         if ($newCount >= 16) {
-    //             self::rewardAfterFullEmi($receiver);
-    //         }
-
-    //         // ✅ 9. Distribute 50% commission (using original package amount, not including registration fee)
-    //         $this->distributeCommission($receiver->id, $package->amount);
-
-    //         DB::commit();
-
-    //         // ✅ Return different messages based on package type
-    //         $successMessage = match ($packageId) {
-    //             4, 5 => "Congratulations! You have successfully paid ₹{$finalAmount} from your wallet. You have received " . ($packageId == 4 ? '4' : '8') . ' vouchers for each month now.',
-    //             default => "EMI #{$newCount} paid successfully! ₹{$finalAmount} deducted from your wallet.",
-    //         };
-
-    //         return back()->with('success', $successMessage);
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return back()->with('error', 'Something went wrong: ' . $e->getMessage());
-    //     }
-    // }
-
-    //
-
-    // public function store(Request $r)
-    // {
-    //     // 1. Clean and Validate
-    //     $memberId = strtoupper(trim($r->member_id));
-    //     $r->validate([
-    //         'member_id' => 'required|string|exists:users,member_id',
-    //         'package_id' => 'required|integer|exists:packages,id',
-    //         'payment_by' => 'required|string',
-    //     ]);
-    //     $member = \App\Models\User::where('member_id', $r->member_id)->first();
-
-    //     if (!$member) {
-    //         return back()
-    //             ->withInput()
-    //             ->withErrors(['member_id' => 'The provided Member ID is invalid or does not exist.']);
-    //     }
-
-    //     $currentUser = Auth::user();
-    //     $receiver = DB::table('users')->where('member_id', $memberId)->first();
-    //     $package = DB::table('packages')->where('id', $r->package_id)->first();
-    //     $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
-
-    //     if (!$receiver) {
-    //         return back()->with('error', 'Member not found.');
-    //     }
-
-    //     // 2. Safe Calculation
-    //     // Use '0' if the column is missing or null to prevent crashes
-    //     $currentCount = $receiver->investment_count ?? 0;
-    //     $registrationFee = $currentCount == 0 ? 100 : 0;
-    //     $finalAmount = (float) $package->amount + $registrationFee;
-
-    //     // 3. Wallet Check
-    //     if (!$wallet || $wallet->balance < $finalAmount) {
-    //         return back()->with('error', "Insufficient balance. Need: ₹{$finalAmount}");
-    //     }
-
-    //     DB::beginTransaction();
-    //     try {
-    //         // A. Deduct from Wallet
-    //         DB::table('wallets')->where('user_id', $currentUser->id)->decrement('balance', $finalAmount);
-
-    //         DB::table('transactions')->insert([
-    //             'user_id' => $currentUser->id,
-    //             'type' => 'Debit',
-    //             'amount' => $finalAmount,
-    //             'remarks' => 'EMI payment for ' . $receiver->username,
-    //             'created_at' => now(),
-    //         ]);
-    //         // B. Create Order
-    //         DB::table('orders')->insert([
-    //             'user_id' => $receiver->id,
-    //             'from_user_id' => $currentUser->id,
-    //             'package_id' => $package->id,
-    //             'amount' => $finalAmount,
-    //             'payment_by' => $r->payment_by,
-    //             'status' => 'completed',
-    //             'created_at' => now(),
-    //             'updated_at' => now(),
-    //         ]);
-
-    //         // C. Update Receiver Progress
-    //         $increment = match ((int) $package->id) {
-    //             1 => 1,
-    //             2 => 8,
-    //             3 => 16,
-    //             default => 1,
-    //         };
-
-    //         $newTotal = $currentCount + $increment;
-
-    //         // Using update instead of increment for better control
-    //         DB::table('users')
-    //             ->where('id', $receiver->id)
-    //             ->update([
-    //                 'investment_count' => $newTotal,
-    //                 'emi_status' => $newTotal >= 16 ? 'completed' : 'ongoing',
-    //                 'updated_at' => now(),
-    //             ]);
-
-    //         // D. Commission
-    //         if (method_exists($this, 'distributeCommission')) {
-    //             // dd($this);
-    //             $this->distributeCommission($receiver->id, $package->amount);
-    //         }
-
-    //         DB::commit();
-    //         return back()->with('success', "Success! Package assigned to {$receiver->member_id}");
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return back()->with('error', 'Error: ' . $e->getMessage());
-    //     }
-    // }
-
     public function store(Request $r)
     {
         // 1. Validate using member_id instead of email
@@ -580,53 +357,6 @@ class TopupController extends Controller
         return $result;
     }
 
-    // private function OLDcheckAndDistributePairCompletionBonusMAYANKOLD($sponsor, $amount)
-    // {
-    //     // Get left & right direct children
-    //     $left = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'left')->first();
-
-    //     $right = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'right')->first();
-
-    //     // Both legs must exist
-    //     if (!$left || !$right) {
-    //         return;
-    //     }
-
-    //     // Both must have paid SAME EMI number
-    //     if ($left->investment_count != $right->investment_count) {
-    //         return;
-    //     }
-
-    //     $emiNumber = $left->investment_count;
-
-    //     // Prevent duplicate pair bonus for same EMI
-    //     $alreadyPaid = DB::table('transactions')
-    //         ->where([
-    //             'user_id' => $sponsor->id,
-    //             'remarks' => "Pair Bonus EMI #{$emiNumber}",
-    //         ])
-    //         ->first();
-
-    //     if ($alreadyPaid) {
-    //         return;
-    //     }
-
-    //     // Calculate pair bonus (10%)
-    //     $pairBonus = $amount * 0.1;
-
-    //     // Credit sponsor wallet
-    //     DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
-
-    //     // Record transaction
-    //     DB::table('transactions')->insert([
-    //         'user_id' => $sponsor->id,
-    //         'type' => 'Credit',
-    //         'amount' => $pairBonus,
-    //         'remarks' => "Pair Completion Bonus from {$leftChild->username} and {$rightChild->username} (₹{$amount})",
-    //         'created_at' => now(),
-    //     ]);
-    // }
-
     private function pickExtremeAtDepth($users, $depth, $extreme = 'leftmost')
     {
         $filtered = array_values(
@@ -687,70 +417,6 @@ class TopupController extends Controller
         return $result;
     }
 
-    private function checkAndDistributePairCompletionBonusOOOOLLDD($sponsor, $amount)
-    {
-        // ✅ Ensure wallet exists
-        DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['balance' => DB::raw('COALESCE(balance,0)'), 'updated_at' => now()]);
-
-        // Get left leg & right leg users with depth
-        $leftUsers = $this->getLegUsersByDepth($sponsor->id, 'left');
-        $rightUsers = $this->getLegUsersByDepth($sponsor->id, 'right');
-
-        if (empty($leftUsers) || empty($rightUsers)) {
-            return;
-        }
-
-        // Max depth available in either side
-        $maxDepthLeft = max(array_column($leftUsers, 'depth'));
-        $maxDepthRight = max(array_column($rightUsers, 'depth'));
-        $maxDepth = min($maxDepthLeft, $maxDepthRight);
-
-        for ($depth = 1; $depth <= $maxDepth; $depth++) {
-            // ✅ Pick outermost users at this depth
-            $leftPick = $this->pickExtremeAtDepth($leftUsers, $depth, 'leftmost');
-            $rightPick = $this->pickExtremeAtDepth($rightUsers, $depth, 'rightmost');
-
-            if (!$leftPick || !$rightPick) {
-                continue;
-            }
-
-            // Must have EMI paid (investment_count > 0)
-            if ($leftPick['investment_count'] <= 0 || $rightPick['investment_count'] <= 0) {
-                continue;
-            }
-
-            // ✅ Total EMIs that can be paired at this depth
-            $possiblePairsForDepth = min($leftPick['investment_count'], $rightPick['investment_count']);
-
-            // ✅ Already paid pairs for this sponsor+depth
-            $alreadyPaidPairs = DB::table('transactions')
-                ->where('user_id', $sponsor->id)
-                ->where('remarks', 'like', "Pair Completion Bonus Depth {$depth} EMI #%")
-                ->count();
-
-            // ✅ New pairs to pay
-            $newPairs = $possiblePairsForDepth - $alreadyPaidPairs;
-            if ($newPairs <= 0) {
-                continue;
-            }
-
-            // Pay each EMI separately (so your remarks & reports stay correct)
-            for ($emi = $alreadyPaidPairs + 1; $emi <= $possiblePairsForDepth; $emi++) {
-                $pairBonus = $amount * 0.1;
-
-                DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
-
-                DB::table('transactions')->insert([
-                    'user_id' => $sponsor->id,
-                    'type' => 'Credit',
-                    'amount' => $pairBonus,
-                    'remarks' => "Pair Completion Bonus Depth {$depth} EMI #{$emi} from {$leftPick['username']} & {$rightPick['username']} (₹{$amount})",
-                    'created_at' => now(),
-                ]);
-            }
-        }
-    }
-
     /**
      * Distribute Binary MLM Commission (10% Direct + 10% Indirect)
      * + Pair Completion Bonus (10% when both legs activate)
@@ -795,29 +461,90 @@ class TopupController extends Controller
         // }
         // ✅ DIRECT COMMISSION — ONLY ON FIRST EMI
         // dd($user);
+
+
+
+        
+        // if ($user->investment_count >= 1) {
+        //     $sponsor = DB::table('users')->where('id', $user->sponsor_id)->first();
+        //     // dd($sponsor);
+        //     $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
+        //     if ($sponsor) {
+        //         // $commission = $amount * 0.1;
+        //         $commission = $amount * 0.1; // 10% commission
+        //         if ($amount >= 50000) {
+        //             $commission = $amount * 0.05; // 10% commission
+        //         }
+
+        //         DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
+
+        //         DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $commission);
+
+        //         DB::table('transactions')->insert([
+        //             'user_id' => $sponsor->id,
+        //             'type' => 'Credit',
+        //             'amount' => $commission,
+        //             'remarks' => "Direct 10% Commission from {$user->username} (₹{$amount})",
+        //             'created_at' => now(),
+        //         ]);
+        //         $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
+        //     }
+        // }
+
         if ($user->investment_count >= 1) {
-            $sponsor = DB::table('users')->where('id', $user->sponsor_id)->first();
-            // dd($sponsor);
-            $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
-            if ($sponsor) {
-                // $commission = $amount * 0.1;
-                $commission = $amount * 0.1; // 10% commission
-                if ($amount >= 50000) {
-                    $commission = $amount * 0.05; // 10% commission
+            $currentUserId = $user->sponsor_id;
+            $level = 1;
+
+            // Define the percentages for as many levels as you need
+            $levelPercentages = [
+                1 => 0.05, // 5%
+                2 => 0.01,
+                3 => 0.01, // 1%
+                4 => 0.0075,
+                5 => 0.0075, // 0.75%
+                6 => 0.005, // 0.5%
+                7 => 0.0025,
+                8 => 0.0025,
+                9 => 0.0025,
+                10 => 0.0025, // 0.25%
+            ];
+
+            // This loop continues ONLY if there is a parent and we haven't passed level 10
+            while ($currentUserId && $level <= 10) {
+                $sponsor = DB::table('users')->where('id', $currentUserId)->first();
+
+                // If for some reason the database record is missing, stop
+                if (!$sponsor) {
+                    break;
                 }
 
-                DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
+                $percentage = $levelPercentages[$level] ?? 0;
 
-                DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $commission);
+                if ($percentage > 0) {
+                    $commission = $amount * $percentage;
 
-                DB::table('transactions')->insert([
-                    'user_id' => $sponsor->id,
-                    'type' => 'Credit',
-                    'amount' => $commission,
-                    'remarks' => "Direct 10% Commission from {$user->username} (₹{$amount})",
-                    'created_at' => now(),
-                ]);
-                $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
+                    DB::transaction(function () use ($sponsor, $commission, $user, $amount, $level, $percentage) {
+                        // Update Wallet
+                        DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
+                        DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $commission);
+
+                        // Insert Transaction Record
+                        DB::table('transactions')->insert([
+                            'user_id' => $sponsor->id,
+                            'type' => 'Credit',
+                            'amount' => $commission,
+                            'remarks' => "L{$level} Commission (" . $percentage * 100 . "%) from {$user->username} (₹" . number_format($amount) . ')',
+                            'created_at' => now(),
+                        ]);
+
+                        // Check Pair Bonus for this specific level's parent
+                        $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
+                    });
+                }
+
+                // MOVE TO THE NEXT LEVEL
+                $currentUserId = $sponsor->sponsor_id; // Get the next person up
+                $level++; // Increment level count
             }
         }
 
@@ -864,93 +591,6 @@ class TopupController extends Controller
             $level++;
         }
     }
-
-    /**
-     * Pair Completion Bonus - When both left and right legs have paid
-     */
-    // private function checkAndDistributePairCompletionBonusTOOOLD($sponsor, $amount)
-    // {
-    //     $left = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'left')->first();
-
-    //     $right = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'right')->first();
-
-    //     if (!$left || !$right) {
-    //         return;
-    //     }
-
-    //     // ❗ BOTH must have paid SAME EMI
-    //     if ($left->investment_count != $right->investment_count) {
-    //         return;
-    //     }
-
-    //     $emiNumber = $left->investment_count;
-
-    //     // ❗ Check if this EMI pair bonus already paid
-    //     $alreadyPaid = DB::table('transactions')
-    //         ->where([
-    //             'user_id' => $sponsor->id,
-    //             'remarks' => "Pair Bonus EMI #{$emiNumber}",
-    //         ])
-    //         ->first();
-
-    //     if ($alreadyPaid) {
-    //         return;
-    //     }
-
-    //     // ✅ PAY PAIR BONUS
-    //     $pairBonus = $amount * 0.1;
-
-    //     DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
-
-    //     DB::table('transactions')->insert([
-    //         'user_id' => $sponsor->id,
-    //         'type' => 'Credit',
-    //         'amount' => $pairBonus,
-    //         'remarks' => "Pair Completion Bonus from {$leftChild->username} and {$rightChild->username} (₹{$amount})",
-    //         'created_at' => now(),
-    //     ]);
-    // }
-
-    // private function checkAndDistributePairCompletionBonusOLD($sponsor, $amount)
-    // {
-    //     // Get both legs of the sponsor
-    //     $leftChild = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'left')->first();
-
-    //     $rightChild = DB::table('users')->where('placement_id', $sponsor->id)->where('position', 'right')->first();
-
-    //     // Check if BOTH legs exist AND both have made at least 1 investment
-    //     if (!$leftChild || !$rightChild) {
-    //         return;
-    //     }
-    //     if ($leftChild->investment_count < 1 || $rightChild->investment_count < 1) {
-    //         return;
-    //     }
-
-    //     // ✅ Check if pair bonus already given (to avoid duplicate payments)
-    //     $alreadyGiven = DB::table('transactions')
-    //         ->where([
-    //             'user_id' => $sponsor->id,
-    //         ])
-    //         ->where('remarks', 'like', 'Pair Completion Bonus%')
-    //         ->first();
-
-    //     if ($alreadyGiven) {
-    //         return;
-    //     }
-
-    //     // ✅ Pay pair bonus (10% of current EMI amount)
-    //     $pairBonus = $amount * 0.1;
-
-    //     DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
-
-    //     DB::table('transactions')->insert([
-    //         'user_id' => $sponsor->id,
-    //         'type' => 'Credit',
-    //         'amount' => $pairBonus,
-    //         'remarks' => "Pair Completion Bonus from {$leftChild->username} and {$rightChild->username} (₹{$amount})",
-    //         'created_at' => now(),
-    //     ]);
-    // }
 
     private static function rewardAfterFullEmi($user)
     {
