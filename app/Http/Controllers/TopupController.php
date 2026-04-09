@@ -480,17 +480,13 @@ class TopupController extends Controller
         // 2. Sum the 'amount' from the orders table for those specific users
         // This ensures we get ₹50,000 if that is what they actually paid.
 
-
-
         $leftOrderCount = DB::table('orders')->whereIn('user_id', $leftUserIds)->count();
         $leftRawSum = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount');
-        $leftTotalVolume = $leftRawSum - ($leftOrderCount * 100);
+        $leftTotalVolume = $leftRawSum - $leftOrderCount * 100;
         $rightOrderCount = DB::table('orders')->whereIn('user_id', $rightUserIds)->count();
         $rightRawSum = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount');
-        $rightTotalVolume = $rightRawSum - ($rightOrderCount * 100);
+        $rightTotalVolume = $rightRawSum - $rightOrderCount * 100;
         $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
-
-
 
         // $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount');
         // $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount');
@@ -508,26 +504,52 @@ class TopupController extends Controller
         $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
 
         // 5. Pay the 10% Bonus
+        // if ($newVolumeToPay >= 1000) {
+        //     // dd($amount);
+        //     $bonusPercentage = 0.1;
+        //     if ($amount >= 50000) {
+        //         $bonusPercentage = 0.05;
+        //     }
+        //     // dd($bonusPercentage);
+        //     $pairBonus = $newVolumeToPay * $bonusPercentage;
+
+        //     DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay) {
+        //         DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+
+        //         DB::table('transactions')->insert([
+        //             'user_id' => $sponsor->id,
+        //             'type' => 'Credit',
+        //             'amount' => $pairBonus,
+        //             'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToPay) . ' volume (10% Bonus)',
+        //             'created_at' => now(),
+        //         ]);
+        //     });
+        // }
         if ($newVolumeToPay >= 1000) {
-            // dd($amount);
-            $bonusPercentage = 0.1;
+            $bonusPercentage = 0.1; // Default 10%
+
             if ($amount >= 50000) {
-                $bonusPercentage = 0.05;
+                $bonusPercentage = 0; // Set to 0 to skip logic
             }
-            // dd($bonusPercentage);
-            $pairBonus = $newVolumeToPay * $bonusPercentage;
 
-            DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay) {
-                DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+            // Only proceed if there is actually a bonus to pay
+            if ($bonusPercentage > 0) {
+                $pairBonus = $newVolumeToPay * $bonusPercentage;
 
-                DB::table('transactions')->insert([
-                    'user_id' => $sponsor->id,
-                    'type' => 'Credit',
-                    'amount' => $pairBonus,
-                    'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToPay) . ' volume (10% Bonus)',
-                    'created_at' => now(),
-                ]);
-            });
+                DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay, $bonusPercentage) {
+                    // 1. Update Wallet
+                    DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+
+                    // 2. Create Transaction Entry
+                    DB::table('transactions')->insert([
+                        'user_id' => $sponsor->id,
+                        'type' => 'Credit',
+                        'amount' => $pairBonus,
+                        'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToPay) . ' volume (' . $bonusPercentage * 100 . '% Bonus)',
+                        'created_at' => now(),
+                    ]);
+                });
+            }
         }
     }
 

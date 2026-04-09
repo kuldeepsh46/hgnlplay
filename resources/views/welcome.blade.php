@@ -2196,20 +2196,19 @@ padding-top: 20px;
 
     <!-- Desktop View -->
     <div class="desktop-pdf">
-        <iframe 
-            src="https://hgnlpay.co.in/public/storage/Himalyan-Pay.pdf"
-            width="100%"
-            height="800"
-            style="border:none;border-radius:10px; background-color:#fff;">
-        </iframe>
-    </div>
+    <iframe 
+        src="{{ asset('storage/HGNLPAY.pdf') }}"
+        width="100%"
+        height="800"
+        style="border:none;border-radius:10px; background-color:#fff;">
+    </iframe>
+</div>
 
-    <!-- Mobile View -->
-    <div class="mobile-pdf">
-        <a href="https://hgnlpay.co.in/public/storage/Himalyan-Pay.pdf" target="_blank" class="pdf-btn">
-            Open PDF
-        </a>
-    </div>
+<div class="mobile-pdf">
+    <a href="{{ asset('storage/HGNLPAY.pdf') }}" target="_blank" class="pdf-btn">
+        Open PDF
+    </a>
+</div>
 
 </div>
             <!-- CTA band -->
