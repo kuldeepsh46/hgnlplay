@@ -425,7 +425,7 @@ class TopupController extends Controller
     {
         $commission = $amount * 0.1; // 10% commission
         if ($amount >= 50000) {
-            $commission = $amount * 0.05; // 10% commission
+            $commission = 0; // 10% commission
         }
 
         $user = DB::table('users')->find($userId);
