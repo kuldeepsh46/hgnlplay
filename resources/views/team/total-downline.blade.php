@@ -188,7 +188,7 @@ body{
   <div class="team-card" data-position="{{ strtolower($user->team_side) }}">
 
     <div class="tc-left">
-      {{-- <div class="tc-index">{{ $key+1 }}</div> --}}
+      <div class="tc-index">{{ $key+1 }}</div>
       <div>
         <div class="tc-name">{{ $user->username }}</div>
         <div class="tc-username">{{ $user->name }}</div>
@@ -196,8 +196,8 @@ body{
     </div>
 
     <div class="tc-center">
-      <span class="tc-label">Placement ID</span>
-      <span class="tc-value">{{ $user->placement_id }}</span>
+      {{-- <span class="tc-label">Placement ID</span> --}}
+      {{-- <span class="tc-value">{{ $user->placement_id }}</span> --}}
     </div>
 
     {{-- Changed from $user->position to $user->team_side --}}

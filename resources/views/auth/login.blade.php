@@ -1,203 +1,271 @@
 @extends('layouts.app')
 
+@section('title', 'Login')
+
 @section('content')
-<style>
-    /* Section & Container Styling */
-    section.common-section {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        background: radial-gradient(900px 600px at 30% -10%, #0f1a12 0%, transparent 70%), var(--bg, #0f141b);
-        overflow: hidden;
-        color: #fff;
-        font-family: 'Inter', sans-serif;
-    }
+    <style>
+        /* ================= LAYOUT & BACKGROUND ================= */
+        .hgnl-login-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+            box-sizing: border-box;
+            background: radial-gradient(circle at 30% -20%, #1a2a1f 0%, transparent 60%), #06090c;
+            font-family: 'Inter', sans-serif;
+        }
 
-    .login-container {
-        width: 100%;
-        max-width: 400px;
-        padding: 40px;
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        text-align: center;
-    }
+        /* ================= WIDE GLASS CARD ================= */
+        .hgnl-login-card {
+            width: 95%;
+            max-width: 1100px;
+            /* Wider for desktop consistency */
+            background-color: #10171f;
+            border: 1px solid #1b222b;
+            border-radius: 16px;
+            padding: 60px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+            box-sizing: border-box;
+        }
 
-    /* Brand & Logo */
-    .logo {
-        width: 93px;
-        height: 93px;
-        margin: 0 auto 20px;
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        background: #fff;
-        box-shadow: 0 0 0 4px rgba(232, 78, 109, 0.2);
-        overflow: hidden;
-    }
+        /* ================= BRANDING SECTION ================= */
+        .login-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 50px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 30px;
+        }
 
-    .logo img {
-        width: 80%;
-        height: auto;
-        object-fit: contain;
-    }
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 25px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(167, 255, 30, 0.2);
+        }
 
-    .brand h1 {
-        font-size: 28px;
-        margin-bottom: 10px;
-        letter-spacing: 0.5px;
-        font-weight: 700;
-        color: #fff;
-    }
+        .login-logo img {
+            width: 85%;
+            object-fit: contain;
+        }
 
-    .brand-green {
-        color: #e84e6d; /* Pink accent color */
-    }
+        .brand-text h1 {
+            font-size: 32px;
+            margin: 0;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
 
-    h2 {
-        font-size: 22px;
-        margin-top: 20px;
-        font-weight: 600;
-    }
+        .brand-accent {
+            color: #a7ff1e;
+            /* Neon Green matched to Register form */
+        }
 
-    .subtitle {
-        font-size: 14px;
-        color: #aaa;
-        margin-bottom: 30px;
-    }
+        .brand-text p {
+            color: #a0acb3;
+            margin: 5px 0 0 0;
+            font-size: 15px;
+        }
 
-    /* Form Styling */
-    .form-group {
-        text-align: left;
-        margin-bottom: 20px;
-    }
+        /* ================= FORM GRID ================= */
+        .login-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            /* Split for Member ID and Password */
+            gap: 30px;
+        }
 
-    .form-group label {
-        display: block;
-        font-size: 13px;
-        margin-bottom: 8px;
-        color: #ddd;
-        font-weight: 500;
-    }
+        .login-field {
+            display: flex;
+            flex-direction: column;
+        }
 
-    .form-control {
-        width: 100%;
-        padding: 12px 15px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        color: #fff;
-        font-size: 14px;
-        transition: all 0.3s;
-    }
+        .login-field.full-width {
+            grid-column: span 2;
+        }
 
-    .form-control:focus {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: #3f7871;
-        outline: none;
-        box-shadow: 0 0 8px rgba(63, 120, 113, 0.3);
-    }
+        .login-field label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #a0acb3;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
 
-    /* Forgot Password Link */
-    .forgot-password-link {
-        display: block;
-        text-align: right;
-        font-size: 12px;
-        color: #3f7871;
-        text-decoration: none;
-        font-weight: 600;
-        margin-top: 8px;
-        transition: color 0.2s;
-    }
+        /* ================= INPUTS ================= */
+        .login-input {
+            width: 100%;
+            padding: 18px;
+            border-radius: 8px;
+            border: 1px solid #1b222b;
+            background-color: #0b0e12;
+            color: #fff;
+            font-size: 16px;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box;
+        }
 
-    .forgot-password-link:hover {
-        color: #e84e6d;
-        text-decoration: underline;
-    }
+        .login-input:focus {
+            outline: none;
+            border-color: #a7ff1e;
+            background-color: #0d1218;
+            box-shadow: 0 0 15px rgba(167, 255, 30, 0.1);
+        }
 
-    /* Button Styling */
-    .btn-login {
-        width: 100%;
-        padding: 15px;
-        border: none;
-        border-radius: 12px;
-        background: #3f7871;
-        color: #fff;
-        font-weight: 700;
-        font-size: 16px;
-        cursor: pointer;
-        transition: all 0.25s;
-        margin-top: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
+        .forgot-link {
+            align-self: flex-end;
+            font-size: 13px;
+            color: #a7ff1e;
+            text-decoration: none;
+            margin-top: 10px;
+            font-weight: 600;
+        }
 
-    .btn-login:hover {
-        background: #4a8c84;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    }
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
 
-    .invalid-feedback {
-        color: #ff4d4d;
-        font-size: 12px;
-        margin-top: 5px;
-        display: block;
-    }
-</style>
+        /* ================= ACTION BUTTONS ================= */
+        .btn-container {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            /* Login is primary, Register is secondary */
+            gap: 20px;
+            margin-top: 40px;
+        }
 
-<section class="common-section login-section">
-    <div class="login-container">
-        <div class="brand">
-            <div class="logo">
-                <a href="/">
-                    <img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading">git statusgit status
-                </a>
+        .hgnl-btn-primary {
+            background-color: #a7ff1e;
+            color: #000;
+            font-weight: 800;
+            border: none;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 16px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(167, 255, 30, 0.2);
+        }
+
+        .hgnl-btn-primary:hover {
+            background-color: #c1ff5e;
+            transform: translateY(-2px);
+        }
+
+        .hgnl-btn-secondary {
+            background: transparent;
+            color: #a7ff1e;
+            font-weight: 700;
+            border: 2px solid #a7ff1e;
+            border-radius: 10px;
+            padding: 18px;
+            font-size: 14px;
+            text-transform: uppercase;
+            text-decoration: none;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .hgnl-btn-secondary:hover {
+            background: rgba(167, 255, 30, 0.05);
+            border-color: #fff;
+            color: #fff;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 850px) {
+
+            .login-grid,
+            .btn-container {
+                grid-template-columns: 1fr;
+            }
+
+            .login-field.full-width {
+                grid-column: span 1;
+            }
+
+            .hgnl-login-card {
+                padding: 30px;
+            }
+
+            .login-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .login-logo {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+    <div class="hgnl-login-wrapper">
+        <div class="hgnl-login-card">
+
+            <div class="login-header">
+                <div class="login-logo">
+                    <img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading">
+                </div>
+                <div class="brand-text">
+                    <h1>Himalaya <span class="brand-accent">Trading</span></h1>
+                    <p>Login to manage your portfolio and team.</p>
+                </div>
             </div>
-            <h1>Himalaya <span class="brand-green">Trading</span></h1>
+
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
+
+                <div class="login-grid">
+
+                    <div class="login-field">
+                        <label for="member_id">Member ID</label>
+                        <input id="member_id" type="text" class="login-input @error('member_id') is-invalid @enderror"
+                            name="member_id" value="{{ old('member_id') }}" placeholder="e.g. HGNL10001" required autofocus>
+
+                        @error('member_id')
+                            <span style="color: #ff5a5a; font-size: 12px; margin-top: 5px;">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="login-field">
+                        <label for="password">Security Password</label>
+                        <input id="password" type="password" class="login-input @error('password') is-invalid @enderror"
+                            name="password" placeholder="••••••••" required>
+
+                        @if (Route::has('password.request'))
+                            <a class="forgot-link" href="{{ route('password.request') }}">Forgot Security Key?</a>
+                        @endif
+
+                        @error('password')
+                            <span style="color: #ff5a5a; font-size: 12px; margin-top: 5px;">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="login-field full-width">
+                        <div class="btn-container">
+                            <button type="submit" class="hgnl-btn-primary">
+                                Login
+                            </button>
+                            <a href="{{ route('member.register') }}" class="hgnl-btn-secondary">
+                                Create Account
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
         </div>
-
-        <h2>Welcome Back</h2>
-        <p class="subtitle">Login to continue your journey</p>
-        
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
-            
-            <div class="form-group">
-                <label for="member_id">Member ID</label>
-                <input id="member_id" type="text" class="form-control @error('member_id') is-invalid @enderror" 
-                    name="member_id" value="{{ old('member_id') }}" placeholder="e.g. HGNL10001" required autofocus>
-
-                @error('member_id')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror"
-                    name="password" required autocomplete="current-password">
-                
-                @error('password')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-
-                @if (Route::has('password.request'))
-                    <a class="forgot-password-link" href="{{ route('password.request') }}">
-                        Forgot Password?
-                    </a>
-                @endif
-            </div>
-
-            <button type="submit" class="btn-login">
-                Login
-            </button>
-        </form>
     </div>
-</section>
 @endsection

@@ -149,6 +149,7 @@ class DashboardController extends Controller
 
         if ($user->hasRole('customer')) {
             // 1️⃣ Payouts
+            // dd($user->id);
             $payoutReceived = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'completed')->count();
             $payoutPending = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'pending')->count();
 

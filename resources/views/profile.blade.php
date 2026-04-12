@@ -67,7 +67,7 @@
 
         <div class="profile-item highlight">
             <label>Wallet Balance</label>
-            <p>₹ {{ number_format($user->wallet_balance, 2) }}</p>
+            <p>₹ {{ number_format($walletBalance, 2) }}</p>
         </div>
     </div>
 

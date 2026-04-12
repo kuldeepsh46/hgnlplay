@@ -88,10 +88,11 @@ Route::middleware(['auth'])->group(function () {
 // Route::middleware(['auth', 'role:admin'])->group(function () {
 //     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 // });
-
+Route::get('/member/register', [MemberController::class, 'create'])->name('member.register');
+Route::post('/member/register', [MemberController::class, 'store'])->name('member.store');
 Route::middleware(['auth'])->group(function () {
-    Route::get('/member/register', [MemberController::class, 'create'])->name('member.register');
-    Route::post('/member/register', [MemberController::class, 'store'])->name('member.store');
+    // Route::get('/member/register', [MemberController::class, 'create'])->name('member.register');
+    // Route::post('/member/register', [MemberController::class, 'store'])->name('member.store');
     // User Routes
     // Route::get('/wallet-fund-request', [MemberController::class, 'fundRequest'])->name('user.fundRequest');
 });

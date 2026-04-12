@@ -16,7 +16,13 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        return view('profile', compact('user'));
+
+$walletBalance = DB::table('wallets')
+    ->where('user_id', $user->id)
+    ->value('balance') ?? 0; // value() gets just the balance column, ?? 0 handles missing rows
+
+// dd($walletBalance);
+        return view('profile', compact('user', 'walletBalance'));
     }
     public function edit()
     {

@@ -632,14 +632,14 @@
                         <h3>{{ $payoutPending ?? 0 }}</h3>
                         <p>Payout Pending</p>
                     </div>
-                    {{-- <div class="stat-box">
+                    <div class="stat-box">
         <h3>{{ $totalDownline ?? 0 }}</h3>
         <p>Total Downline</p>
-      </div> --}}
-                    <div class="stat-box">
+      </div>
+                    {{-- <div class="stat-box">
                         <h3 id="downline-count">{{ $leftDownline ?? 0 }}</h3>
                         <p>Total Downline</p>
-                    </div>
+                    </div> --}}
                     <div class="stat-box">
                         <h3>₹{{ number_format($directIncome ?? 0, 2) }}</h3>
                         <p>Direct Income</p>
