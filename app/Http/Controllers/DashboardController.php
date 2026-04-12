@@ -163,7 +163,27 @@ class DashboardController extends Controller
             $totalEarning = $directIncome + $pairIncome;
 
             // 4️⃣ Total Downline (Global)
-            $totalDownline = DB::table('users')->where('sponsor_id', $user->id)->orWhere('placement_id', $user->id)->count();
+            // $totalDownline = DB::table('users')->where('sponsor_id', $user->id)->orWhere('placement_id', $user->id)->count();
+            $allDownliners = [];
+
+        // 1. MANUALLY FIND THE TWO GATEKEEPERS
+        $leftBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first();
+
+        $rightBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first();
+
+        // 2. FORCE THE LEFT SIDE
+        if ($leftRoot = $leftBranchRoot) {
+            $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
+        }
+
+        // 3. FORCE THE RIGHT SIDE
+        if ($rightRoot = $rightBranchRoot) {
+            $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
+        }
+
+        // 4. PREPARE THE COLLECTION
+        $teamMembers = collect($allDownliners)->reject(fn($m) => $m->id == 27)->sortBy('created_at');
+        $totalDownline = $teamMembers->count();
 
             // 5️⃣ SPLIT Downline (For Radio Buttons)
             // We filter by 'leg' column (1 = Left, 2 = Right)
@@ -234,6 +254,21 @@ class DashboardController extends Controller
                 'packageUsers', // 👈 ADD THIS
             ),
         );
+    }
+    private function crawlAndForceSide($node, $side, &$list)
+    {
+        // We overwrite the 'position' property in the object memory
+        // so the Blade sees 'left' or 'right' regardless of the DB value.
+        $node->position = $side;
+        $list[] = $node;
+
+        // Get EVERY child of this node
+        $children = \App\Models\User::where('placement_id', $node->id)->get();
+
+        foreach ($children as $child) {
+            // We pass the parent's $side (the forced one) to the child
+            $this->crawlAndForceSide($child, $side, $list);
+        }
     }
     public function SSSSindex()
     {
