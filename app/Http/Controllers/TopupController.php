@@ -423,15 +423,13 @@ class TopupController extends Controller
      */
     private function distributeCommission($userId, $amount)
     {
-        $commission = $amount * 0.1; // 10% commission
-        if ($amount >= 50000) {
-            $commission = 0; // 10% commission
-        }
-
         $user = DB::table('users')->find($userId);
-        // dd($user);
         if (!$user) {
             return;
+        }
+        if ($amount < 50000) {
+            $commission = $amount * 0.1; // 10% commission
+        } else {
         }
 
         // // ✅ 1️⃣ DIRECT COMMISSION (10%) - To immediate sponsor
@@ -462,9 +460,6 @@ class TopupController extends Controller
         // ✅ DIRECT COMMISSION — ONLY ON FIRST EMI
         // dd($user);
 
-
-
-        
         // if ($user->investment_count >= 1) {
         //     $sponsor = DB::table('users')->where('id', $user->sponsor_id)->first();
         //     // dd($sponsor);
@@ -491,107 +486,201 @@ class TopupController extends Controller
         //     }
         // }
 
-        if ($user->investment_count >= 1) {
-            $currentUserId = $user->sponsor_id;
-            $level = 1;
+        // if ($user->investment_count >= 1) {
+        //     $currentUserId = $user->sponsor_id;
+        //     $level = 1;
 
-            // Define the percentages for as many levels as you need
-            $levelPercentages = [
-                1 => 0.05, // 5%
-                2 => 0.01,
-                3 => 0.01, // 1%
-                4 => 0.0075,
-                5 => 0.0075, // 0.75%
-                6 => 0.005, // 0.5%
-                7 => 0.0025,
-                8 => 0.0025,
-                9 => 0.0025,
-                10 => 0.0025, // 0.25%
-            ];
+        //     // Define the percentages for as many levels as you need
+        //     $levelPercentages = [
+        //         1 => 0.05, // 5%
+        //         2 => 0.01,
+        //         3 => 0.01, // 1%
+        //         4 => 0.0075,
+        //         5 => 0.0075, // 0.75%
+        //         6 => 0.005, // 0.5%
+        //         7 => 0.0025,
+        //         8 => 0.0025,
+        //         9 => 0.0025,
+        //         10 => 0.0025, // 0.25%
+        //     ];
 
-            // This loop continues ONLY if there is a parent and we haven't passed level 10
-            while ($currentUserId && $level <= 10) {
-                $sponsor = DB::table('users')->where('id', $currentUserId)->first();
+        //     // This loop continues ONLY if there is a parent and we haven't passed level 10
+        //     while ($currentUserId && $level <= 10) {
+        //         $sponsor = DB::table('users')->where('id', $currentUserId)->first();
 
-                // If for some reason the database record is missing, stop
-                if (!$sponsor) {
+        //         // If for some reason the database record is missing, stop
+        //         if (!$sponsor) {
+        //             break;
+        //         }
+
+        //         $percentage = $levelPercentages[$level] ?? 0;
+
+        //         if ($percentage > 0) {
+        //             $commission = $amount * $percentage;
+
+        //             DB::transaction(function () use ($sponsor, $commission, $user, $amount, $level, $percentage) {
+        //                 // Update Wallet
+        //                 DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
+        //                 DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $commission);
+
+        //                 // Insert Transaction Record
+        //                 DB::table('transactions')->insert([
+        //                     'user_id' => $sponsor->id,
+        //                     'type' => 'Credit',
+        //                     'amount' => $commission,
+        //                     'remarks' => "L{$level} Commission (" . $percentage * 100 . "%) from {$user->username} (₹" . number_format($amount) . ')',
+        //                     'created_at' => now(),
+        //                 ]);
+
+        //                 // Check Pair Bonus for this specific level's parent
+        //                 $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
+        //             });
+        //         }
+
+        //         // MOVE TO THE NEXT LEVEL
+        //         $currentUserId = $sponsor->sponsor_id; // Get the next person up
+        //         $level++; // Increment level count
+        //     }
+        // }
+
+        // // ✅ 2️⃣ INDIRECT COMMISSION (10%) - To upline chain through binary tree
+        // $current = $user;
+        // $level = 1;
+
+        // while ($current && $level <= 10) {
+        //     // Limit to 10 levels
+        //     // Get parent/upline from binary structure
+        //     $binaryNode = DB::table('binary_nodes')->where('user_id', $current->id)->first();
+        //     if (!$binaryNode || !$binaryNode->parent_id) {
+        //         break;
+        //     }
+
+        //     $upline = DB::table('users')->find($binaryNode->parent_id);
+        //     if (!$upline) {
+        //         break;
+        //     }
+
+        //     // 10% commission for indirect sales
+        //     // $indirectCommission = $amount * 0.1;
+        //     $indirectCommission = $amount * 0.1; // 10% indirectCommission
+        //     if ($amount >= 50000) {
+        //         $indirectCommission = $amount * 0.05; // 10% indirectCommission
+        //     }
+
+        //     // Ensure wallet exists
+        //     DB::table('wallets')->updateOrInsert(['user_id' => $upline->id], ['updated_at' => now()]);
+
+        //     // Add commission to upline wallet
+        //     DB::table('wallets')->where('user_id', $upline->id)->increment('balance', $indirectCommission);
+
+        //     // Record transaction
+        //     DB::table('transactions')->insert([
+        //         'user_id' => $upline->id,
+        //         'type' => 'Credit',
+        //         'amount' => $indirectCommission,
+        //         'remarks' => "Indirect 10% Commission from {$user->username} - Level {$level} (₹{$amount})",
+        //         'created_at' => now(),
+        //     ]);
+
+        //     $current = $upline;
+        //     $level++;
+        // }
+
+        // 1. DETERMINE COMMISSION TYPE
+        if ($amount < 50000) {
+            // DIRECT COMMISSION (Single person)
+            $commission = $amount * 0.1; // 10%
+            $beneficiaryId = $user->sponsor_id; // Direct sponsor gets the credit
+
+            if ($beneficiaryId) {
+                $this->distributeCommissionDBOpr($beneficiaryId, $commission, "10% Direct Commission from {$user->username}", $user, $amount);
+            }
+        } else {
+            // MULTI-LEVEL & INDIRECT COMMISSION (The "Else" Section)
+
+            // ✅ 1️⃣ LEVEL COMMISSION (Sponsor Chain)
+            if ($user->investment_count >= 1) {
+                $currentUserId = $user->sponsor_id;
+                $level = 1;
+                $levelPercentages = [
+                    1 => 0.05,
+                    2 => 0.01,
+                    3 => 0.01,
+                    4 => 0.0075,
+                    5 => 0.0075,
+                    6 => 0.005,
+                    7 => 0.0025,
+                    8 => 0.0025,
+                    9 => 0.0025,
+                    10 => 0.0025,
+                ];
+
+                while ($currentUserId && $level <= 10) {
+                    $sponsor = DB::table('users')->where('id', $currentUserId)->first();
+                    if (!$sponsor) {
+                        break;
+                    }
+
+                    $percentage = $levelPercentages[$level] ?? 0;
+                    if ($percentage > 0) {
+                        $levelCommission = $amount * $percentage;
+
+                        // DB Operation for Level Commission
+                        $remarks = "L{$level} Commission (" . $percentage * 100 . "%) from {$user->username}";
+                        $this->distributeCommissionDBOpr($sponsor->id, $levelCommission, $remarks, $user, $amount, $level);
+
+                        // Pair Bonus Check
+                        $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
+                    }
+                    $currentUserId = $sponsor->sponsor_id;
+                    $level++;
+                }
+            }
+
+            // ✅ 2️⃣ INDIRECT COMMISSION (Binary Chain)
+            $current = $user;
+            $idxLevel = 1;
+            while ($current && $idxLevel <= 10) {
+                $binaryNode = DB::table('binary_nodes')->where('user_id', $current->id)->first();
+                if (!$binaryNode || !$binaryNode->parent_id) {
                     break;
                 }
 
-                $percentage = $levelPercentages[$level] ?? 0;
-
-                if ($percentage > 0) {
-                    $commission = $amount * $percentage;
-
-                    DB::transaction(function () use ($sponsor, $commission, $user, $amount, $level, $percentage) {
-                        // Update Wallet
-                        DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
-                        DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $commission);
-
-                        // Insert Transaction Record
-                        DB::table('transactions')->insert([
-                            'user_id' => $sponsor->id,
-                            'type' => 'Credit',
-                            'amount' => $commission,
-                            'remarks' => "L{$level} Commission (" . $percentage * 100 . "%) from {$user->username} (₹" . number_format($amount) . ')',
-                            'created_at' => now(),
-                        ]);
-
-                        // Check Pair Bonus for this specific level's parent
-                        $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
-                    });
+                $upline = DB::table('users')->find($binaryNode->parent_id);
+                if (!$upline) {
+                    break;
                 }
 
-                // MOVE TO THE NEXT LEVEL
-                $currentUserId = $sponsor->sponsor_id; // Get the next person up
-                $level++; // Increment level count
+                // Logic: 5% if amount >= 50,000
+                $indirectCommission = $amount * 0.05;
+
+                // DB Operation for Indirect Commission
+                $remarks = "Indirect 5% Commission from {$user->username} - Level {$idxLevel}";
+                $this->distributeCommissionDBOpr($upline->id, $indirectCommission, $remarks, $user, $amount);
+
+                $current = $upline;
+                $idxLevel++;
             }
-        }
-
-        // ✅ 2️⃣ INDIRECT COMMISSION (10%) - To upline chain through binary tree
-        $current = $user;
-        $level = 1;
-
-        while ($current && $level <= 10) {
-            // Limit to 10 levels
-            // Get parent/upline from binary structure
-            $binaryNode = DB::table('binary_nodes')->where('user_id', $current->id)->first();
-            if (!$binaryNode || !$binaryNode->parent_id) {
-                break;
-            }
-
-            $upline = DB::table('users')->find($binaryNode->parent_id);
-            if (!$upline) {
-                break;
-            }
-
-            // 10% commission for indirect sales
-            // $indirectCommission = $amount * 0.1;
-            $indirectCommission = $amount * 0.1; // 10% indirectCommission
-            if ($amount >= 50000) {
-                $indirectCommission = $amount * 0.05; // 10% indirectCommission
-            }
-
-            // Ensure wallet exists
-            DB::table('wallets')->updateOrInsert(['user_id' => $upline->id], ['updated_at' => now()]);
-
-            // Add commission to upline wallet
-            DB::table('wallets')->where('user_id', $upline->id)->increment('balance', $indirectCommission);
-
-            // Record transaction
-            DB::table('transactions')->insert([
-                'user_id' => $upline->id,
-                'type' => 'Credit',
-                'amount' => $indirectCommission,
-                'remarks' => "Indirect 10% Commission from {$user->username} - Level {$level} (₹{$amount})",
-                'created_at' => now(),
-            ]);
-
-            $current = $upline;
-            $level++;
         }
     }
+    private function distributeCommissionDBOpr($targetUserId, $commissionAmount, $remarks, $fromUser, $totalAmount, $lvl = null)
+    {
+        DB::transaction(function () use ($targetUserId, $commissionAmount, $remarks, $fromUser, $totalAmount) {
+            // 1. Update/Insert Wallet
+            DB::table('wallets')->updateOrInsert(['user_id' => $targetUserId], ['updated_at' => now()]);
 
+            DB::table('wallets')->where('user_id', $targetUserId)->increment('balance', $commissionAmount);
+
+            // 2. Insert Transaction Record
+            DB::table('transactions')->insert([
+                'user_id' => $targetUserId,
+                'type' => 'Credit',
+                'amount' => $commissionAmount,
+                'remarks' => $remarks . ' (₹' . number_format($totalAmount) . ')',
+                'created_at' => now(),
+            ]);
+        });
+    }
     private static function rewardAfterFullEmi($user)
     {
         $rewardAmount = 5000; // or calculate dynamically

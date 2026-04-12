@@ -153,7 +153,8 @@ class DashboardController extends Controller
             $payoutPending = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'pending')->count();
 
             // 2️⃣ Incomes
-            $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Direct 10% Commission%')->sum('amount');
+            // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Direct 10% Commission%')->sum('amount');
+            $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', '%Commission%')->sum('amount');
             $pairIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
 
             // 3️⃣ Wallet & Earnings
