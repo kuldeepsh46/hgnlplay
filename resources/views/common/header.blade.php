@@ -104,6 +104,10 @@
                 <li class="{{ Request::routeIs('admin.users') ? 'active' : '' }}">👥 <span>Manage Users</span></li>
             </a>
 
+            <a href="{{ route('packages.index') }}" style="text-decoration:none;color:inherit;display:block;">
+    <li class="{{ Request::routeIs('packages.*') ? 'active' : '' }}">📦 <span>Manage Packages</span></li>
+</a>
+
             <a href="{{ route('admin.payments') }}" style="text-decoration:none;color:inherit;display:block;">
                 <li class="{{ Request::routeIs('admin.payments') ? 'active' : '' }}">💳 <span>Manage Payments</span>
                 </li>
@@ -121,55 +125,32 @@
             <a href="{{ route('admin.lucky.index') }}" style="text-decoration:none;color:inherit;display:block;">
                 <li class="{{ Request::routeIs('admin.lucky.index') ? 'active' : '' }}">🎁 <span>Lucky Draw</span></li>
             </a>
-            {{-- <a href="{{ route('admin.settings') }}" style="text-decoration:none;color:inherit;display:block;">
-            <li class="{{ Request::routeIs('') ? 'active' : '' }}">🎁 <span>Settings</span></li>
-        </a> --}}
 
-            {{-- <li class="team-item {{ request()->routeIs('admin.settings.qr', 'team.list') ? 'active open' : '' }}"
+            <li class="team-item {{ request()->is('admin/settings/qr*') || request()->routeIs('team.list') ? 'active open' : '' }}"
                 style="display:block;padding:0px;">
+
                 <div class="team-menu">
                     <span class="team-title">
-                        👥 <span>Settings</span>
+                        ⚙️ <span>Settings</span>
                     </span>
                     <span class="arrow">▾</span>
                 </div>
 
                 <ul class="submenu">
                     <li>
-                        <a href="{{ route('admin.settings.updateQR') }}">QR Code</a>
+                        <a href="{{ route('admin.settings.viewQR', 1) }}"
+                            class="{{ request()->fullUrl() == route('admin.settings.viewQR', 1) ? 'active' : '' }}">
+                            QR Code
+                        </a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.settings.updateQR') }}">USDT</a>
+                        <a href="{{ route('admin.settings.viewQR', 2) }}"
+                            class="{{ request()->fullUrl() == route('admin.settings.viewQR', 2) ? 'active' : '' }}">
+                            USDT
+                        </a>
                     </li>
-                    <li>
                 </ul>
-            </li> --}}
-
-            <li class="team-item {{ request()->is('admin/settings/qr*') || request()->routeIs('team.list') ? 'active open' : '' }}"
-    style="display:block;padding:0px;">
-    
-    <div class="team-menu">
-        <span class="team-title">
-            ⚙️ <span>Settings</span>
-        </span>
-        <span class="arrow">▾</span>
-    </div>
-
-    <ul class="submenu">
-        <li>
-            <a href="{{ route('admin.settings.viewQR', 1) }}" 
-               class="{{ request()->fullUrl() == route('admin.settings.viewQR', 1) ? 'active' : '' }}">
-               QR Code
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('admin.settings.viewQR', 2) }}" 
-               class="{{ request()->fullUrl() == route('admin.settings.viewQR', 2) ? 'active' : '' }}">
-               USDT
-            </a>
-        </li>
-    </ul>
-</li>
+            </li>
         @endif
 
 

@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\PackageController;
 use App\Mail\WelcomeMemberMail;
 use App\Models\User;
 use App\Http\Controllers\ManageUsersRolesController;
@@ -161,12 +162,21 @@ Route::get('/mail-preview', function () {
     return new WelcomeMemberMail($user, 'Shimla@46');
 });
 Route::get('/manage-users-role', [ManageUsersRolesController::class, 'index'])->name('admin.manage.role.index');
-    
-    // The Single Package Reverse
-    Route::post('/delete-package', [ManageUsersRolesController::class, 'deletePackage'])->name('admin.delete.package');
-    
-    // THE MISSING ROUTE: The All-User Reverse
-    Route::post('/reverse-all-user', [ManageUsersRolesController::class, 'reverseAll'])->name('admin.manage.reverseAll');
-    
-    // The Panic Button
-    Route::post('/panic-nuke', [ManageUsersRolesController::class, 'systemPanic'])->name('admin.panic');
+
+// The Single Package Reverse
+Route::post('/delete-package', [ManageUsersRolesController::class, 'deletePackage'])->name('admin.delete.package');
+
+// THE MISSING ROUTE: The All-User Reverse
+Route::post('/reverse-all-user', [ManageUsersRolesController::class, 'reverseAll'])->name('admin.manage.reverseAll');
+
+// The Panic Button
+Route::post('/panic-nuke', [ManageUsersRolesController::class, 'systemPanic'])->name('admin.panic');
+
+Route::resource('admin/packages', PackageController::class)->names([
+    'index' => 'packages.index',
+    'create' => 'packages.create',
+    'store' => 'packages.store',
+    'edit' => 'packages.edit',
+    'update' => 'packages.update',
+    'destroy' => 'packages.destroy',
+]);
