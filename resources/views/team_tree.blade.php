@@ -2,109 +2,132 @@
 @section('title', 'Team Structure')
 @section('main')
 
-{{-- 1. Ensure Alpine.js is loaded for the toggle logic --}}
-<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+    .tree-scroll {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 20px 20px;
+    }.card {
+    background-color: #fff;
+    border-radius: 10px;
+}
+    </style>
 
-<style>
-    /* Prevents children from "flashing" on page load before Alpine.js initializes */
-    [x-cloak] { display: none !important; }
+        <div class="header">
+            <h1>Team StructureS</h1>
+            <div class="user-info">
+                👤 {{ $user->username ?? $user->name }}
+            </div>
+        </div>
 
-    .mobile-view { display: none; padding: 15px; background: #f4f7f6; min-height: 100vh; }
-    .desktop-view { display: block; }
+        <div class="card">
+            <div class="tree-scroll">
+                <div class="tree-container">
+                    @include('partials.tree-node', ['node' => $tree])
+                </div>
+            </div>
+        </div>
 
-    @media (max-width: 991px) {
-        .mobile-view { display: block; }
-        .desktop-view { display: none; }
-    }
 
-    .mobile-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 12px;
-        display: flex;
+
+
+
+    <style>
+    /* ===== Password Modal ===== */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(11, 14, 18, 0.9);
+        justify-content: center;
         align-items: center;
-        gap: 12px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        transition: all 0.2s ease;
+        backdrop-filter: blur(4px);
     }
-    .mobile-card:active { transform: scale(0.98); background: #f8fafc; }
-</style>
 
-@php
-    if (!function_exists('renderMobileNested')) {
-        function renderMobileNested($item, $side = 'Root') {
-            if (!$item) return '';
-
-            $isActive = $item['is_active'] ?? false;
-            $image = $isActive ? asset('assets/images/g1.png') : asset('assets/images/r1.png');
-            $hasChildren = !empty($item['left']) || !empty($item['right']);
-            $pkgAmount = number_format($item['personal_investment'] ?? 0, 2);
-            
-            // open: false ensures it starts CLOSED
-            $html = '<div class="mobile-node-group" x-data="{ open: false }" style="margin-bottom:10px;">';
-            
-            $html .= '<div class="mobile-card" @click="open = !open" style="cursor:pointer; position:relative;">';
-            
-            if($side !== 'Root') {
-                $sideColor = ($side == 'Left') ? '#00cec9' : '#ff7675';
-                $html .= '<span style="position:absolute; top:-8px; left:12px; background:'.$sideColor.'; font-size:9px; padding:2px 8px; border-radius:4px; font-weight:900; color:#000;">'.$side.'</span>';
-            }
-
-            $html .= '<img src="'.$image.'" style="width:45px; height:45px; border-radius:50%;">';
-            $html .= '<div style="display:flex; flex-direction:column; flex-grow:1;">
-                        <span style="font-size:10px; color:#3b82f6; font-weight:800;">'.$item['member_id'].'</span>
-                        <span style="font-size:14px; font-weight:700; color:#1e293b; text-transform:uppercase;">'.$item['username'].'</span>
-                        <span style="font-size:11px; color:#64748b;">Pkg: $'.$pkgAmount.'</span>
-                      </div>';
-            
-            if($hasChildren) {
-                $html .= '<i class="fa fa-chevron-down" :style="open ? \'transform:rotate(180deg)\' : \'\'" style="transition:0.3s; color:#cbd5e1; font-size:12px;"></i>';
-            }
-
-            $html .= '</div>';
-
-            // x-show="open" handles the visibility
-            if($hasChildren) {
-                $html .= '<div x-show="open" x-cloak x-collapse style="margin-left:20px; padding-left:15px; border-left:2px solid #e2e8f0; margin-top:8px;">';
-                $html .= renderMobileNested($item['left'] ?? null, 'Left');
-                $html .= renderMobileNested($item['right'] ?? null, 'Right');
-                $html .= '</div>';
-            }
-
-            $html .= '</div>';
-            return $html;
-        }
+    .modal-content {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        width: 90%;
+        max-width: 400px;
+        color: var(--text);
+        position: relative;
+        box-shadow: 0 0 30px #00000080;
     }
-@endphp
 
-{{-- DESKTOP UI --}}
-<div class="desktop-view">
-    @include('partials.tree-node', ['node' => $tree])
-</div>
+    .modal-content h2 {
+        margin-top: 0;
+        color: var(--accent);
+        text-align: center;
+    }
 
-{{-- MOBILE UI --}}
-<div class="mobile-view">
-    {{-- Summary Stats --}}
-    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <div style="flex:1; background:#1e293b; color:#fff; padding:12px; border-radius:10px;">
-            <div style="font-size:9px; opacity:0.6;">LEFT BIZ</div>
-            <div style="font-size:14px; font-weight:800;">${{ number_format($tree['total_business_left'] ?? 0, 2) }}</div>
+    .modal-content .close {
+        position: absolute;
+        top: 10px;
+        right: 16px;
+        font-size: 22px;
+        cursor: pointer;
+        color: var(--muted);
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #2a3442;
+        background: #0f1620;
+        color: #fff;
+    }
+    </style>
+    <!-- Password Change Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Change Password</h2>
+
+            <form id="passwordForm" method="POST" action="{{ route('changep.update') }}">
+                @csrf
+                <div class="form-group">
+                    <label for="new_password">New Password</label>
+                    <input type="password" name="new_password" id="new_password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="new_password_confirmation">Confirm Password</label>
+                    <input type="password" name="new_password_confirmation" id="new_password_confirmation" required
+                        minlength="6">
+                </div>
+                <button type="submit" class="btn btn-copy" style="width:100%;">Update Password</button>
+            </form>
+            @if (session('success'))
+            <p style="color:#a7ff1e; text-align:center;">{{ session('success') }}</p>
+            @endif
+            @if (session('error'))
+            <p style="color:#ff5555; text-align:center;">{{ session('error') }}</p>
+            @endif
         </div>
-        <div style="flex:1; background:#1e293b; color:#fff; padding:12px; border-radius:10px; text-align:right;">
-            <div style="font-size:9px; opacity:0.6;">RIGHT BIZ</div>
-            <div style="font-size:14px; font-weight:800;">${{ number_format($tree['total_business_right'] ?? 0, 2) }}</div>
-        </div>
+
+
     </div>
 
-    {{-- The Tree Nodes --}}
-    <div class="mobile-tree-root">
-        @if(isset($tree))
-            {!! renderMobileNested($tree) !!}
-        @else
-            <p style="text-align:center; color:#94a3b8;">No data found.</p>
-        @endif
-    </div>
-</div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
+    
 @endsection

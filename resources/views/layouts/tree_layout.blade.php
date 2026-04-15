@@ -3,63 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>@yield('title')</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Network Genealogy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1e4f7a;
-            --secondary: #e53935;
-            --bg: #f0f2f5;
-            --card-bg: #ffffff;
+            --bg-dark: #0a0e14;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #3d5afe;
+            --accent-cyan: #00e5ff;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
         }
 
         body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: #333;
+            overflow-x: hidden;
         }
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
+        .app-container {
+            padding: 20px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
-            box-sizing: border-box;
         }
 
-        .header-ui {
-            background: var(--primary);
-            color: white;
-            padding: 30px 20px;
-            border-radius: 0 0 30px 30px;
-            margin-bottom: 20px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        /* Responsive UI Card */
-        .tree-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            overflow: hidden;
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
 
         @yield('styles')
     </style>
 </head>
 <body>
-    <div class="header-ui">
-        <h2 style="margin:0; font-weight: 800;">My Network</h2>
-        <p style="opacity: 0.8; margin: 5px 0 0 0;">Visual Genealogy Tree</p>
-    </div>
-    <div class="container">
-        <div class="tree-card">
-            @yield('content')
-        </div>
+    <div class="app-container">
+        @yield('content')
     </div>
 </body>
 </html>
