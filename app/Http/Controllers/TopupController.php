@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class TopupController extends Controller
 {
@@ -25,218 +24,6 @@ class TopupController extends Controller
         return view('member-topup', compact('user', 'packages', 'wallet', 'walletTransactions'));
     }
 
-    // public function store(Request $r)
-    // {
-    //     // 1. Validate using member_id instead of email
-    //     $r->validate([
-    //         'member_id' => 'required|string|exists:users,member_id',
-    //         'package_id' => 'required|integer|exists:packages,id',
-    //         'payment_by' => 'required|string',
-    //     ]);
-
-    //     $currentUser = Auth::user();
-    //     $memberId = strtoupper(trim($r->member_id));
-
-    //     // 2. Fetch data using member_id
-    //     // Note: We use the Model \App\Models\User to ensure the reward functions work correctly
-    //     $receiver = \App\Models\User::where('member_id', $memberId)->first();
-    //     $package = DB::table('packages')->where('id', $r->package_id)->first();
-    //     $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
-
-    //     if (!$receiver) {
-    //         return back()->with('error', 'Member not found.');
-    //     }
-
-    //     // 3. INTERNAL FINAL AMOUNT CALCULATION (Fixes the "Top-up not happening" issue)
-    //     // dd($receiver->investment_count);
-    //     $currentCount = $receiver->investment_count ?? 0;
-    //     $registrationFee = $currentCount == 0 ? 100 : 0;
-    //     $finalAmount = (float) $package->amount + $registrationFee;
-    //     // dd($currentCount, $registrationFee, $finalAmount);
-
-    //     // 4. Calculate increment value based on package_id
-    //     $packageId = (int) $r->package_id;
-
-    //     $packageAmount = (float) $package->amount;
-    //     $incrementValue = match ($packageAmount) {
-    //         1000.0 => 1,
-    //         7000.0 => 7,
-    //         13000.0 => 13,
-    //         50000.0 => 50,
-    //         100000.0 => 100,
-    //         default => floor($packageAmount / 1000),
-    //     };
-
-    //     $newTotal = $currentCount + $incrementValue;
-
-    //     // --- Start: PACKAGE LIMIT & LOCK-IN LOGIC ---
-    //     $currentCount = $receiver->investment_count ?? 0;
-    //     $packageAmount = (float) $package->amount;
-
-    //     // 1. Normalize Existing Order Amount (Subtract 100 if it was the first payment)
-    //     $existingOrder = DB::table('orders')->where('user_id', $receiver->id)->first();
-
-    //     if ($existingOrder) {
-    //         $existingBaseAmount = (float) $existingOrder->amount;
-
-    //         // If the first order was 1100, 7100, etc., treat it as 1000, 7000 for comparison
-    //         $normalizedExisting = $existingBaseAmount % 1000 == 100 ? $existingBaseAmount - 100 : $existingBaseAmount;
-
-    //         if ($normalizedExisting != $packageAmount) {
-    //             return back()->with('error', "Member is locked to the ₹{$normalizedExisting} package. Cannot top up with ₹{$packageAmount}.");
-    //         }
-    //     }
-
-    //     // 2. Define Max Top-ups for each specific Amount (Base Amounts)
-    //     $maxLimit = match ($packageAmount) {
-    //         1000.0 => 16,
-    //         7000.0 => 2,
-    //         13000.0 => 1,
-    //         50000.0 => 1,
-    //         100000.0 => 1,
-    //         default => 0,
-    //     };
-
-    //     if ($maxLimit === 0) {
-    //         return back()->with('error', 'Invalid package. Only 1k (16x), 7k (2x), 13k (1x), 50k (1x), or 100k (1x) are allowed.');
-    //     }
-
-    //     // 3. Calculate Increment (Package 1=1, 2=8, 3=16)
-    //     $packageId = (int) $package->id;
-    //     $incrementValue = match ($packageId) {
-    //         1 => 1,
-    //         2 => 8,
-    //         3 => 16,
-    //         default => 1,
-    //     };
-
-    //     $newTotal = $currentCount + $incrementValue;
-
-    //     // 4. Enforce the specific Limit Check
-    //     if ($newTotal > $maxLimit) {
-    //         $remaining = max(0, $maxLimit - $currentCount);
-    //         return back()->with('error', "Limit reached for ₹{$packageAmount}. Remaining: {$remaining}. This selection adds {$incrementValue}.");
-    //     }
-    //     // --- END: PACKAGE LIMIT & LOCK-IN LOGIC ---
-
-    //     // ✅ 1. Check EMI/Investment limit (max 16)
-    //     $amount = $r->input('amount');
-    //     // $receiver = User::find($r->input('user_id'));
-
-    //     // 1. Define the dynamic EMI limits
-    //     if ($amount == 1000) {
-    //         $limit = 16;
-    //     } elseif ($amount == 7000) {
-    //         $limit = 2;
-    //     } elseif (in_array($amount, [13000, 50000, 100000])) {
-    //         $limit = 1;
-    //     } else {
-    //         $limit = 1; // Default fallback
-    //     }
-
-    //     $currentCount = $receiver->investment_count ?? 0;
-    //     $incrementValue = 1; // Assuming 1 package = 1 EMI entry
-    //     // dd($currentCount, $incrementValue);
-    //     $newTotal = $currentCount + $incrementValue;
-
-    //     // 2. Updated Validation Condition
-    //     if ($newTotal > $limit) {
-    //         $remaining = max(0, $limit - $currentCount);
-
-    //         // Dynamic error message based on the specific package limit
-    //         return back()->with('error', "Limit Exceeded for ₹{$amount} package. " . "This package allows a maximum of {$limit} EMI(s). " . "You can only add {$remaining} more.");
-    //     }
-
-    //     // ✅ 2. Wallet balance validation
-    //     if (!$wallet || $wallet->balance < $finalAmount) {
-    //         return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
-    //     }
-
-    //     // ✅ 3. Lucky Service logic for specialized packages
-    //     if (in_array($packageId, [4, 5])) {
-    //         \App\Services\LuckyService::createCycleIfNotExists($receiver->id, $packageId);
-    //     }
-
-    //     DB::beginTransaction();
-    //     try {
-    //         // ✅ 4. Deduct wallet balance
-    //         DB::table('wallets')
-    //             ->where('user_id', $currentUser->id)
-    //             ->update([
-    //                 'balance' => $wallet->balance - $finalAmount,
-    //                 'updated_at' => now(),
-    //             ]);
-
-    //         // ✅ 5. Record debit transaction
-    //         DB::table('transactions')->insert([
-    //             'user_id' => $currentUser->id,
-    //             'type' => 'Debit',
-    //             'amount' => $finalAmount,
-    //             'remarks' => 'EMI payment for ' . $receiver->username . " ({$memberId})",
-    //             'created_at' => now(),
-    //         ]);
-
-    //         // ✅ 6. Record order (as EMI)
-    //         DB::table('orders')->insert([
-    //             'user_id' => $receiver->id,
-    //             'from_user_id' => $currentUser->id,
-    //             'package_id' => $package->id,
-    //             'amount' => $finalAmount,
-    //             'payment_by' => $r->payment_by,
-    //             'status' => 'completed',
-    //             'created_at' => now(),
-    //             'updated_at' => now(),
-    //         ]);
-
-    //         // ✅ 7. Update investment_count and status
-    //         DB::table('users')
-    //             ->where('id', $receiver->id)
-    //             ->update([
-    //                 'investment_count' => $newTotal,
-    //                 'emi_status' => $newTotal >= 16 ? 'completed' : 'ongoing',
-    //                 'updated_at' => now(),
-    //             ]);
-
-    //         // ✅ 8. Trigger pair bonus check for ALL uplines (The part missing in the new function)
-    //         $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
-
-    //         while ($sponsor) {
-    //             if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
-    //                 $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount);
-    //             }
-
-    //             if (empty($sponsor->placement_id)) {
-    //                 break;
-    //             }
-    //             $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
-    //         }
-
-    //         // ✅ 9. Trigger reward once all 16 EMIs are completed
-    //         if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
-    //             $this->rewardAfterFullEmi($receiver);
-    //         }
-
-    //         // ✅ 10. Distribute 50% commission
-    //         if ($currentCount == 0) {
-    //             if (method_exists($this, 'distributeCommission')) {
-    //                 $this->distributeCommission($receiver->id, $package->amount);
-    //             }
-    //         }
-
-    //         DB::commit();
-
-    //         // ✅ 11. Success messages
-    //         $successMessage = match ($packageId) {
-    //             4, 5 => "Congratulations! You have successfully paid ₹{$finalAmount} for Member {$memberId}. Vouchers have been issued.",
-    //             default => "EMI #{$newTotal} paid successfully! ₹{$finalAmount} deducted from your wallet for Member {$memberId}.",
-    //         };
-
-    //         return back()->with('success', $successMessage);
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return back()->with('error', 'Something went wrong: ' . $e->getMessage());
-    //     }
-    // }
     public function store(Request $r)
     {
         // 1. Validate using member_id instead of email
@@ -365,98 +152,110 @@ class TopupController extends Controller
             return back()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
+    // private function checkAndDistributePairCompletionBonus($sponsor, $amount)
+    // {
+    //     if (!$sponsor) {
+    //         return;
+    //     }
+
+    //     // 1. Get TOTAL Volume from both sides
+    //     // Even if they only have 1 package, we sum the subtree in case there are many users
+    //     $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
+    //     $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
+
+    //     if (empty($leftUsers) || empty($rightUsers)) {
+    //         return;
+    //     }
+    //     $leftUserIds = collect($leftUsers)->pluck('id')->toArray();
+    //     $rightUserIds = collect($rightUsers)->pluck('id')->toArray();
+
+    //     // 2. Sum the 'amount' from the orders table for those specific users
+    //     // This ensures we get ₹50,000 if that is what they actually paid.
+
+    //     $leftOrderCount = DB::table('orders')->whereIn('user_id', $leftUserIds)->count();
+    //     $leftRawSum = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount');
+    //     $leftTotalVolume = $leftRawSum - $leftOrderCount * 100;
+    //     $rightOrderCount = DB::table('orders')->whereIn('user_id', $rightUserIds)->count();
+    //     $rightRawSum = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount');
+    //     $rightTotalVolume = $rightRawSum - $rightOrderCount * 100;
+    //     $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
+    //     $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
+
+    //     // 3. Subtract what was ALREADY paid to this sponsor
+    //     $totalPaidBonus = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
+
+    //     $alreadyMatchedVolume = $totalPaidBonus * 10;
+
+    //     // 4. Calculate the Difference
+    //     $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
+
+    //     if ($newVolumeToPay >= 1000) {
+    //         $bonusPercentage = 0.1; // Default 10%
+
+    //         if ($amount >= 50000) {
+    //             $bonusPercentage = 0; // Set to 0 to skip logic
+    //         }
+
+    //         // Only proceed if there is actually a bonus to pay
+    //         if ($bonusPercentage > 0) {
+    //             $pairBonus = $newVolumeToPay * $bonusPercentage;
+
+    //             DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay, $bonusPercentage) {
+    //                 // 1. Update Wallet
+    //                 DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+
+    //                 // 2. Create Transaction Entry
+    //                 DB::table('transactions')->insert([
+    //                     'user_id' => $sponsor->id,
+    //                     'type' => 'Credit',
+    //                     'amount' => $pairBonus,
+    //                     'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToPay) . ' volume (' . $bonusPercentage * 100 . '% Bonus)',
+    //                     'created_at' => now(),
+    //                 ]);
+    //             });
+    //         }
+    //     }
+    // }
+
     private function checkAndDistributePairCompletionBonus($sponsor, $amount)
-    {
-        if (!$sponsor) {
-            return;
-        }
+{
+    if (!$sponsor || !$this->isBinaryEligible($sponsor->id)) return;
 
-        // 1. Get TOTAL Volume from both sides
-        // Even if they only have 1 package, we sum the subtree in case there are many users
-        $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
-        $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
+    $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
+    $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
 
-        if (empty($leftUsers) || empty($rightUsers)) {
-            return;
-        }
-        $leftUserIds = collect($leftUsers)->pluck('id')->toArray();
-        $rightUserIds = collect($rightUsers)->pluck('id')->toArray();
+    if (empty($leftUsers) || empty($rightUsers)) return;
 
-        // 2. Sum the 'amount' from the orders table for those specific users
-        // This ensures we get ₹50,000 if that is what they actually paid.
+    $leftIds = collect($leftUsers)->pluck('id')->toArray();
+    $rightIds = collect($rightUsers)->pluck('id')->toArray();
 
-        $leftOrderCount = DB::table('orders')->whereIn('user_id', $leftUserIds)->count();
-        $leftRawSum = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount');
-        $leftTotalVolume = $leftRawSum - $leftOrderCount * 100;
-        $rightOrderCount = DB::table('orders')->whereIn('user_id', $rightUserIds)->count();
-        $rightRawSum = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount');
-        $rightTotalVolume = $rightRawSum - $rightOrderCount * 100;
-        $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
+    // Volume = Sum - (₹100 reg fee per User)
+    $leftVol = DB::table('orders')->whereIn('user_id', $leftIds)->sum('amount') - (count($leftIds) * 100);
+    $rightVol = DB::table('orders')->whereIn('user_id', $rightIds)->sum('amount') - (count($rightIds) * 100);
 
-        // $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount');
-        // $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount');
-        // 2. The Matching Math
-        // If Left Child has 50k and Right Child has 50k, Match = 50,000
-        $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
-        // dd($currentMaxMatch);
+    $currentMaxMatch = min($leftVol, $rightVol);
 
-        // 3. Subtract what was ALREADY paid to this sponsor
-        $totalPaidBonus = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
+    $totalPaidBonus = DB::table('transactions')
+        ->where('user_id', $sponsor->id)
+        ->where('remarks', 'like', 'Pair Completion Bonus%')
+        ->sum('amount');
 
-        $alreadyMatchedVolume = $totalPaidBonus * 10;
+    $alreadyMatchedVolume = $totalPaidBonus * 10; 
+    $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
 
-        // 4. Calculate the Difference
-        $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
+    if ($newVolumeToPay >= 1000 && $amount < 50000) {
+        $pairBonus = $newVolumeToPay * 0.1;
 
-        // 5. Pay the 10% Bonus
-        // if ($newVolumeToPay >= 1000) {
-        //     // dd($amount);
-        //     $bonusPercentage = 0.1;
-        //     if ($amount >= 50000) {
-        //         $bonusPercentage = 0.05;
-        //     }
-        //     // dd($bonusPercentage);
-        //     $pairBonus = $newVolumeToPay * $bonusPercentage;
-
-        //     DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay) {
-        //         DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
-
-        //         DB::table('transactions')->insert([
-        //             'user_id' => $sponsor->id,
-        //             'type' => 'Credit',
-        //             'amount' => $pairBonus,
-        //             'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToPay) . ' volume (10% Bonus)',
-        //             'created_at' => now(),
-        //         ]);
-        //     });
-        // }
-        if ($newVolumeToPay >= 1000) {
-            $bonusPercentage = 0.1; // Default 10%
-
-            if ($amount >= 50000) {
-                $bonusPercentage = 0; // Set to 0 to skip logic
-            }
-
-            // Only proceed if there is actually a bonus to pay
-            if ($bonusPercentage > 0) {
-                $pairBonus = $newVolumeToPay * $bonusPercentage;
-
-                DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay, $bonusPercentage) {
-                    // 1. Update Wallet
-                    DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
-
-                    // 2. Create Transaction Entry
-                    DB::table('transactions')->insert([
-                        'user_id' => $sponsor->id,
-                        'type' => 'Credit',
-                        'amount' => $pairBonus,
-                        'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToPay) . ' volume (' . $bonusPercentage * 100 . '% Bonus)',
-                        'created_at' => now(),
-                    ]);
-                });
-            }
-        }
+        DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+        DB::table('transactions')->insert([
+            'user_id' => $sponsor->id,
+            'type' => 'Credit',
+            'amount' => $pairBonus,
+            'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToPay) . ' volume (10% Bonus)',
+            'created_at' => now(),
+        ]);
     }
+}
 
     private function getFullSubtreeUsers($rootId, $side)
     {
@@ -549,248 +348,140 @@ class TopupController extends Controller
      * Distribute Binary MLM Commission (10% Direct + 10% Indirect)
      * + Pair Completion Bonus (10% when both legs activate)
      */
+    // private function distributeCommission($userId, $amount)
+    // {
+    //     $user = DB::table('users')->find($userId);
+    //     if (!$user) {
+    //         return;
+    //     }
+    //     if ($amount < 50000) {
+    //         $commission = $amount * 0.1; // 10% commission
+    //     } else {
+    //     }
+    //     // 1. DETERMINE COMMISSION TYPE
+    //     if ($amount < 50000) {
+    //         // DIRECT COMMISSION (Single person)
+    //         $commission = $amount * 0.1; // 10%
+    //         $beneficiaryId = $user->sponsor_id; // Direct sponsor gets the credit
+
+    //         if ($beneficiaryId) {
+    //             $this->distributeCommissionDBOpr($beneficiaryId, $commission, "10% Direct Commission from {$user->username}", $user, $amount);
+    //         }
+    //     } else {
+    //         // MULTI-LEVEL & INDIRECT COMMISSION (The "Else" Section)
+
+    //         // ✅ 1️⃣ LEVEL COMMISSION (Sponsor Chain)
+    //         if ($user->investment_count >= 1) {
+    //             $currentUserId = $user->sponsor_id;
+    //             $level = 1;
+    //             $levelPercentages = [
+    //                 1 => 0.05,
+    //                 2 => 0.01,
+    //                 3 => 0.01,
+    //                 4 => 0.0075,
+    //                 5 => 0.0075,
+    //                 6 => 0.005,
+    //                 7 => 0.0025,
+    //                 8 => 0.0025,
+    //                 9 => 0.0025,
+    //                 10 => 0.0025,
+    //             ];
+
+    //             while ($currentUserId && $level <= 10) {
+    //                 $sponsor = DB::table('users')->where('id', $currentUserId)->first();
+    //                 if (!$sponsor) {
+    //                     break;
+    //                 }
+
+    //                 $percentage = $levelPercentages[$level] ?? 0;
+    //                 if ($percentage > 0) {
+    //                     $levelCommission = $amount * $percentage;
+
+    //                     // DB Operation for Level Commission
+    //                     $remarks = "L{$level} Commission (" . $percentage * 100 . "%) from {$user->username}";
+    //                     $this->distributeCommissionDBOpr($sponsor->id, $levelCommission, $remarks, $user, $amount, $level);
+
+    //                     // Pair Bonus Check
+    //                     $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
+    //                 }
+    //                 $currentUserId = $sponsor->sponsor_id;
+    //                 $level++;
+    //             }
+    //         }
+
+    //         // ✅ 2️⃣ INDIRECT COMMISSION (Binary Chain)
+    //         $current = $user;
+    //         $idxLevel = 1;
+    //         while ($current && $idxLevel <= 10) {
+    //             $binaryNode = DB::table('binary_nodes')->where('user_id', $current->id)->first();
+    //             if (!$binaryNode || !$binaryNode->parent_id) {
+    //                 break;
+    //             }
+
+    //             $upline = DB::table('users')->find($binaryNode->parent_id);
+    //             if (!$upline) {
+    //                 break;
+    //             }
+
+    //             // Logic: 5% if amount >= 50,000
+    //             $indirectCommission = $amount * 0.05;
+
+    //             // DB Operation for Indirect Commission
+    //             $remarks = "Indirect 5% Commission from {$user->username} - Level {$idxLevel}";
+    //             $this->distributeCommissionDBOpr($upline->id, $indirectCommission, $remarks, $user, $amount);
+
+    //             $current = $upline;
+    //             $idxLevel++;
+    //         }
+    //     }
+    // }
+
     private function distributeCommission($userId, $amount)
-    {
-        $user = DB::table('users')->find($userId);
-        if (!$user) {
-            return;
+{
+    $user = DB::table('users')->find($userId);
+    if (!$user) return;
+
+    // RULE: Only triggered for packages under 50k
+    if ($amount < 50000) {
+        $beneficiaryId = $user->sponsor_id; 
+        
+        if ($beneficiaryId && $this->isBasicActive($beneficiaryId)) {
+            $commission = $amount * 0.1;
+            $this->distributeCommissionDBOpr(
+                $beneficiaryId, 
+                $commission, 
+                "10% Direct Commission from first top-up of {$user->username}", 
+                $user, 
+                $amount
+            );
         }
-        if ($amount < 50000) {
-            $commission = $amount * 0.1; // 10% commission
-        } else {
-        }
+    } 
+    // High-value package logic (Level commissions)
+    else {
+        $currentUserId = $user->sponsor_id;
+        $level = 1;
+        $levelPercentages = [1=>0.05, 2=>0.01, 3=>0.01, 4=>0.0075, 5=>0.0075, 6=>0.005, 7=>0.0025, 8=>0.0025, 9=>0.0025, 10=>0.0025];
 
-        // // ✅ 1️⃣ DIRECT COMMISSION (10%) - To immediate sponsor
-        // $sponsor = DB::table('users')->where('id', $user->placement_id)->first();
-        // if ($sponsor) {
-        //     // Ensure wallet exists
-        //     DB::table('wallets')->updateOrInsert(
-        //         ['user_id' => $sponsor->id],
-        //         ['updated_at' => now()]
-        //     );
-
-        //     // Add 10% commission to sponsor wallet
-        //     DB::table('wallets')->where('user_id', $sponsor->id)
-        //         ->increment('balance', $commission);
-
-        //     // Record transaction
-        //     DB::table('transactions')->insert([
-        //         'user_id' => $sponsor->id,
-        //         'type' => 'Credit',
-        //         'amount' => $commission,
-        //         'remarks' => "Direct 10% Commission from {$user->username} (₹{$amount})",
-        //         'created_at' => now(),
-        //     ]);
-
-        //     // ✅ 3️⃣ CHECK FOR PAIR COMPLETION BONUS
-        //     $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
-        // }
-        // ✅ DIRECT COMMISSION — ONLY ON FIRST EMI
-        // dd($user);
-
-        // if ($user->investment_count >= 1) {
-        //     $sponsor = DB::table('users')->where('id', $user->sponsor_id)->first();
-        //     // dd($sponsor);
-        //     $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
-        //     if ($sponsor) {
-        //         // $commission = $amount * 0.1;
-        //         $commission = $amount * 0.1; // 10% commission
-        //         if ($amount >= 50000) {
-        //             $commission = $amount * 0.05; // 10% commission
-        //         }
-
-        //         DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
-
-        //         DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $commission);
-
-        //         DB::table('transactions')->insert([
-        //             'user_id' => $sponsor->id,
-        //             'type' => 'Credit',
-        //             'amount' => $commission,
-        //             'remarks' => "Direct 10% Commission from {$user->username} (₹{$amount})",
-        //             'created_at' => now(),
-        //         ]);
-        //         $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
-        //     }
-        // }
-
-        // if ($user->investment_count >= 1) {
-        //     $currentUserId = $user->sponsor_id;
-        //     $level = 1;
-
-        //     // Define the percentages for as many levels as you need
-        //     $levelPercentages = [
-        //         1 => 0.05, // 5%
-        //         2 => 0.01,
-        //         3 => 0.01, // 1%
-        //         4 => 0.0075,
-        //         5 => 0.0075, // 0.75%
-        //         6 => 0.005, // 0.5%
-        //         7 => 0.0025,
-        //         8 => 0.0025,
-        //         9 => 0.0025,
-        //         10 => 0.0025, // 0.25%
-        //     ];
-
-        //     // This loop continues ONLY if there is a parent and we haven't passed level 10
-        //     while ($currentUserId && $level <= 10) {
-        //         $sponsor = DB::table('users')->where('id', $currentUserId)->first();
-
-        //         // If for some reason the database record is missing, stop
-        //         if (!$sponsor) {
-        //             break;
-        //         }
-
-        //         $percentage = $levelPercentages[$level] ?? 0;
-
-        //         if ($percentage > 0) {
-        //             $commission = $amount * $percentage;
-
-        //             DB::transaction(function () use ($sponsor, $commission, $user, $amount, $level, $percentage) {
-        //                 // Update Wallet
-        //                 DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
-        //                 DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $commission);
-
-        //                 // Insert Transaction Record
-        //                 DB::table('transactions')->insert([
-        //                     'user_id' => $sponsor->id,
-        //                     'type' => 'Credit',
-        //                     'amount' => $commission,
-        //                     'remarks' => "L{$level} Commission (" . $percentage * 100 . "%) from {$user->username} (₹" . number_format($amount) . ')',
-        //                     'created_at' => now(),
-        //                 ]);
-
-        //                 // Check Pair Bonus for this specific level's parent
-        //                 $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
-        //             });
-        //         }
-
-        //         // MOVE TO THE NEXT LEVEL
-        //         $currentUserId = $sponsor->sponsor_id; // Get the next person up
-        //         $level++; // Increment level count
-        //     }
-        // }
-
-        // // ✅ 2️⃣ INDIRECT COMMISSION (10%) - To upline chain through binary tree
-        // $current = $user;
-        // $level = 1;
-
-        // while ($current && $level <= 10) {
-        //     // Limit to 10 levels
-        //     // Get parent/upline from binary structure
-        //     $binaryNode = DB::table('binary_nodes')->where('user_id', $current->id)->first();
-        //     if (!$binaryNode || !$binaryNode->parent_id) {
-        //         break;
-        //     }
-
-        //     $upline = DB::table('users')->find($binaryNode->parent_id);
-        //     if (!$upline) {
-        //         break;
-        //     }
-
-        //     // 10% commission for indirect sales
-        //     // $indirectCommission = $amount * 0.1;
-        //     $indirectCommission = $amount * 0.1; // 10% indirectCommission
-        //     if ($amount >= 50000) {
-        //         $indirectCommission = $amount * 0.05; // 10% indirectCommission
-        //     }
-
-        //     // Ensure wallet exists
-        //     DB::table('wallets')->updateOrInsert(['user_id' => $upline->id], ['updated_at' => now()]);
-
-        //     // Add commission to upline wallet
-        //     DB::table('wallets')->where('user_id', $upline->id)->increment('balance', $indirectCommission);
-
-        //     // Record transaction
-        //     DB::table('transactions')->insert([
-        //         'user_id' => $upline->id,
-        //         'type' => 'Credit',
-        //         'amount' => $indirectCommission,
-        //         'remarks' => "Indirect 10% Commission from {$user->username} - Level {$level} (₹{$amount})",
-        //         'created_at' => now(),
-        //     ]);
-
-        //     $current = $upline;
-        //     $level++;
-        // }
-
-        // 1. DETERMINE COMMISSION TYPE
-        if ($amount < 50000) {
-            // DIRECT COMMISSION (Single person)
-            $commission = $amount * 0.1; // 10%
-            $beneficiaryId = $user->sponsor_id; // Direct sponsor gets the credit
-
-            if ($beneficiaryId) {
-                $this->distributeCommissionDBOpr($beneficiaryId, $commission, "10% Direct Commission from {$user->username}", $user, $amount);
+        while ($currentUserId && $level <= 10) {
+            if ($this->isBasicActive($currentUserId)) {
+                $percentage = $levelPercentages[$level] ?? 0;
+                $levelCommission = $amount * $percentage;
+                
+                $this->distributeCommissionDBOpr(
+                    $currentUserId, 
+                    $levelCommission, 
+                    "L{$level} First-Time Commission from {$user->username}", 
+                    $user, 
+                    $amount, 
+                    $level
+                );
             }
-        } else {
-            // MULTI-LEVEL & INDIRECT COMMISSION (The "Else" Section)
-
-            // ✅ 1️⃣ LEVEL COMMISSION (Sponsor Chain)
-            if ($user->investment_count >= 1) {
-                $currentUserId = $user->sponsor_id;
-                $level = 1;
-                $levelPercentages = [
-                    1 => 0.05,
-                    2 => 0.01,
-                    3 => 0.01,
-                    4 => 0.0075,
-                    5 => 0.0075,
-                    6 => 0.005,
-                    7 => 0.0025,
-                    8 => 0.0025,
-                    9 => 0.0025,
-                    10 => 0.0025,
-                ];
-
-                while ($currentUserId && $level <= 10) {
-                    $sponsor = DB::table('users')->where('id', $currentUserId)->first();
-                    if (!$sponsor) {
-                        break;
-                    }
-
-                    $percentage = $levelPercentages[$level] ?? 0;
-                    if ($percentage > 0) {
-                        $levelCommission = $amount * $percentage;
-
-                        // DB Operation for Level Commission
-                        $remarks = "L{$level} Commission (" . $percentage * 100 . "%) from {$user->username}";
-                        $this->distributeCommissionDBOpr($sponsor->id, $levelCommission, $remarks, $user, $amount, $level);
-
-                        // Pair Bonus Check
-                        $this->checkAndDistributePairCompletionBonus($sponsor, $amount);
-                    }
-                    $currentUserId = $sponsor->sponsor_id;
-                    $level++;
-                }
-            }
-
-            // ✅ 2️⃣ INDIRECT COMMISSION (Binary Chain)
-            $current = $user;
-            $idxLevel = 1;
-            while ($current && $idxLevel <= 10) {
-                $binaryNode = DB::table('binary_nodes')->where('user_id', $current->id)->first();
-                if (!$binaryNode || !$binaryNode->parent_id) {
-                    break;
-                }
-
-                $upline = DB::table('users')->find($binaryNode->parent_id);
-                if (!$upline) {
-                    break;
-                }
-
-                // Logic: 5% if amount >= 50,000
-                $indirectCommission = $amount * 0.05;
-
-                // DB Operation for Indirect Commission
-                $remarks = "Indirect 5% Commission from {$user->username} - Level {$idxLevel}";
-                $this->distributeCommissionDBOpr($upline->id, $indirectCommission, $remarks, $user, $amount);
-
-                $current = $upline;
-                $idxLevel++;
-            }
+            $upline = DB::table('users')->where('id', $currentUserId)->first();
+            $currentUserId = $upline ? $upline->sponsor_id : null;
+            $level++;
         }
     }
+}
     private function distributeCommissionDBOpr($targetUserId, $commissionAmount, $remarks, $fromUser, $totalAmount, $lvl = null)
     {
         DB::transaction(function () use ($targetUserId, $commissionAmount, $remarks, $fromUser, $totalAmount) {
@@ -1130,4 +821,56 @@ class TopupController extends Controller
 
         return back()->with('success', "Top-up successful! ₹{$package->amount} has been deducted from your wallet.");
     }
+
+    private function isEligibleForCommission($userId)
+    {
+        $user = DB::table('users')->find($userId);
+        if (!$user) return false;
+
+        // Rule: Parent must have at least one successful top-up (active investment)
+        if (($user->investment_count ?? 0) <= 0) {
+            return false;
+        }
+
+        // Rule: Must have at least one active child on the Left and one on the Right in Binary Tree
+        // We check placement_id to verify the physical structure of the tree
+        $hasActiveLeft = DB::table('users')
+            ->where('placement_id', $userId)
+            ->where('position', 'left')
+            ->where('investment_count', '>', 0)
+            ->exists();
+
+        $hasActiveRight = DB::table('users')
+            ->where('placement_id', $userId)
+            ->where('position', 'right')
+            ->where('investment_count', '>', 0)
+            ->exists();
+
+        return ($hasActiveLeft && $hasActiveRight);
+    }
+    // Use this for Direct Income
+private function isBasicActive($userId)
+{
+    $user = DB::table('users')->find($userId);
+    return ($user && ($user->investment_count ?? 0) > 0);
+}
+
+private function isBinaryEligible($userId)
+{
+    if (!$this->isBasicActive($userId)) return false;
+
+    $hasActiveLeft = DB::table('users')
+        ->where('placement_id', $userId)
+        ->where('position', 'left')
+        ->where('investment_count', '>', 0)
+        ->exists();
+
+    $hasActiveRight = DB::table('users')
+        ->where('placement_id', $userId)
+        ->where('position', 'right')
+        ->where('investment_count', '>', 0)
+        ->exists();
+
+    return ($hasActiveLeft && $hasActiveRight);
+}
 }
