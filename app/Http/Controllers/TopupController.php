@@ -443,23 +443,17 @@ class TopupController extends Controller
 
         $sponsorId = $user->sponsor_id;
 
-        // Check if sponsor is eligible (Active + 1 Direct Left + 1 Direct Right)
-        if (!$this->isBinaryEligible($sponsorId)) return;
-
-        // Package under 50k: 10% Direct Commission
         if ($amount < 50000) {
-            $commission = $amount * 0.1;
-            $this->executeCredit($sponsorId, $commission, "10% Direct Commission from {$user->username}");
-        }
-        // High-value package: 10-Level Distribution
-        else {
+            if ($this->isBinaryEligible($sponsorId)) {
+                $this->executeCredit($sponsorId, $amount * 0.1, "10% Direct Commission from {$user->username}");
+            }
+        } else {
             $currentSponsorId = $sponsorId;
-            $levelPercentages = [1 => 0.05, 2 => 0.01, 3 => 0.01, 4 => 0.0075, 5 => 0.0075, 6 => 0.005, 7 => 0.0025, 8 => 0.0025, 9 => 0.0025, 10 => 0.0025];
+            $levels = [1 => 0.05, 2 => 0.01, 3 => 0.01, 4 => 0.0075, 5 => 0.0075, 6 => 0.005, 7 => 0.0025, 8 => 0.0025, 9 => 0.0025, 10 => 0.0025];
 
-            for ($level = 1; $level <= 10 && $currentSponsorId; $level++) {
+            for ($i = 1; $i <= 10 && $currentSponsorId; $i++) {
                 if ($this->isBinaryEligible($currentSponsorId)) {
-                    $percentage = $levelPercentages[$level] ?? 0;
-                    $this->executeCredit($currentSponsorId, $amount * $percentage, "L{$level} Commission from {$user->username}");
+                    $this->executeCredit($currentSponsorId, $amount * $levels[$i], "L{$i} Direct Commission from {$user->username}");
                 }
                 $upline = DB::table('users')->find($currentSponsorId);
                 $currentSponsorId = $upline ? $upline->sponsor_id : null;
@@ -708,36 +702,42 @@ class TopupController extends Controller
         }
     }
 
-    private function distributeBinaryBonus($activatedUser, $pv)
+    private function distributeBinaryBonus($activatedUser, $currentAmount)
     {
         $current = $activatedUser;
+        $level = 1;
 
-        // Travel up the placement tree
-        while ($current->placement_id) {
+        // Traverse up the Placement Tree (Tree View)
+        while ($current && $current->placement_id && $level <= 10) {
             $parent = DB::table('users')->find($current->placement_id);
             if (!$parent) break;
 
-            $side = $current->position;
+            $side = $current->position; // 'left' or 'right'
 
-            // Add PV to the node regardless of eligibility (to keep volume records)
+            // 1. Update/Insert current volume into the node
             DB::table('binary_nodes')->updateOrInsert(
                 ['user_id' => $parent->id],
                 [
-                    $side . '_pv' => DB::raw($side . '_pv + ' . $pv),
+                    $side . '_pv' => DB::raw($side . '_pv + ' . $currentAmount),
                     'updated_at' => now(),
                 ]
             );
 
-            // ONLY calculate match if parent is Binary Eligible (1 Direct Left + 1 Direct Right)
+            $node = DB::table('binary_nodes')->where('user_id', $parent->id)->first();
+
+            // 2. Check Eligibility
             if ($this->isBinaryEligible($parent->id)) {
-                $node = DB::table('binary_nodes')->where('user_id', $parent->id)->first();
                 $matchedPV = min($node->left_pv, $node->right_pv);
 
                 if ($matchedPV > 0) {
-                    $bonus = $matchedPV * 0.10; // 10% Matching
-                    $this->executeCredit($parent->id, $bonus, "Binary Match Bonus");
+                    // Calculation: 10% base matching bonus
+                    $bonus = $matchedPV * 0.10;
 
-                    // Clear the matched PV
+                    // If package is high value, you could implement specific L1-L10 scaling here
+                    // Otherwise, standard 10% is applied to eligible uplines up to Level 10
+                    $this->executeCredit($parent->id, $bonus, "Binary Match Bonus (L{$level})");
+
+                    // 3. Clear Matched Volume (Pending logic)
                     DB::table('binary_nodes')->where('user_id', $parent->id)->update([
                         'left_pv' => DB::raw("left_pv - $matchedPV"),
                         'right_pv' => DB::raw("right_pv - $matchedPV"),
@@ -746,6 +746,7 @@ class TopupController extends Controller
             }
 
             $current = $parent;
+            $level++;
         }
     }
 
@@ -834,37 +835,22 @@ class TopupController extends Controller
 
     private function isBinaryEligible($userId)
     {
-        // 1. Root must be active
-        if (!$this->isBasicActive($userId)) return false;
+        $user = DB::table('users')->find($userId);
+        if (!$user || ($user->investment_count ?? 0) <= 0) return false;
 
-        // 2. Must have at least one direct referral in the LEFT subtree
         $hasDirectLeft = DB::table('users')
             ->where('sponsor_id', $userId)
             ->where('position', 'left')
             ->where('investment_count', '>', 0)
             ->exists();
 
-        // 3. Must have at least one direct referral in the RIGHT subtree
         $hasDirectRight = DB::table('users')
             ->where('sponsor_id', $userId)
             ->where('position', 'right')
             ->where('investment_count', '>', 0)
             ->exists();
-// dd($hasDirectLeft, $hasDirectRight);
-        return ($hasDirectLeft && $hasDirectRight);
-    }
-    private function executeCredit($userId, $amount, $remarks)
-    {
-        if ($amount <= 0) return;
 
-        DB::table('wallets')->where('user_id', $userId)->increment('balance', $amount);
-        DB::table('transactions')->insert([
-            'user_id' => $userId,
-            'type' => 'Credit',
-            'amount' => $amount,
-            'remarks' => $remarks,
-            'created_at' => now(),
-        ]);
+        return ($hasDirectLeft && $hasDirectRight);
     }
     private function distributeDirectCommission($referredUserId, $amount)
     {
@@ -883,5 +869,18 @@ class TopupController extends Controller
                 "Direct Commission from {$referredUser->username}"
             );
         }
+    }
+    private function executeCredit($userId, $amount, $remarks)
+    {
+        if ($amount <= 0) return;
+
+        DB::table('wallets')->where('user_id', $userId)->increment('balance', $amount);
+        DB::table('transactions')->insert([
+            'user_id' => $userId,
+            'type' => 'Credit',
+            'amount' => $amount,
+            'remarks' => $remarks,
+            'created_at' => now(),
+        ]);
     }
 }
