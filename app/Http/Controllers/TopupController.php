@@ -712,14 +712,14 @@ class TopupController extends Controller
     {
         $current = $activatedUser;
 
-        // Move up the placement tree
+        // Travel up the placement tree
         while ($current->placement_id) {
             $parent = DB::table('users')->find($current->placement_id);
             if (!$parent) break;
 
-            $side = $current->position; // 'left' or 'right'
+            $side = $current->position;
 
-            // 1. Update PV for the parent
+            // Add PV to the node regardless of eligibility (to keep volume records)
             DB::table('binary_nodes')->updateOrInsert(
                 ['user_id' => $parent->id],
                 [
@@ -728,21 +728,19 @@ class TopupController extends Controller
                 ]
             );
 
-            // 2. Check Eligibility & Matching
+            // ONLY calculate match if parent is Binary Eligible (1 Direct Left + 1 Direct Right)
             if ($this->isBinaryEligible($parent->id)) {
                 $node = DB::table('binary_nodes')->where('user_id', $parent->id)->first();
                 $matchedPV = min($node->left_pv, $node->right_pv);
 
                 if ($matchedPV > 0) {
-                    $bonus = ($matchedPV * 10) / 100; // 10% Matching Bonus
+                    $bonus = $matchedPV * 0.10; // 10% Matching
+                    $this->executeCredit($parent->id, $bonus, "Binary Match Bonus");
 
-                    $this->executeCredit($parent->id, $bonus, "Binary Matching Bonus (Matched: $matchedPV)");
-
-                    // Deduct matched volume
+                    // Clear the matched PV
                     DB::table('binary_nodes')->where('user_id', $parent->id)->update([
                         'left_pv' => DB::raw("left_pv - $matchedPV"),
                         'right_pv' => DB::raw("right_pv - $matchedPV"),
-                        'updated_at' => now(),
                     ]);
                 }
             }
@@ -836,22 +834,23 @@ class TopupController extends Controller
 
     private function isBinaryEligible($userId)
     {
+        // 1. Root must be active
         if (!$this->isBasicActive($userId)) return false;
 
-        // Check for at least one DIRECT referral in the LEFT subtree
+        // 2. Must have at least one direct referral in the LEFT subtree
         $hasDirectLeft = DB::table('users')
             ->where('sponsor_id', $userId)
-            ->where('position', 'left') // Position relative to the sponsor's root
+            ->where('position', 'left')
             ->where('investment_count', '>', 0)
             ->exists();
 
-        // Check for at least one DIRECT referral in the RIGHT subtree
+        // 3. Must have at least one direct referral in the RIGHT subtree
         $hasDirectRight = DB::table('users')
             ->where('sponsor_id', $userId)
             ->where('position', 'right')
             ->where('investment_count', '>', 0)
             ->exists();
-
+// dd($hasDirectLeft, $hasDirectRight);
         return ($hasDirectLeft && $hasDirectRight);
     }
     private function executeCredit($userId, $amount, $remarks)
@@ -866,5 +865,23 @@ class TopupController extends Controller
             'remarks' => $remarks,
             'created_at' => now(),
         ]);
+    }
+    private function distributeDirectCommission($referredUserId, $amount)
+    {
+        $referredUser = DB::table('users')->find($referredUserId);
+        $sponsorId = $referredUser->sponsor_id;
+
+        if (!$sponsorId) return;
+
+        // Check if 83 (sponsor) is eligible to receive commission
+        if ($this->isBinaryEligible($sponsorId)) {
+            $commission = $amount * 0.10; // 10%
+
+            $this->executeCredit(
+                $sponsorId,
+                $commission,
+                "Direct Commission from {$referredUser->username}"
+            );
+        }
     }
 }
