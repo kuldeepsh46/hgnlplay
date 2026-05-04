@@ -243,7 +243,57 @@ if ($currentCount == 0) {
     //     }
     // }
 
-    private function checkAndDistributePairCompletionBonus($sponsor, $amount)
+//     private function checkAndDistributePairCompletionBonus($sponsor, $amount)
+// {
+//     // 1. STRICT CAP: No pair income for packages 50k and above
+//     if (!$sponsor || $amount >= 50000) {
+//         return;
+//     }
+
+//     $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
+//     $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
+
+//     if (empty($leftUsers) || empty($rightUsers)) {
+//         return;
+//     }
+
+//     $leftUserIds = collect($leftUsers)->pluck('id')->toArray();
+//     $rightUserIds = collect($rightUsers)->pluck('id')->toArray();
+
+//     // Summing volume (Subtracting the ₹100 registration fee per order)
+//     $leftOrderCount = DB::table('orders')->whereIn('user_id', $leftUserIds)->count();
+//     $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount') - ($leftOrderCount * 100);
+    
+//     $rightOrderCount = DB::table('orders')->whereIn('user_id', $rightUserIds)->count();
+//     $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount') - ($rightOrderCount * 100);
+
+//     $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
+
+//     $totalPaidBonus = DB::table('transactions')
+//         ->where('user_id', $sponsor->id)
+//         ->where('remarks', 'like', 'Pair Completion Bonus%')
+//         ->sum('amount');
+
+//     $alreadyMatchedVolume = $totalPaidBonus * 10;
+//     $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
+
+//     if ($newVolumeToPay >= 1000) {
+//         $pairBonus = $newVolumeToPay * 0.1; // 10%
+
+//         DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay) {
+//             DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+//             DB::table('transactions')->insert([
+//                 'user_id' => $sponsor->id,
+//                 'type' => 'Credit',
+//                 'amount' => $pairBonus,
+//                 'remarks' => 'Pair Completion Bonus: Matched ₹' . number_format($newVolumeToPay) . ' volume (10% Bonus)',
+//                 'created_at' => now(),
+//             ]);
+//         });
+//     }
+// }
+
+private function checkAndDistributePairCompletionBonus($sponsor, $amount)
 {
     // 1. STRICT CAP: No pair income for packages 50k and above
     if (!$sponsor || $amount >= 50000) {
@@ -260,28 +310,52 @@ if ($currentCount == 0) {
     $leftUserIds = collect($leftUsers)->pluck('id')->toArray();
     $rightUserIds = collect($rightUsers)->pluck('id')->toArray();
 
-    // Summing volume (Subtracting the ₹100 registration fee per order)
-    $leftOrderCount = DB::table('orders')->whereIn('user_id', $leftUserIds)->count();
-    $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->sum('amount') - ($leftOrderCount * 100);
-    
-    $rightOrderCount = DB::table('orders')->whereIn('user_id', $rightUserIds)->count();
-    $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->sum('amount') - ($rightOrderCount * 100);
+    // 2. Calculate Pure Investment Volume (Excluding Reg Fees)
+    // We count unique users because each user pays the 100 registration fee only once
+    $leftUniqueInvestors = DB::table('orders')
+        ->whereIn('user_id', $leftUserIds)
+        ->where('status', 'completed')
+        ->distinct('user_id')
+        ->count();
 
+    $leftTotalVolume = DB::table('orders')
+        ->whereIn('user_id', $leftUserIds)
+        ->where('status', 'completed')
+        ->sum('amount') - ($leftUniqueInvestors * 100);
+    
+    $rightUniqueInvestors = DB::table('orders')
+        ->whereIn('user_id', $rightUserIds)
+        ->where('status', 'completed')
+        ->distinct('user_id')
+        ->count();
+
+    $rightTotalVolume = DB::table('orders')
+        ->whereIn('user_id', $rightUserIds)
+        ->where('status', 'completed')
+        ->sum('amount') - ($rightUniqueInvestors * 100);
+
+    // 3. Identify the lifetime matchable ceiling
     $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
 
+    // 4. Calculate exactly how much volume was already paid for
+    // Reverse calculation: if they got 100 bonus, they matched 1000 volume
     $totalPaidBonus = DB::table('transactions')
         ->where('user_id', $sponsor->id)
         ->where('remarks', 'like', 'Pair Completion Bonus%')
         ->sum('amount');
 
     $alreadyMatchedVolume = $totalPaidBonus * 10;
+    
+    // 5. The difference is the new volume eligible for payout
     $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
 
+    // Set a threshold (e.g., ₹1000) to trigger payout
     if ($newVolumeToPay >= 1000) {
         $pairBonus = $newVolumeToPay * 0.1; // 10%
 
         DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay) {
             DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+            
             DB::table('transactions')->insert([
                 'user_id' => $sponsor->id,
                 'type' => 'Credit',
