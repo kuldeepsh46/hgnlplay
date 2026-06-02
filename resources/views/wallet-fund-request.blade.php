@@ -429,7 +429,7 @@
                     </div>
                 </label>
 
-                <label class="gateway-card">
+                {{-- <label class="gateway-card">
                     <input type="radio" name="gateway_type" value="usdt" onchange="switchQR('usdt')">
                     <div class="card-content">
                         <div class="icon">💎</div>
@@ -439,7 +439,7 @@
                         </div>
                         <div class="check-mark">✓</div>
                     </div>
-                </label>
+                </label> --}}
             </div>
 
             <div class="flex-section">
