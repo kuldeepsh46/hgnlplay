@@ -2196,12 +2196,12 @@ padding-top: 20px;
 
     <!-- Desktop View -->
     <div class="desktop-pdf">
-    <iframe 
+    {{-- <iframe 
         src="{{ asset('assets/HGNLPAY.pdf') }}"
         width="100%"
         height="800"
         style="border:none;border-radius:10px; background-color:#fff;">
-    </iframe>
+    </iframe> --}}
 </div>
 
 <div class="mobile-pdf">
