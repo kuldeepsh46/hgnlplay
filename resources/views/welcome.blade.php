@@ -1815,7 +1815,7 @@ padding-top: 20px;
 
         </div>
     </section>
-    <!--  -->
+    {{-- <!--  -->
 <section id="teams" class="team-section">
     <div class="container">
 
@@ -1856,7 +1856,7 @@ padding-top: 20px;
 
         </div>
     </div>
-</section>
+</section> --}}
 <!--  -->
 
 
