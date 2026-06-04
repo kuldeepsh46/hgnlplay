@@ -1839,7 +1839,6 @@ padding-top: 20px;
             <!-- Member 2 -->
             <div class="team-card">
                 <div class="team-img">
-                    <img src="{{ asset('assets/images/isro.png') }}" alt="Isro Thakur">
                 </div>
                 <h4 class="team-name">ISRO THAKUR</h4>
                 <p class="team-role">CEO</p>

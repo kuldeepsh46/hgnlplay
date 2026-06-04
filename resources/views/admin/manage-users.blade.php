@@ -206,7 +206,6 @@ nav[aria-label="Pagination Navigation"] span[aria-disabled="true"] {
 
 </style>
 
-
 <div class="header">
     <h1>Manage Users</h1>
     <div class="user-info">👤 {{ Auth::user()->username ?? Auth::user()->name }}</div>
@@ -226,6 +225,7 @@ nav[aria-label="Pagination Navigation"] span[aria-disabled="true"] {
             <thead>
                 <tr>
                     <th>#</th>
+                    <th>Member Id</th>
                     <th>User Name</th>
                     <th>Email</th>
                     <th>Mobile</th>
@@ -242,6 +242,7 @@ nav[aria-label="Pagination Navigation"] span[aria-disabled="true"] {
                 @forelse($users as $index => $u)
                 <tr>
                     <td>{{ $index + 1 }}</td>
+                    <td>{{ $u->member_id }}</td>
                     <td>
                         <a href="{{ route('tree.view', ['id' => $u->id]) }}"
                             class="username-link">{{ $u->username ?? $u->name }}</a>
