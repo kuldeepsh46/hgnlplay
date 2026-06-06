@@ -17,6 +17,108 @@ class DashboardController extends Controller
         // =============================
         // 🔹 Global Admin Dashboard Data
         // =============================
+
+        // =============================
+        // 🔹 Timezone Calculation (IST bounds converted to your App's Timezone)
+        // =============================
+        // $startOfTodayIST = Carbon::now('Asia/Kolkata')->startOfDay()->setTimezone(config('app.timezone'));
+        // $endOfTodayIST = Carbon::now('Asia/Kolkata')->endOfDay()->setTimezone(config('app.timezone'));
+
+        // // =============================
+        // // 🔹 Today's Dashboard Data (IST)
+        // // =============================
+
+        // // 1. New Users Today
+        // $todayUsers = DB::table('users')
+        //     ->whereNotIn('id', [106, 107])
+        //     ->whereBetween('created_at', [$startOfTodayIST, $endOfTodayIST])
+        //     ->count();
+
+        // // 2. Total Top-ups Today (Every single order placed today)
+        // $todayTopups = DB::table('orders')
+        //     ->whereBetween('created_at', [$startOfTodayIST, $endOfTodayIST])
+        //     ->count();
+
+        // // 3. Renewals Today
+        // // (Checks for orders today where the user already has an older order in the system)
+        // $todayRenewals = DB::table('orders as o1')
+        //     ->whereBetween('o1.created_at', [$startOfTodayIST, $endOfTodayIST])
+        //     ->whereExists(function ($query) {
+        //         $query->select(DB::raw(1))->from('orders as o2')->whereColumn('o1.user_id', 'o2.user_id')->whereColumn('o2.id', '<', 'o1.id'); // Found an older order ID for this user
+        //     })
+        //     ->count();
+
+        // // 4. Withdrawals Requested Today (Any status, just created today)
+        // $todayPendingWithdraws = DB::table('withdraw_requests')
+        //     ->whereBetween('created_at', [$startOfTodayIST, $endOfTodayIST])
+        //     ->count();
+
+        // // 5. Withdrawals Paid Today
+        // // (Uses updated_at because a request made yesterday might be paid today)
+        // $todayCompletedWithdraws = DB::table('withdraw_requests')
+        //     ->where('status', 'completed')
+        //     ->whereBetween('updated_at', [$startOfTodayIST, $endOfTodayIST])
+        //     ->count();
+
+        //     $todaysData = [
+        //         'todayUsers' => $todayUsers,
+        //         'todayTopups' => $todayTopups,
+        //         'todayRenewals' => $todayRenewals,
+        //         'todayPendingWithdraws' => $todayPendingWithdraws,
+        //         'todayCompletedWithdraws' => $todayCompletedWithdraws,
+        //     ];
+
+        // 1. Force the timezone conversions into strict SQL datetime strings
+        $startOfTodayIST = \Carbon\Carbon::now('Asia/Kolkata')->startOfDay()->format('Y-m-d H:i:s');
+        $endOfTodayIST = \Carbon\Carbon::now('Asia/Kolkata')->endOfDay()->format('Y-m-d H:i:s');
+
+        // (Optional) Uncomment this to see exactly what times Laravel is looking for:
+        // dd($startOfTodayIST, $endOfTodayIST);
+
+        // =============================
+        // 🔹 Today's Dashboard Data (IST)
+        // =============================
+
+        // 1. New Users Today
+        $todayUsers = DB::table('users')
+            ->whereNotIn('id', [106, 107])
+            ->whereBetween('created_at', [$startOfTodayIST, $endOfTodayIST])
+            ->count();
+
+        // 2. Total Top-ups Today (Every single order placed today)
+        $todayTopups = DB::table('orders')
+            ->whereBetween('created_at', [$startOfTodayIST, $endOfTodayIST])
+            ->count();
+            // dd($todayTopups);
+        // dd($startOfTodayIST, $endOfTodayIST);
+
+        // 3. Renewals Today
+        $todayRenewals = DB::table('orders as o1')
+            ->whereBetween('o1.created_at', [$startOfTodayIST, $endOfTodayIST])
+            ->whereExists(function ($query) {
+                $query->select(DB::raw(1))->from('orders as o2')->whereColumn('o1.user_id', 'o2.user_id')->whereColumn('o2.id', '<', 'o1.id');
+            })
+            ->count();
+
+        // 4. Withdrawals Requested Today
+        $todayPendingWithdraws = DB::table('withdraw_requests')
+            ->whereBetween('created_at', [$startOfTodayIST, $endOfTodayIST])
+            ->count();
+
+        // 5. Withdrawals Paid Today
+        $todayCompletedWithdraws = DB::table('withdraw_requests')
+            ->where('status', 'completed')
+            ->whereBetween('updated_at', [$startOfTodayIST, $endOfTodayIST])
+            ->count();
+
+        $todaysData = [
+            'todayUsers' => $todayUsers,
+            'todayTopups' => $todayTopups,
+            'todayRenewals' => $todayRenewals,
+            'todayPendingWithdraws' => $todayPendingWithdraws,
+            'todayCompletedWithdraws' => $todayCompletedWithdraws,
+        ];
+
         $totalUsers = DB::table('users')
             ->whereNotIn('id', [106, 107])
             ->count();
@@ -78,75 +180,6 @@ class DashboardController extends Controller
         $fiftyKTotal = $packageSums['50000.00'] ?? 0;
         $oneLakhTotal = $packageSums['100000.00'] ?? 0;
 
-        // =============================
-        // 🔹 Customer-Specific Dashboard Data
-        // =============================
-        // if ($user->hasRole('customer')) {
-        //     // 1️⃣ Payout Received (Completed)
-        //     $payoutReceived = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'completed')->count();
-
-        //     // 2️⃣ Payout Pending
-        //     $payoutPending = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'pending')->count();
-
-        //     // 3️⃣ Direct Income (sum of transactions with "Direct 10% Commission…")
-        //     $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Direct 10% Commission%')->sum('amount');
-
-        //     $pairIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
-
-        //     // 4️⃣ Ledger Balance (today’s net movement)
-        //     $today = Carbon::today();
-        //     $todayCredits = DB::table('transactions')->where('user_id', $user->id)->whereDate('created_at', $today)->where('type', 'Credit')->sum('amount');
-
-        //     $todayDebits = DB::table('transactions')->where('user_id', $user->id)->whereDate('created_at', $today)->where('type', 'Debit')->sum('amount');
-
-        //     $ledgerBalance = $todayCredits - $todayDebits;
-
-        //     $todayearning = $directIncome + $pairIncome;
-
-        //     // 5️⃣ Topup Wallet (current wallet balance)
-        //     $walletBalance = DB::table('wallets')->where('user_id', $user->id)->value('balance') ?? 0;
-
-        //     // 6️⃣ Total Downline (users having this user as sponsor_id OR placement_id)
-        //     $totalDownline = DB::table('users')->where('sponsor_id', $user->id)->orWhere('placement_id', $user->id)->count();
-
-        //     $cycle = DB::table('lucky_cycles')
-        //         ->where('user_id', auth()->id())
-        //         ->first();
-
-        //     $totalVouchers = 0;
-        //     $unusedVouchers = 0;
-        //     $rewardStatus = 'Not Eligible';
-        //     $rewardText = '-';
-
-        //     if ($cycle) {
-        //         $totalVouchers = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->count();
-
-        //         $unusedVouchers = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->where('status', 'unused')->count();
-
-        //         if ($cycle->status === 'won') {
-        //             $rewardStatus = '🎉 Winner';
-        //             $rewardText = 'Congratulations! You won a reward';
-        //         } elseif ($cycle->status === 'completed') {
-        //             $rewardStatus = '🏆 Gold Reward';
-        //             $rewardText = $cycle->package_id == 4 ? 'Gold worth ₹65,000' : 'Gold worth ₹1,30,000';
-        //         } else {
-        //             $rewardStatus = '⏳ Active';
-        //             $rewardText = 'Lucky draw ongoing';
-        //         }
-        //     }
-
-        //     $voucherGroups = [];
-        //     $rewards = [];
-
-        //     if ($cycle) {
-        //         $voucherGroups = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->orderBy('month_no')->get()->groupBy('month_no');
-
-        //         $rewards = DB::table('lucky_rewards')->where('cycle_id', $cycle->id)->get();
-        //     }
-
-        //     return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'ledgerBalance', 'walletBalance', 'totalDownline', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'packageUsers'));
-        // }
-
         if ($user->hasRole('customer')) {
             // 1️⃣ Payouts
             // dd($user->id);
@@ -166,24 +199,24 @@ class DashboardController extends Controller
             // $totalDownline = DB::table('users')->where('sponsor_id', $user->id)->orWhere('placement_id', $user->id)->count();
             $allDownliners = [];
 
-        // 1. MANUALLY FIND THE TWO GATEKEEPERS
-        $leftBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first();
+            // 1. MANUALLY FIND THE TWO GATEKEEPERS
+            $leftBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first();
 
-        $rightBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first();
+            $rightBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first();
 
-        // 2. FORCE THE LEFT SIDE
-        if ($leftRoot = $leftBranchRoot) {
-            $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
-        }
+            // 2. FORCE THE LEFT SIDE
+            if ($leftRoot = $leftBranchRoot) {
+                $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
+            }
 
-        // 3. FORCE THE RIGHT SIDE
-        if ($rightRoot = $rightBranchRoot) {
-            $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
-        }
+            // 3. FORCE THE RIGHT SIDE
+            if ($rightRoot = $rightBranchRoot) {
+                $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
+            }
 
-        // 4. PREPARE THE COLLECTION
-        $teamMembers = collect($allDownliners)->reject(fn($m) => $m->id == 27)->sortBy('created_at');
-        $totalDownline = $teamMembers->count();
+            // 4. PREPARE THE COLLECTION
+            $teamMembers = collect($allDownliners)->reject(fn($m) => $m->id == 27)->sortBy('created_at');
+            $totalDownline = $teamMembers->count();
 
             // 5️⃣ SPLIT Downline (For Radio Buttons)
             // We filter by 'leg' column (1 = Left, 2 = Right)
@@ -234,26 +267,7 @@ class DashboardController extends Controller
         }
 
         // Admin dashboard view
-        return view(
-            'dashboard',
-            compact(
-                'user',
-                'totalUsers',
-                'totalWallet',
-                'pendingWithdraws',
-                'completedWithdraws',
-                'totalTopups',
-                'labels',
-                'userData',
-                'fundData',
-                'starterTotal',
-                'sevenTotal',
-                'thirteenTotal',
-                'fiftyKTotal',
-                'oneLakhTotal',
-                'packageUsers', // 👈 ADD THIS
-            ),
-        );
+        return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal', 'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData'));
     }
     private function crawlAndForceSide($node, $side, &$list)
     {
@@ -310,10 +324,22 @@ class DashboardController extends Controller
 
     public function manageUsers()
     {
+        // $users = DB::table('users as u')
+        //     ->whereNotIn('u.id', [106, 107])
+        //     ->leftJoin('wallets as w', 'w.user_id', '=', 'u.id')
+        //     ->select('u.*', DB::raw('COALESCE(w.balance,0) as wallet_balance'))
+        //     ->orderByDesc('u.id')
+        //     ->get();
         $users = DB::table('users as u')
             ->whereNotIn('u.id', [106, 107])
             ->leftJoin('wallets as w', 'w.user_id', '=', 'u.id')
-            ->select('u.*', DB::raw('COALESCE(w.balance,0) as wallet_balance'))
+            ->leftJoin('orders as o', 'o.user_id', '=', 'u.id') // Join with the orders table
+            ->select(
+                'u.*',
+                DB::raw('COALESCE(w.balance, 0) as wallet_balance'),
+                DB::raw('COALESCE(SUM(o.amount), 0) as total_invested'), // Sum the investments
+            )
+            ->groupBy('u.id', 'w.balance') // Grouping required for aggregate function SUM
             ->orderByDesc('u.id')
             ->get();
 

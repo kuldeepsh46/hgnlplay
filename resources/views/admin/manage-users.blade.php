@@ -220,6 +220,7 @@ nav[aria-label="Pagination Navigation"] span[aria-disabled="true"] {
         placeholder="Search Username, Email or Mobile..."
         style="padding:8px 12px;border-radius:6px;border:1px solid #2a3442;background:#0f1620;color:#fff;width:280px;">
 </div>
+{{-- {{dd($users)}} --}}
     <div class="table-wrap">
         <table>
             <thead>
@@ -229,6 +230,7 @@ nav[aria-label="Pagination Navigation"] span[aria-disabled="true"] {
                     <th>User Name</th>
                     <th>Email</th>
                     <th>Mobile</th>
+                    <th>Total Amount Invested</th>
                     <th>Wallet Balance</th>
                     <th>Withdraw (Completed)</th>
                     <th>Withdraw (Pending)</th>
@@ -249,15 +251,18 @@ nav[aria-label="Pagination Navigation"] span[aria-disabled="true"] {
                     </td>
                     <td>{{ $u->email }}</td>
                     <td>{{ $u->mobile ?? 'N/A' }}</td>
-                    <td>₹{{ number_format(DB::table('wallets')->where('user_id',$u->id)->value('balance') ?? 0,2) }}
+                    <td>₹{{ number_format($u->total_invested ?? 0,2) }}</td>
                     </td>
-                    
+                    <td style="color:#ffc107;">
+                        ₹{{ number_format($u->withdraw_pending ?? 0,2) }}
+                    </td>
                     <td style="color:#00ffb3;">
                         ₹{{ number_format($u->withdraw_completed ?? 0,2) }}
                     </td>
                     <td style="color:#ffc107;">
                         ₹{{ number_format($u->withdraw_pending ?? 0,2) }}
                     </td>
+                    
                     <td>
                         {{ $u->first_package }}
                     </td>

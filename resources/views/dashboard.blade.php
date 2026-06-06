@@ -2,6 +2,21 @@
 @section('title', 'Dashboard')
 @section('main')
     <style>
+        /* =========================================
+           1. YOUR ORIGINAL BASE & LAYOUT CSS
+           (Untouched to keep the rest of the page working)
+        ========================================= */
+        :root {
+            --bg: #0b0e12;
+            --card: #12181f;
+            --text: #ffffff;
+            --muted: #a0acb3;
+            --accent: #a7ff1e;
+            /* Based on your original glow */
+            --border: #1f2832;
+            --radius: 12px;
+        }
+
         body {
             margin: 0;
             font-family: "Inter", sans-serif;
@@ -11,8 +26,6 @@
             min-height: 100vh;
         }
 
-
-        /* ===== Main ===== */
         .main {
             flex: 1;
             padding: 20px;
@@ -170,15 +183,7 @@
             color: #d4dee8
         }
 
-        /* ===== Responsive ===== */
-        @media(max-width:768px) {
-
-            .main {
-                padding: 80px 16px
-            }
-
-        }
-
+        /* ===== Additional Grids & Charts ===== */
         canvas#growthChart {
             background: #0b0e12;
             border: 1px solid #1f2832;
@@ -243,14 +248,7 @@
             font-size: 14px;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .performance-grid {
-                flex-direction: column;
-            }
-        }
-
-        /* ===== Password Modal ===== */
+        /* ===== Original Password Modal ===== */
         .modal {
             display: none;
             position: fixed;
@@ -312,12 +310,7 @@
             color: #fff;
         }
 
-
-
-
-
-
-
+        /* ===== Original Lucky Modal ===== */
         .lucky-modal {
             display: none;
             position: fixed;
@@ -411,12 +404,8 @@
             background: #22c55e;
             color: #022c22;
         }
-    </style>
 
-    <style>
-        /* ===============================
-                       MODAL BACKDROP
-                    ================================= */
+        /* ===== Original Custom Modal (Backdrop/Tables) ===== */
         .custom-modal {
             display: none;
             position: fixed;
@@ -429,9 +418,6 @@
             animation: fadeIn 0.2s ease-in-out;
         }
 
-        /* ===============================
-                       MODAL CONTAINER
-                    ================================= */
         .custom-modal-content {
             width: 700px;
             max-height: 85vh;
@@ -444,9 +430,6 @@
             overflow: hidden;
         }
 
-        /* ===============================
-                       MODAL HEADER
-                    ================================= */
         .modal-header {
             padding: 18px 20px;
             background: linear-gradient(90deg, #0f1b26, #122635);
@@ -462,7 +445,6 @@
             font-size: 18px;
         }
 
-        /* Close Button */
         #closeModal {
             background: #ff3b3b;
             border: none;
@@ -480,15 +462,11 @@
             transform: scale(1.05);
         }
 
-        /* ===============================
-                       MODAL BODY
-                    ================================= */
         .modal-body {
             padding: 15px;
             overflow-y: auto;
         }
 
-        /* Scrollbar styling */
         .modal-body::-webkit-scrollbar {
             width: 6px;
         }
@@ -502,9 +480,6 @@
             border-radius: 6px;
         }
 
-        /* ===============================
-                       TABLE STYLING
-                    ================================= */
         .modal-body table {
             width: 100%;
             border-collapse: collapse;
@@ -531,15 +506,11 @@
             background: rgba(0, 255, 170, 0.05);
         }
 
-        /* Amount Column Highlight */
         .modal-body td:nth-child(3) {
             color: #00ffb3;
             font-weight: 600;
         }
 
-        /* ===============================
-                       ANIMATION
-                    ================================= */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -550,16 +521,186 @@
             }
         }
 
-        /* ===============================
-                       RESPONSIVE
-                    ================================= */
-        @media (max-width: 768px) {
+        /* General Responsive */
+        @media(max-width:768px) {
+            .main {
+                padding: 80px 16px;
+            }
+
+            .performance-grid {
+                flex-direction: column;
+            }
+
             .custom-modal-content {
                 width: 95%;
             }
         }
-    </style>
 
+
+        /* =========================================
+           2. NEW DASHBOARD STATS CSS
+           (Appended safely so it only affects the new UI)
+        ========================================= */
+        .dashboard-stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #12181f;
+            /* Matched to var(--card) */
+            border-radius: 12px;
+            /* Matched to var(--radius) */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            padding: 24px;
+            border: 1px solid #1f2832;
+            /* Matched to var(--border) */
+        }
+
+        .today-card {
+            border-top: 4px solid #a7ff1e;
+        }
+
+        /* Neon Green Accent */
+        .overall-card {
+            border-top: 4px solid #3b82f6;
+        }
+
+        /* Blue Accent */
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #1f2832;
+            padding-bottom: 12px;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header h2 i {
+            color: #a0acb3;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-pulse {
+            background-color: rgba(167, 255, 30, 0.1);
+            color: #a7ff1e;
+            border: 1px solid rgba(167, 255, 30, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        .badge-solid {
+            background-color: #1a232c;
+            color: #a0acb3;
+            border: 1px solid #1f2832;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: #10171f;
+            border: 1px solid #1b222b;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: inset 0 0 10px rgba(167, 255, 30, 0.02);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            background: #162029;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(167, 255, 30, 0.05);
+        }
+
+        .highlight-stat {
+            background: #131a23;
+            border: 1px solid #1f2832;
+        }
+
+        .stat-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: rgba(167, 255, 30, 0.1);
+            color: #a7ff1e;
+            border-radius: 50%;
+            font-size: 1.2rem;
+        }
+
+        .overall-grid .stat-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .stat-content p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #a0acb3;
+            font-weight: 500;
+        }
+
+        .stat-content h3 {
+            margin: 4px 0 0 0;
+            font-size: 1.4rem;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{{-- {{dd($todaysData)}} --}}
     @if (Auth::user()->hasRole('customer'))
         <!-- Main Content -->
         <div class="header">
@@ -591,34 +732,34 @@
             </div>
         </div> --}}
         <div class="card">
-    <h2>Referral Center</h2>
+            <h2>Referral Center</h2>
 
-    <div>
-        <label>
-            <input type="radio" name="leg" value="1" checked> Left
-        </label>
+            <div>
+                <label>
+                    <input type="radio" name="leg" value="1" checked> Left
+                </label>
 
-        <label>
-            <input type="radio" name="leg" value="2"> Right
-        </label>
-    </div>
+                <label>
+                    <input type="radio" name="leg" value="2"> Right
+                </label>
+            </div>
 
-    <div class="referral-controls">
-        <input type="text" id="refLink"
-            value="{{ url('/register') }}?refid={{ Auth::user()->id }}&leg=1&name={{ urlencode(Auth::user()->username ?? Auth::user()->name) }}"
-            readonly>
+            <div class="referral-controls">
+                <input type="text" id="refLink"
+                    value="{{ url('/register') }}?refid={{ Auth::user()->id }}&leg=1&name={{ urlencode(Auth::user()->username ?? Auth::user()->name) }}"
+                    readonly>
 
-        <button class="btn btn-copy" onclick="copyLink()">Copy Link</button>
+                <button class="btn btn-copy" onclick="copyLink()">Copy Link</button>
 
-        <button class="btn btn-whatsapp" onclick="shareWhatsApp()">Share</button>
-    </div>
+                <button class="btn btn-whatsapp" onclick="shareWhatsApp()">Share</button>
+            </div>
 
-    <div style="margin-top:15px;">
-        <strong>Total Downline: </strong>
-        <span id="downline-count">{{ $leftDownline ?? 0 }}</span>
-    </div>
+            <div style="margin-top:15px;">
+                <strong>Total Downline: </strong>
+                <span id="downline-count">{{ $leftDownline ?? 0 }}</span>
+            </div>
 
-</div>
+        </div>
         <!-- Performance -->
         <div class="card performance-card">
             <h2 class="section-title">Performance</h2>
@@ -633,9 +774,9 @@
                         <p>Payout Pending</p>
                     </div>
                     <div class="stat-box">
-        <h3>{{ $totalDownline ?? 0 }}</h3>
-        <p>Total Downline</p>
-      </div>
+                        <h3>{{ $totalDownline ?? 0 }}</h3>
+                        <p>Total Downline</p>
+                    </div>
                     {{-- <div class="stat-box">
                         <h3 id="downline-count">{{ $leftDownline ?? 0 }}</h3>
                         <p>Total Downline</p>
@@ -869,7 +1010,7 @@
         </div>
 
         <!-- Stats -->
-        <div class="card">
+        {{-- <div class="card">
             <h2>System Overview</h2>
             <div class="grid">
                 <div class="stat">
@@ -893,6 +1034,98 @@
                     <p>Total Top-ups</p>
                 </div>
             </div>
+        </div> --}}
+{{-- {{dd($todaysData)}} --}}
+        <div class="dashboard-stats-container">
+
+            <div class="stat-card today-card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-calendar-day"></i> Today's Overview</h2>
+                    {{-- <span class="badge badge-pulse">Live (00:00 - 23:59)</span> --}}
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item highlight-stat">
+                        <div class="stat-icon"><i class="fa-solid fa-user-plus"></i></div>
+                        <div class="stat-content">
+                            <p>New Users</p>
+                            <h3>{{ $todaysData['todayUsers'] ?? 0 }}</h3>
+                        </div>
+                    </div>
+                    <div class="stat-item highlight-stat">
+                        <div class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        <div class="stat-content">
+                            <p>Top-ups Today</p>
+                            <h3>{{ $todaysData['todayTopups'] ?? 0 }}</h3>
+                        </div>
+                    </div>
+                    <div class="stat-item highlight-stat">
+                        <div class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        <div class="stat-content">
+                            <p>Renewals Today</p>
+                            <h3>{{ $todaysData['todayRenewals'] ?? 0 }}</h3>
+                        </div>
+                    </div>
+                    <div class="stat-item highlight-stat">
+                        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+                        <div class="stat-content">
+                            <p>Withdrawals Req.</p>
+                            <h3>{{ $todayPendingWithdraws ?? 0 }}</h3>
+                        </div>
+                    </div>
+                    <div class="stat-item highlight-stat">
+                        <div class="stat-icon"><i class="fa-solid fa-check-double"></i></div>
+                        <div class="stat-content">
+                            <p>Withdrawals Paid</p>
+                            <h3>{{ $todaysData['todayCompletedWithdraws'] ?? 0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card overall-card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-globe"></i> Overall System</h2>
+                    <span class="badge badge-solid">All-Time</span>
+                </div>
+                <div class="stats-grid overall-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-content">
+                            <p>Total Users</p>
+                            <h3>{{ $totalUsers ?? 0 }}</h3>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
+                        <div class="stat-content">
+                            <p>Total Wallet Balance</p>
+                            <h3>₹{{ number_format($totalWallet ?? 0, 2) }}</h3>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                        <div class="stat-content">
+                            <p>Pending Withdrawals</p>
+                            <h3>{{ $pendingWithdraws ?? 0 }}</h3>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="stat-content">
+                            <p>Completed Withdrawals</p>
+                            <h3>{{ $completedWithdraws ?? 0 }}</h3>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+                        <div class="stat-content">
+                            <p>Total Top-ups</p>
+                            <h3>{{ $totalTopups ?? 0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="card">
