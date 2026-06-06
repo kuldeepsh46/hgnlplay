@@ -324,6 +324,7 @@ class DashboardController extends Controller
 
     public function manageUsers()
     {
+        dd('This method is currently not in use. Please check manageUsersOLD() for the previous implementation or refer to the new manageUsers() for the updated version with enhanced data.');
         // $users = DB::table('users as u')
         //     ->whereNotIn('u.id', [106, 107])
         //     ->leftJoin('wallets as w', 'w.user_id', '=', 'u.id')
