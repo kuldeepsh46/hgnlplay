@@ -44,22 +44,22 @@ class User extends Authenticatable
     /**
      * Automatic Member ID Generation
      */
-  protected static function boot()
-{
-    parent::boot();
+    protected static function boot()
+    {
+        parent::boot();
 
-    static::creating(function ($user) {
-        // 1. Use a transaction-safe way to get the ID
-        // We add 1 to the current max ID
-        $nextId = (DB::table('users')->max('id') ?? 0) + 1;
+        static::creating(function ($user) {
+            // 1. Use a transaction-safe way to get the ID
+            // We add 1 to the current max ID
+            $nextId = (DB::table('users')->max('id') ?? 0) + 1;
 
-        // 2. Padding (Optional but Recommended)
-        // If you want HGNL00010110 instead of HGNL10110, use str_pad
-        $formattedId = str_pad($nextId + 10000, 8, '0', STR_PAD_LEFT);
+            // 2. Padding (Optional but Recommended)
+            // If you want HGNL00010110 instead of HGNL10110, use str_pad
+            $formattedId = str_pad($nextId + 10000, 8, '0', STR_PAD_LEFT);
 
-        $user->member_id = 'HGNL' . $formattedId;
-    });
-}
+            $user->member_id = 'HGNL' . $formattedId;
+        });
+    }
 
     /* --- Relationships --- */
 
@@ -136,13 +136,14 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
     protected static function booted()
-{
-    static::creating(function ($user) {
-        $lastUser = \App\Models\User::orderBy('id', 'desc')->first();
-        $nextId = $lastUser ? ($lastUser->id + 1) : 1;
-        
-        // This ensures new users get the same format as your imported ones
-        $user->member_id = 'HGNL' . (1000 + $nextId);
-    });
-}
+    {
+        static::creating(function ($user) {
+            $lastUser = \App\Models\User::orderBy('id', 'desc')->first();
+            $nextId = $lastUser ? $lastUser->id + 1 : 1;
+
+            // This ensures new users get the same format as your imported ones
+            $user->member_id = 'HGNL' . (1000 + $nextId);
+        });
+    }
+    
 }

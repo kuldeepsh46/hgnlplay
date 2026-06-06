@@ -731,6 +731,16 @@
                 <button class="btn btn-whatsapp" onclick="shareWhatsApp()">Share</button>
             </div>
         </div> --}}
+
+{{-- {{dd($progress)}} --}}
+        <div>
+    {{-- <h3>Current Level: {{ $progress->rank_level }}</h3>
+    <p>Tier 1 Progress: {{ $progress->tier_1_count }} / 3</p>
+    <p>Tier 2 Progress: {{ $progress->tier_2_count }} / 9</p>
+    <p>Tier 3 Progress: {{ $progress->tier_3_count }} / 27</p> --}}
+</div>
+
+
         <div class="card">
             <h2>Referral Center</h2>
 
@@ -1035,7 +1045,13 @@
                 </div>
             </div>
         </div> --}}
-{{-- {{dd($todaysData)}} --}}
+{{-- {{dd($progress)}}
+<div>
+    <h3>Current Level: {{ $progress->rank_level }}</h3>
+    <p>Tier 1 Progress: {{ $progress->tier_1_count }} / 3</p>
+    <p>Tier 2 Progress: {{ $progress->tier_2_count }} / 9</p>
+    <p>Tier 3 Progress: {{ $progress->tier_3_count }} / 27</p>
+</div> --}}
         <div class="dashboard-stats-container">
 
             <div class="stat-card today-card">

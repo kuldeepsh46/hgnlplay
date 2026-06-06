@@ -13,7 +13,6 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-
         // =============================
         // 🔹 Global Admin Dashboard Data
         // =============================
@@ -89,7 +88,7 @@ class DashboardController extends Controller
         $todayTopups = DB::table('orders')
             ->whereBetween('created_at', [$startOfTodayIST, $endOfTodayIST])
             ->count();
-            // dd($todayTopups);
+        // dd($todayTopups);
         // dd($startOfTodayIST, $endOfTodayIST);
 
         // 3. Renewals Today
@@ -183,6 +182,8 @@ class DashboardController extends Controller
         if ($user->hasRole('customer')) {
             // 1️⃣ Payouts
             // dd($user->id);
+            $progress = \App\Models\UserMatrixProgress::where('user_id', $user->id)->first();
+            // dd($progress);
             $payoutReceived = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'completed')->count();
             $payoutPending = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'pending')->count();
 
@@ -263,7 +264,7 @@ class DashboardController extends Controller
                 $rewards = DB::table('lucky_rewards')->where('cycle_id', $cycle->id)->get();
             }
 
-            return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'walletBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning'));
+            return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'walletBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning', 'progress'));
         }
 
         // Admin dashboard view
@@ -322,70 +323,124 @@ class DashboardController extends Controller
         return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData'));
     }
 
-    public function manageUsers()
-    {
-        // $users = DB::table('users as u')
-        //     ->whereNotIn('u.id', [106, 107])
-        //     ->leftJoin('wallets as w', 'w.user_id', '=', 'u.id')
-        //     ->select('u.*', DB::raw('COALESCE(w.balance,0) as wallet_balance'))
-        //     ->orderByDesc('u.id')
-        //     ->get();
-        $users = DB::table('users as u')
-    ->select('u.*')
-    
-    // 1. Get Wallet Balance
-    ->addSelect(['wallet_balance' => DB::table('wallets as w')
-        ->selectRaw('COALESCE(w.balance, 0)')
-        ->whereColumn('w.user_id', 'u.id')
-        ->limit(1)
-    ])
-    
-    // 2. Get Total Invested (Replaces the broken LEFT JOIN & GROUP BY)
-    ->addSelect(['total_invested' => DB::table('orders as o')
-        ->selectRaw('COALESCE(SUM(o.amount), 0)')
-        ->whereColumn('o.user_id', 'u.id')
-    ])
-    
-    // 3. Get Total Completed Withdraws (Moved out of the foreach loop)
-    ->addSelect(['withdraw_completed' => DB::table('withdraw_requests as wr')
-        ->selectRaw('COALESCE(SUM(wr.net_amount), 0)')
-        ->whereColumn('wr.user_id', 'u.id')
-        ->where('wr.status', 'completed')
-    ])
-    
-    // 4. Get Total Pending Withdraws (Moved out of the foreach loop)
-    ->addSelect(['withdraw_pending' => DB::table('withdraw_requests as wr')
-        ->selectRaw('COALESCE(SUM(wr.net_amount), 0)')
-        ->whereColumn('wr.user_id', 'u.id')
-        ->where('wr.status', 'pending')
-    ])
-    
-    ->orderByDesc('u.id')
-    ->get();
+    // public function manageUsers()
+    // {
+    //     // $users = DB::table('users as u')
+    //     //     ->whereNotIn('u.id', [106, 107])
+    //     //     ->leftJoin('wallets as w', 'w.user_id', '=', 'u.id')
+    //     //     ->select('u.*', DB::raw('COALESCE(w.balance,0) as wallet_balance'))
+    //     //     ->orderByDesc('u.id')
+    //     //     ->get();
+    //     $users = DB::table('users as u')
+    //         ->select('u.*')
 
-// Now handle the First Purchased Package with a much lighter loop
-foreach ($users as $user) {
-    // We can join packages directly to orders here to save an extra query
-    $firstOrder = DB::table('orders as o')
-        ->join('packages as p', 'o.package_id', '=', 'p.id')
-        ->where('o.user_id', $user->id)
-        ->where('o.status', 'completed')
-        ->select('p.name as package_name', 'o.amount')
-        ->orderBy('o.created_at', 'asc')
-        ->first();
+    //         // 1. Get Wallet Balance
+    //         ->addSelect(['wallet_balance' => DB::table('wallets as w')->selectRaw('COALESCE(w.balance, 0)')->whereColumn('w.user_id', 'u.id')->limit(1)])
 
-    if ($firstOrder) {
-        $user->first_package = $firstOrder->package_name;
-        $user->price         = $firstOrder->amount;
-    } else {
-        $user->first_package = 'N/A';
-        $user->price         = 'N/A';
+    //         // 2. Get Total Invested (Replaces the broken LEFT JOIN & GROUP BY)
+    //         ->addSelect(['total_invested' => DB::table('orders as o')->selectRaw('COALESCE(SUM(o.amount), 0)')->whereColumn('o.user_id', 'u.id')])
+
+    //         // 3. Get Total Completed Withdraws (Moved out of the foreach loop)
+    //         ->addSelect(['withdraw_completed' => DB::table('withdraw_requests as wr')->selectRaw('COALESCE(SUM(wr.net_amount), 0)')->whereColumn('wr.user_id', 'u.id')->where('wr.status', 'completed')])
+
+    //         // 4. Get Total Pending Withdraws (Moved out of the foreach loop)
+    //         ->addSelect(['withdraw_pending' => DB::table('withdraw_requests as wr')->selectRaw('COALESCE(SUM(wr.net_amount), 0)')->whereColumn('wr.user_id', 'u.id')->where('wr.status', 'pending')])
+
+    //         ->orderByDesc('u.id')
+    //         ->get();
+
+    //     // Now handle the First Purchased Package with a much lighter loop
+    //     foreach ($users as $user) {
+    //         // We can join packages directly to orders here to save an extra query
+    //         $firstOrder = DB::table('orders as o')->join('packages as p', 'o.package_id', '=', 'p.id')->where('o.user_id', $user->id)->where('o.status', 'completed')->select('p.name as package_name', 'o.amount')->orderBy('o.created_at', 'asc')->first();
+
+    //         if ($firstOrder) {
+    //             $user->first_package = $firstOrder->package_name;
+    //             $user->price = $firstOrder->amount;
+    //         } else {
+    //             $user->first_package = 'N/A';
+    //             $user->price = 'N/A';
+    //         }
+    //     }
+
+    //     return view('admin.manage-users', compact('users'));
+    // }
+public function manageUsers()
+{
+    $users = DB::table('users as u')
+        ->select('u.*')
+
+        // Wallet balance
+        ->addSelect([
+            'wallet_balance' => DB::table('wallets as w')
+                ->selectRaw('COALESCE(w.balance, 0)')
+                ->whereColumn('w.user_id', 'u.id')
+                ->limit(1)
+        ])
+
+        // Total invested
+        ->addSelect([
+            'total_invested' => DB::table('orders as o')
+                ->selectRaw('COALESCE(SUM(o.amount), 0)')
+                ->whereColumn('o.user_id', 'u.id')
+        ])
+
+        // Withdraw completed
+        ->addSelect([
+            'withdraw_completed' => DB::table('withdraw_requests as wr')
+                ->selectRaw('COALESCE(SUM(wr.net_amount), 0)')
+                ->whereColumn('wr.user_id', 'u.id')
+                ->where('wr.status', 'completed')
+        ])
+
+        // Withdraw pending
+        ->addSelect([
+            'withdraw_pending' => DB::table('withdraw_requests as wr')
+                ->selectRaw('COALESCE(SUM(wr.net_amount), 0)')
+                ->whereColumn('wr.user_id', 'u.id')
+                ->where('wr.status', 'pending')
+        ])
+
+        // Activation date (first completed order)
+        ->addSelect([
+            'activation_date' => DB::table('orders as o')
+                ->selectRaw('MIN(o.created_at)')
+                ->whereColumn('o.user_id', 'u.id')
+                ->where('o.status', 'completed')
+        ])
+
+        // EMI paid count
+        ->addSelect([
+            'total_emis_paid' => DB::table('orders as o')
+                ->selectRaw('COUNT(*)')
+                ->whereColumn('o.user_id', 'u.id')
+                ->where('o.status', 'completed')
+        ])
+
+        ->orderByDesc('u.id')
+        ->get();
+
+    foreach ($users as $user) {
+
+        $firstOrder = DB::table('orders as o')
+            ->join('packages as p', 'o.package_id', '=', 'p.id')
+            ->where('o.user_id', $user->id)
+            ->where('o.status', 'completed')
+            ->select('p.name as package_name', 'o.amount')
+            ->orderBy('o.created_at', 'asc')
+            ->first();
+
+        if ($firstOrder) {
+            $user->first_package = $firstOrder->package_name;
+            $user->price = $firstOrder->amount;
+        } else {
+            $user->first_package = 'N/A';
+            $user->price = 'N/A';
+        }
     }
+
+    return view('admin.manage-users', compact('users'));
 }
-
-return view('admin.manage-users', compact('users'));
-    }
-
     public function manageUsersOLD()
     {
         $users = DB::table('users')

@@ -348,14 +348,34 @@ class TreeController extends Controller
         if ($downlineIds->isEmpty()) {
             $teamMembers = collect([]);
         } else {
-            $teamMembers = \App\Models\User::query()
-                ->select('users.*')
-                // Add the subquery for the first order date
-                ->addSelect(['activation_date' => \DB::table('orders')->selectRaw('MIN(created_at)')->whereColumn('user_id', 'users.id')->where('status', 'completed')->limit(1)])
-                ->whereIn('id', $downlineIds)
-                ->get()
-                ->sortBy('created_at');
+            // $teamMembers = \App\Models\User::query()
+            //     ->select('users.*')
+            //     // Add the subquery for the first order date
+            //     ->addSelect(['activation_date' => \DB::table('orders')->selectRaw('MIN(created_at)')->whereColumn('user_id', 'users.id')->where('status', 'completed')->limit(1)])
+            //     ->whereIn('id', $downlineIds)
+            //     ->get()
+            //     ->sortBy('created_at');
                 // dd($teamMembers);
+
+               $teamMembers = \App\Models\User::query()
+            ->select('users.*')
+            ->addSelect([
+                // First completed order date (Activation Date)
+                'activation_date' => \DB::table('orders')
+                    ->selectRaw('MIN(created_at)')
+                    ->whereColumn('user_id', 'users.id')
+                    ->where('status', 'completed')
+                    ->limit(1),
+
+                // Total completed orders (EMIs paid)
+                'total_emis_paid' => \DB::table('orders')
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('user_id', 'users.id')
+                    ->where('status', 'completed')
+            ])
+            ->whereIn('id', $downlineIds)
+            ->orderBy('created_at')
+            ->get();
         }
 
         return view('team.list', compact('user', 'teamMembers'));

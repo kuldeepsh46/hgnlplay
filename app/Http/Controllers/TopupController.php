@@ -139,7 +139,7 @@ class TopupController extends Controller
             //     }
             // }
 
-            // ✅ 8. Trigger pair bonus check for ALL uplines 
+            // ✅ 8. Trigger pair bonus check for ALL uplines
             // (ONLY for standard packages < 50,000)
             if ($package->amount < 50000) {
                 $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
@@ -147,7 +147,9 @@ class TopupController extends Controller
                     if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
                         $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount);
                     }
-                    if (empty($sponsor->placement_id)) break;
+                    if (empty($sponsor->placement_id)) {
+                        break;
+                    }
                     $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
                 }
             }
@@ -170,6 +172,8 @@ class TopupController extends Controller
                 4, 5 => "Congratulations! You have successfully paid ₹{$finalAmount} for Member {$memberId}. Vouchers have been issued.",
                 default => "Top-up successful! ₹{$finalAmount} deducted from your wallet for Member {$memberId}.",
             };
+            $matrixService = new \App\Services\MatrixService();
+            $matrixService->processCommission($currentUser);
 
             return back()->with('success', $successMessage);
         } catch (\Exception $e) {
@@ -312,36 +316,19 @@ class TopupController extends Controller
 
         // 2. Calculate Pure Investment Volume (Excluding Reg Fees)
         // We count unique users because each user pays the 100 registration fee only once
-        $leftUniqueInvestors = DB::table('orders')
-            ->whereIn('user_id', $leftUserIds)
-            ->where('status', 'completed')
-            ->distinct('user_id')
-            ->count();
+        $leftUniqueInvestors = DB::table('orders')->whereIn('user_id', $leftUserIds)->where('status', 'completed')->distinct('user_id')->count();
 
-        $leftTotalVolume = DB::table('orders')
-            ->whereIn('user_id', $leftUserIds)
-            ->where('status', 'completed')
-            ->sum('amount') - ($leftUniqueInvestors * 100);
+        $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->where('status', 'completed')->sum('amount') - $leftUniqueInvestors * 100;
 
-        $rightUniqueInvestors = DB::table('orders')
-            ->whereIn('user_id', $rightUserIds)
-            ->where('status', 'completed')
-            ->distinct('user_id')
-            ->count();
-        $rightTotalVolume = DB::table('orders')
-            ->whereIn('user_id', $rightUserIds)
-            ->where('status', 'completed')
-            ->sum('amount') - ($rightUniqueInvestors * 100);
+        $rightUniqueInvestors = DB::table('orders')->whereIn('user_id', $rightUserIds)->where('status', 'completed')->distinct('user_id')->count();
+        $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->where('status', 'completed')->sum('amount') - $rightUniqueInvestors * 100;
 
         // 3. Identify the lifetime matchable ceiling
         $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
 
         // 4. Calculate exactly how much volume was already paid for
         // Reverse calculation: if they got 100 bonus, they matched 1000 volume
-        $totalPaidBonus = DB::table('transactions')
-            ->where('user_id', $sponsor->id)
-            ->where('remarks', 'like', 'Pair Completion Bonus%')
-            ->sum('amount');
+        $totalPaidBonus = DB::table('transactions')->where('user_id', $sponsor->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
 
         $alreadyMatchedVolume = $totalPaidBonus * 10;
 
@@ -553,7 +540,9 @@ class TopupController extends Controller
     private function distributeCommission($userId, $amount)
     {
         $user = DB::table('users')->find($userId);
-        if (!$user) return;
+        if (!$user) {
+            return;
+        }
 
         if ($amount < 50000) {
             // --- DIRECT COMMISSION (10%) ---
@@ -576,12 +565,14 @@ class TopupController extends Controller
 
             while ($currentUserId && $level <= 10) {
                 $sponsor = DB::table('users')->where('id', $currentUserId)->first();
-                if (!$sponsor) break;
+                if (!$sponsor) {
+                    break;
+                }
 
                 $percentage = $levelPercentages[$level] ?? 0;
                 if ($percentage > 0) {
                     $levelCommission = $amount * $percentage;
-                    $remarks = "L{$level} Commission (" . ($percentage * 100) . "%) from {$user->username}";
+                    $remarks = "L{$level} Commission (" . $percentage * 100 . "%) from {$user->username}";
                     $this->distributeCommissionDBOpr($sponsor->id, $levelCommission, $remarks, $user, $amount, $level);
                     // Note: Pair bonus call removed from here to prevent double-logic
                 }
@@ -594,10 +585,14 @@ class TopupController extends Controller
             $idxLevel = 1;
             while ($current && $idxLevel <= 10) {
                 $binaryNode = DB::table('binary_nodes')->where('user_id', $current->id)->first();
-                if (!$binaryNode || !$binaryNode->parent_id) break;
+                if (!$binaryNode || !$binaryNode->parent_id) {
+                    break;
+                }
 
                 $upline = DB::table('users')->find($binaryNode->parent_id);
-                if (!$upline) break;
+                if (!$upline) {
+                    break;
+                }
 
                 $indirectCommission = $amount * 0.05;
                 $remarks = "Indirect 5% Commission from {$user->username} - Level {$idxLevel}";
