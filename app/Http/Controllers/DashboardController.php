@@ -331,43 +331,59 @@ class DashboardController extends Controller
         //     ->orderByDesc('u.id')
         //     ->get();
         $users = DB::table('users as u')
-            ->whereNotIn('u.id', [106, 107])
-            ->leftJoin('wallets as w', 'w.user_id', '=', 'u.id')
-            ->leftJoin('orders as o', 'o.user_id', '=', 'u.id') // Join with the orders table
-            ->select(
-                'u.*',
-                DB::raw('COALESCE(w.balance, 0) as wallet_balance'),
-                DB::raw('COALESCE(SUM(o.amount), 0) as total_invested'), // Sum the investments
-            )
-            ->groupBy('u.id', 'w.balance') // Grouping required for aggregate function SUM
-            ->orderByDesc('u.id')
-            ->get();
+    ->select('u.*')
+    
+    // 1. Get Wallet Balance
+    ->addSelect(['wallet_balance' => DB::table('wallets as w')
+        ->selectRaw('COALESCE(w.balance, 0)')
+        ->whereColumn('w.user_id', 'u.id')
+        ->limit(1)
+    ])
+    
+    // 2. Get Total Invested (Replaces the broken LEFT JOIN & GROUP BY)
+    ->addSelect(['total_invested' => DB::table('orders as o')
+        ->selectRaw('COALESCE(SUM(o.amount), 0)')
+        ->whereColumn('o.user_id', 'u.id')
+    ])
+    
+    // 3. Get Total Completed Withdraws (Moved out of the foreach loop)
+    ->addSelect(['withdraw_completed' => DB::table('withdraw_requests as wr')
+        ->selectRaw('COALESCE(SUM(wr.net_amount), 0)')
+        ->whereColumn('wr.user_id', 'u.id')
+        ->where('wr.status', 'completed')
+    ])
+    
+    // 4. Get Total Pending Withdraws (Moved out of the foreach loop)
+    ->addSelect(['withdraw_pending' => DB::table('withdraw_requests as wr')
+        ->selectRaw('COALESCE(SUM(wr.net_amount), 0)')
+        ->whereColumn('wr.user_id', 'u.id')
+        ->where('wr.status', 'pending')
+    ])
+    
+    ->orderByDesc('u.id')
+    ->get();
 
-        // Add extra data for each user
-        foreach ($users as $user) {
-            // ✅ Total Completed Withdraw
-            $user->withdraw_completed = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'completed')->sum('net_amount');
+// Now handle the First Purchased Package with a much lighter loop
+foreach ($users as $user) {
+    // We can join packages directly to orders here to save an extra query
+    $firstOrder = DB::table('orders as o')
+        ->join('packages as p', 'o.package_id', '=', 'p.id')
+        ->where('o.user_id', $user->id)
+        ->where('o.status', 'completed')
+        ->select('p.name as package_name', 'o.amount')
+        ->orderBy('o.created_at', 'asc')
+        ->first();
 
-            // ✅ Total Pending Withdraw
-            $user->withdraw_pending = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'pending')->sum('net_amount');
+    if ($firstOrder) {
+        $user->first_package = $firstOrder->package_name;
+        $user->price         = $firstOrder->amount;
+    } else {
+        $user->first_package = 'N/A';
+        $user->price         = 'N/A';
+    }
+}
 
-            // ✅ First Purchased Package
-            $firstOrder = DB::table('orders')->where('user_id', $user->id)->where('status', 'completed')->orderBy('created_at', 'asc')->first();
-
-            if ($firstOrder) {
-                $package = DB::table('packages')->where('id', $firstOrder->package_id)->value('name');
-
-                $price = $firstOrder->amount;
-
-                $user->first_package = $package ?? 'N/A';
-                $user->price = $price ?? 'N/A';
-            } else {
-                $user->first_package = 'N/A';
-                $user->price = 'N/A';
-            }
-        }
-dd($users);
-        return view('admin.manage-users', compact('users'));
+return view('admin.manage-users', compact('users'));
     }
 
     public function manageUsersOLD()
