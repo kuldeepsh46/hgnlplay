@@ -300,28 +300,63 @@ class TreeController extends Controller
 
     //     return view('team.list', compact('user', 'teamMembers'));
     // }
+    // public function list()
+    // {
+    //     $user = \Illuminate\Support\Facades\Auth::user();
+    //     $allDownliners = [];
+
+    //     // 1. MANUALLY FIND THE TWO GATEKEEPERS
+    //     $leftBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first();
+
+    //     $rightBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first();
+
+    //     // 2. FORCE THE LEFT SIDE
+    //     if ($leftRoot = $leftBranchRoot) {
+    //         $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
+    //     }
+
+    //     // 3. FORCE THE RIGHT SIDE
+    //     if ($rightRoot = $rightBranchRoot) {
+    //         $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
+    //     }
+
+    //     // 4. PREPARE THE COLLECTION
+    //     $teamMembers = collect($allDownliners)->reject(fn($m) => $m->id == 27)->sortBy('created_at');
+
+    //     return view('team.list', compact('user', 'teamMembers'));
+    // }
+
     public function list()
     {
         $user = \Illuminate\Support\Facades\Auth::user();
         $allDownliners = [];
 
-        // 1. MANUALLY FIND THE TWO GATEKEEPERS
+        // 1. GATHER ALL DOWNLINE USERS (Using your existing crawling logic)
         $leftBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first();
-
         $rightBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first();
 
-        // 2. FORCE THE LEFT SIDE
         if ($leftRoot = $leftBranchRoot) {
             $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
         }
-
-        // 3. FORCE THE RIGHT SIDE
         if ($rightRoot = $rightBranchRoot) {
             $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
         }
 
-        // 4. PREPARE THE COLLECTION
-        $teamMembers = collect($allDownliners)->reject(fn($m) => $m->id == 27)->sortBy('created_at');
+        // 2. EXTRACT IDS AND FETCH DATA WITH ACTIVATION DATE IN ONE QUERY
+        $downlineIds = collect($allDownliners)->pluck('id')->filter(fn($id) => $id != 27);
+
+        if ($downlineIds->isEmpty()) {
+            $teamMembers = collect([]);
+        } else {
+            $teamMembers = \App\Models\User::query()
+                ->select('users.*')
+                // Add the subquery for the first order date
+                ->addSelect(['activation_date' => \DB::table('orders')->selectRaw('MIN(created_at)')->whereColumn('user_id', 'users.id')->where('status', 'completed')->limit(1)])
+                ->whereIn('id', $downlineIds)
+                ->get()
+                ->sortBy('created_at');
+                // dd($teamMembers);
+        }
 
         return view('team.list', compact('user', 'teamMembers'));
     }
@@ -456,51 +491,47 @@ class TreeController extends Controller
     //     return view('team.total-downline', compact('users'));
     // }
     public function totalDownline()
-{
-    $user = Auth::user();
-    $allDownliners = [];
+    {
+        $user = Auth::user();
+        $allDownliners = [];
 
-    // 1. Identify the roots of YOUR two main branches
-    $leftBranchRoot = User::where('placement_id', $user->id)
-                        ->where('position', 'left')
-                        ->first();
+        // 1. Identify the roots of YOUR two main branches
+        $leftBranchRoot = User::where('placement_id', $user->id)->where('position', 'left')->first();
 
-    $rightBranchRoot = User::where('placement_id', $user->id)
-                         ->where('position', 'right')
-                         ->first();
+        $rightBranchRoot = User::where('placement_id', $user->id)->where('position', 'right')->first();
 
-    // 2. Explore the Left side (Force 'left' tag)
-    if ($leftBranchRoot) {
-        $this->crawlAndTag($leftBranchRoot, 'left', $allDownliners);
+        // 2. Explore the Left side (Force 'left' tag)
+        if ($leftBranchRoot) {
+            $this->crawlAndTag($leftBranchRoot, 'left', $allDownliners);
+        }
+
+        // 3. Explore the Right side (Force 'right' tag)
+        if ($rightBranchRoot) {
+            $this->crawlAndTag($rightBranchRoot, 'right', $allDownliners);
+        }
+
+        // 4. Convert to collection for the view
+        $users = collect($allDownliners);
+
+        return view('team.total-downline', compact('users'));
     }
 
-    // 3. Explore the Right side (Force 'right' tag)
-    if ($rightBranchRoot) {
-        $this->crawlAndTag($rightBranchRoot, 'right', $allDownliners);
+    /**
+     * Recursive helper to assign the branch side relative to YOU
+     */
+    private function crawlAndTag($node, $side, &$list)
+    {
+        // We set a dynamic property 'team_side' so the blade
+        // knows which branch they are in relative to YOU.
+        $node->team_side = $side;
+        $list[] = $node;
+
+        $children = User::where('placement_id', $node->id)->get();
+
+        foreach ($children as $child) {
+            $this->crawlAndTag($child, $side, $list);
+        }
     }
-
-    // 4. Convert to collection for the view
-    $users = collect($allDownliners);
-
-    return view('team.total-downline', compact('users'));
-}
-
-/**
- * Recursive helper to assign the branch side relative to YOU
- */
-private function crawlAndTag($node, $side, &$list)
-{
-    // We set a dynamic property 'team_side' so the blade 
-    // knows which branch they are in relative to YOU.
-    $node->team_side = $side; 
-    $list[] = $node;
-
-    $children = User::where('placement_id', $node->id)->get();
-
-    foreach ($children as $child) {
-        $this->crawlAndTag($child, $side, $list);
-    }
-}
 
     private function collectDownline($userId, &$downlineIds)
     {
