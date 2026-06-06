@@ -151,6 +151,7 @@
                 <tr>
                     <th>Member ID</th>
                     <th>Name</th>
+                    <th>Mobile</th>
                     <th>Sponsor</th>
                     <th>Joining Date</th>
                     <th>Activation Date</th>
@@ -168,6 +169,7 @@
                         {{-- {{dd($member)}} --}}
                         <td>{{ $member->member_id }}</td>
                         <td>{{ $member->name }}</td>
+                        <td>{{ $member->mobile ?? 'N/A' }}</td>
                         <td>{{ $member->sponsor_name ?? 'N/A' }}</td>
                         <td>{{ $member->created_at->format('d/m/Y') }}</td>
                         {{-- <td>{{ $member->created_at->format('d/m/Y') }}</td> --}}
