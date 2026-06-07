@@ -261,8 +261,17 @@
                 <select name="package_id" id="packageSelect" required>
                     <option value="">-- Select Package --</option>
                     @foreach ($packages as $p)
-                        <option value="{{ $p->id }}" data-amount="{{ $p->amount }}">{{ $p->name }} —
-                            ₹{{ $p->amount }}</option>
+                        {{-- <option value="{{ $p->id }}" data-amount="{{ $p->amount }}">{{ $p->name }} —
+                            ₹{{ $p->amount }}</option> --}}
+                        <option value="{{ $p->id }}" data-amount="{{ $p->actual_amount }}">
+
+                            {{ $p->name }} —
+                            ₹{{ $p->actual_amount }}
+
+                            @if ($p->discounted_amount)
+                                (First Buy: ₹{{ $p->discounted_amount }})
+                            @endif
+                        </option>
                     @endforeach
                 </select>
                 {{-- REMOVED hidden final_amount to prevent validation errors --}}
@@ -392,7 +401,6 @@
         // const investmentCount = {{ (int) $user->investment_count }};
         // console.log(investmentCount)
         // const registrationFee = investmentCount === 0 ? 100 : 0;
-        
     </script>
 
 
@@ -404,50 +412,50 @@
 
 
             let investmentCount = {{ (int) $user->investment_count }};
-        const packageSelect = document.getElementById('packageSelect');
-        const priceBreakdown = document.getElementById('priceBreakdown');
-        const memberIdInput = document.getElementById('member_id_input');
+            const packageSelect = document.getElementById('packageSelect');
+            const priceBreakdown = document.getElementById('priceBreakdown');
+            const memberIdInput = document.getElementById('member_id_input');
 
-        function updatePriceDisplay(investmentCount) {
-            // console.log("coo")
-            const registrationFee = investmentCount === 0 ? 100 : 0;
-            const selectedOption = packageSelect.options[packageSelect.selectedIndex];
+            function updatePriceDisplay(investmentCount) {
+                // console.log("coo")
+                const registrationFee = investmentCount === 0 ? 100 : 0;
+                const selectedOption = packageSelect.options[packageSelect.selectedIndex];
 
-            if (!selectedOption || !selectedOption.value) {
-                priceBreakdown.innerHTML = '';
-                return;
+                if (!selectedOption || !selectedOption.value) {
+                    priceBreakdown.innerHTML = '';
+                    return;
+                }
+
+                const baseAmount = parseFloat(selectedOption.dataset.amount) || 0;
+                const totalAmount = baseAmount + registrationFee;
+
+                let breakdown = `Payable Amount: ₹${totalAmount.toLocaleString('en-IN')}`;
+                if (registrationFee > 0) {
+                    breakdown +=
+                        ` <span style="color:var(--muted); font-weight:400; font-size:12px;">(Includes ₹100 Reg. Fee)</span>`;
+                }
+                priceBreakdown.innerHTML = breakdown;
             }
 
-            const baseAmount = parseFloat(selectedOption.dataset.amount) || 0;
-            const totalAmount = baseAmount + registrationFee;
+            packageSelect.addEventListener('change', updatePriceDisplay(investmentCount));
+            memberIdInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+            document.addEventListener('DOMContentLoaded', updatePriceDisplay(investmentCount));
 
-            let breakdown = `Payable Amount: ₹${totalAmount.toLocaleString('en-IN')}`;
-            if (registrationFee > 0) {
-                breakdown +=
-                    ` <span style="color:var(--muted); font-weight:400; font-size:12px;">(Includes ₹100 Reg. Fee)</span>`;
+            // Modal Logic
+            const passwordModal = document.getElementById("passwordModal");
+
+            function openModal() {
+                passwordModal.style.display = "flex";
             }
-            priceBreakdown.innerHTML = breakdown;
-        }
 
-        packageSelect.addEventListener('change', updatePriceDisplay(investmentCount));
-        memberIdInput.addEventListener('input', function() {
-            this.value = this.value.toUpperCase();
-        });
-        document.addEventListener('DOMContentLoaded', updatePriceDisplay(investmentCount));
-
-        // Modal Logic
-        const passwordModal = document.getElementById("passwordModal");
-
-        function openModal() {
-            passwordModal.style.display = "flex";
-        }
-
-        function closeModal() {
-            passwordModal.style.display = "none";
-        }
-        window.onclick = function(e) {
-            if (e.target === passwordModal) closeModal();
-        };
+            function closeModal() {
+                passwordModal.style.display = "none";
+            }
+            window.onclick = function(e) {
+                if (e.target === passwordModal) closeModal();
+            };
 
 
 

@@ -19,14 +19,29 @@ class PackageController extends Controller
         return view('admin.packages.create');
     }
 
+    // public function store(Request $request)
+    // {
+    //     $data = $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'amount' => 'required|integer|min:0',
+    //         'pv' => 'required|integer|min:0',
+    //         'direct_bonus' => 'required|integer|min:0',
+    //         'pair_bonus' => 'required|integer|min:0',
+    //     ]);
+
+    //     Package::create($data);
+
+    //     return redirect()->route('packages.index')->with('success', 'Package created successfully!');
+    // }
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'         => 'required|string|max:255',
-            'amount'       => 'required|integer|min:0',
-            'pv'           => 'required|integer|min:0',
+            'name' => 'required|string|max:255',
+            'actual_amount' => 'required|integer|min:0',
+            'discounted_amount' => 'nullable|integer|min:0',
+            'pv' => 'required|integer|min:0',
             'direct_bonus' => 'required|integer|min:0',
-            'pair_bonus'   => 'required|integer|min:0',
+            'pair_bonus' => 'required|integer|min:0',
         ]);
 
         Package::create($data);
@@ -42,11 +57,11 @@ class PackageController extends Controller
     public function update(Request $request, Package $package)
     {
         $data = $request->validate([
-            'name'         => 'required|string|max:255',
-            'amount'       => 'required|integer|min:0',
-            'pv'           => 'required|integer|min:0',
+            'name' => 'required|string|max:255',
+            'amount' => 'required|integer|min:0',
+            'pv' => 'required|integer|min:0',
             'direct_bonus' => 'required|integer|min:0',
-            'pair_bonus'   => 'required|integer|min:0',
+            'pair_bonus' => 'required|integer|min:0',
         ]);
 
         $package->update($data);
