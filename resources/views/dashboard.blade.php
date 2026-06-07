@@ -3,9 +3,9 @@
 @section('main')
     <style>
         /* =========================================
-           1. YOUR ORIGINAL BASE & LAYOUT CSS
-           (Untouched to keep the rest of the page working)
-        ========================================= */
+                       1. YOUR ORIGINAL BASE & LAYOUT CSS
+                       (Untouched to keep the rest of the page working)
+                    ========================================= */
         :root {
             --bg: #0b0e12;
             --card: #12181f;
@@ -538,9 +538,9 @@
 
 
         /* =========================================
-           2. NEW DASHBOARD STATS CSS
-           (Appended safely so it only affects the new UI)
-        ========================================= */
+                       2. NEW DASHBOARD STATS CSS
+                       (Appended safely so it only affects the new UI)
+                    ========================================= */
         .dashboard-stats-container {
             display: flex;
             flex-direction: column;
@@ -700,7 +700,7 @@
             }
         }
     </style>
-{{-- {{dd($todaysData)}} --}}
+    {{-- {{dd($todaysData)}} --}}
     @if (Auth::user()->hasRole('customer'))
         <!-- Main Content -->
         <div class="header">
@@ -709,36 +709,8 @@
                 <span>👤 {{ Auth::user()->uname ?? Auth::user()->name }}</span>
             </div>
         </div>
-
-        <!-- Referral -->
-        {{-- <div class="card">
-            <h2>Referral Center</h2>
-
-            <div>
-                <label>
-                    <input type="radio" name="leg" value="1" checked> Left
-                </label>
-                <label>
-                    <input type="radio" name="leg" value="2"> Right
-                </label>
-            </div>
-
-            <div class="referral-controls">
-                <input type="text" id="refLink"
-                    value="{{ url('/register') }}?refid={{ Auth::user()->id }}&leg=1&name={{ urlencode(Auth::user()->username ?? Auth::user()->name) }}"
-                    readonly>
-                <button class="btn btn-copy" onclick="copyLink()">Copy Link</button>
-                <button class="btn btn-whatsapp" onclick="shareWhatsApp()">Share</button>
-            </div>
-        </div> --}}
-
-{{-- {{dd($progress)}} --}}
         <div>
-    {{-- <h3>Current Level: {{ $progress->rank_level }}</h3>
-    <p>Tier 1 Progress: {{ $progress->tier_1_count }} / 3</p>
-    <p>Tier 2 Progress: {{ $progress->tier_2_count }} / 9</p>
-    <p>Tier 3 Progress: {{ $progress->tier_3_count }} / 27</p> --}}
-</div>
+        </div>
 
 
         <div class="card">
@@ -1018,40 +990,6 @@
             <h1>Admin Console</h1>
             <div class="user-info">👤 {{ Auth::user()->username ?? Auth::user()->name }}</div>
         </div>
-
-        <!-- Stats -->
-        {{-- <div class="card">
-            <h2>System Overview</h2>
-            <div class="grid">
-                <div class="stat">
-                    <h3>{{ $totalUsers }}</h3>
-                    <p>Total Users</p>
-                </div>
-                <div class="stat">
-                    <h3>₹{{ number_format($totalWallet, 2) }}</h3>
-                    <p>Total Wallet Balance</p>
-                </div>
-                <div class="stat">
-                    <h3>{{ $pendingWithdraws }}</h3>
-                    <p>Pending Withdrawals</p>
-                </div>
-                <div class="stat">
-                    <h3>{{ $completedWithdraws }}</h3>
-                    <p>Completed Withdrawals</p>
-                </div>
-                <div class="stat">
-                    <h3>{{ $totalTopups }}</h3>
-                    <p>Total Top-ups</p>
-                </div>
-            </div>
-        </div> --}}
-{{-- {{dd($progress)}}
-<div>
-    <h3>Current Level: {{ $progress->rank_level }}</h3>
-    <p>Tier 1 Progress: {{ $progress->tier_1_count }} / 3</p>
-    <p>Tier 2 Progress: {{ $progress->tier_2_count }} / 9</p>
-    <p>Tier 3 Progress: {{ $progress->tier_3_count }} / 27</p>
-</div> --}}
         <div class="dashboard-stats-container">
 
             <div class="stat-card today-card">
@@ -1412,57 +1350,6 @@
             }
         });
     </script>
-
-
-    {{-- <script>
-  const baseUrl = "{{ url('/register') }}";
-  const refId   = "{{ Auth::user()->id }}";
-  const name    = "{{ urlencode(Auth::user()->username ?? Auth::user()->name) }}";
-
-  function updateReferralLink() {
-    const leg = document.querySelector('input[name="leg"]:checked').value;
-
-    document.getElementById('refLink').value =
-      `${baseUrl}?refid=${refId}&leg=${leg}&name=${name}`;
-  }
-
-  // Initial load
-  updateReferralLink();
-
-  // Listen for radio changes
-  document.querySelectorAll('input[name="leg"]').forEach(radio => {
-    radio.addEventListener('change', updateReferralLink);
-  });
-
-  function copyLink() {
-    const input = document.getElementById("refLink");
-    input.select();
-    document.execCommand("copy");
-    alert("Referral link copied!");
-  }
-
-  function shareWhatsApp() {
-    const link = document.getElementById("refLink").value;
-    window.open(`https://wa.me/?text=${encodeURIComponent(link)}`, "_blank");
-  }
-</script> --}}
-
-
-    {{-- <script>
-
-
-function copyLink(){
-  const link = document.getElementById('refLink');
-  link.select();
-  document.execCommand('copy');
-  alert('Referral link copied!');
-}
-function shareWhatsApp(){
-  const link = document.getElementById('refLink').value;
-  const msg = encodeURIComponent(`Join Himjan Trading using my referral: ${link}`);
-  window.open(`https://wa.me/?text=${msg}`,'_blank');
-}
-</script> --}}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
