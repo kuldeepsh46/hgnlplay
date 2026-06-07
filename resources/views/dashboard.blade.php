@@ -700,7 +700,6 @@
             }
         }
     </style>
-    {{-- {{dd($todaysData)}} --}}
     @if (Auth::user()->hasRole('customer'))
         <!-- Main Content -->
         <div class="header">
