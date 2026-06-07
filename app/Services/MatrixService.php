@@ -1,5 +1,4 @@
 <?php
-namespace App\Services;
 
 namespace App\Services;
 
@@ -9,53 +8,125 @@ use Illuminate\Support\Facades\DB;
 
 class MatrixService
 {
-    /**
-     * @param User $buyer
-     */
     public function processCommission(User $buyer)
     {
-        // 1. Ensure the buyer has a sponsor
-        if (!$buyer->sponsor_id) {
-            return;
-        }
+        if (!$buyer->sponsor_id) return;
 
-        // 2. Safely find the 3-level upline
-        $sponsor1 = User::find($buyer->sponsor_id);
-        $sponsor2 = $sponsor1 ? User::find($sponsor1->sponsor_id) : null;
-        $sponsor3 = $sponsor2 ? User::find($sponsor2->sponsor_id) : null;
+        /**
+         * BUYER LEVEL DECIDES COMMISSION MATRIX
+         */
+        $buyerRank = $buyer->rank_level;
 
-        $uplineChain = [1 => $sponsor1, 2 => $sponsor2, 3 => $sponsor3];
-        $rates = [1 => 100, 2 => 200, 3 => 700];
+        $commissionMatrix = [
+            1 => [1 => 100, 2 => 200, 3 => 700],
+            2 => [1 => 500, 2 => 1500, 3 => 5000],
+            3 => [1 => 1000, 2 => 2000, 3 => 27000],
+        ];
 
-        foreach ($uplineChain as $tier => $user) {
-            if (!$user) {
-                continue;
-            }
+        /**
+         * FIND UP-LINE
+         */
+        $l1 = User::find($buyer->sponsor_id);
+        $l2 = $l1?->sponsor_id ? User::find($l1->sponsor_id) : null;
+        $l3 = $l2?->sponsor_id ? User::find($l2->sponsor_id) : null;
 
-            // Get or Create progress record
-            $progress = UserMatrixProgress::firstOrCreate(['user_id' => $user->id]);
+        $upline = [
+            1 => $l1,
+            2 => $l2,
+            3 => $l3,
+        ];
+
+        foreach ($upline as $tier => $user) {
+
+            if (!$user) continue;
+
+            $progress = UserMatrixProgress::firstOrCreate([
+                'user_id' => $user->id
+            ]);
+
             $tierField = "tier_{$tier}_count";
 
-            // Limits
-            $max = $tier == 1 ? 3 : ($tier == 2 ? 9 : 27);
+            $maxLimit = [
+                1 => 3,
+                2 => 9,
+                3 => 27
+            ][$tier];
 
-            if ($progress->$tierField < $max) {
-                DB::transaction(function () use ($user, $progress, $tierField, $rates, $tier) {
-                    // 1. Update the balance in the 'wallets' table
-                    DB::table('wallets')->where('user_id', $user->id)->increment('balance', $rates[$tier]);
+            DB::transaction(function () use (
+                $user,
+                $progress,
+                $tierField,
+                $tier,
+                $maxLimit,
+                $commissionMatrix,
+                $buyerRank
+            ) {
 
-                    // 2. Increment the progress count
-                    $progress->increment($tierField);
-                });
+                /**
+                 * LOCK ROW (prevent race condition)
+                 */
+                $progress = UserMatrixProgress::where('id', $progress->id)
+                    ->lockForUpdate()
+                    ->first();
 
-                $this->checkPromotion($user, $progress);
-            }
+                /**
+                 * STOP if limit reached
+                 */
+                if ($progress->$tierField >= $maxLimit) {
+                    return;
+                }
+
+                /**
+                 * CREDIT WALLET
+                 */
+                DB::table('wallets')
+                    ->where('user_id', $user->id)
+                    ->increment('balance', $commissionMatrix[$buyerRank][$tier]);
+
+                /**
+                 * INCREMENT MATRIX COUNT
+                 */
+                $progress->increment($tierField);
+            });
+
+            /**
+             * REFRESH AFTER TRANSACTION
+             */
+            $progress->refresh();
+
+            /**
+             * CHECK PROMOTION
+             */
+            $this->checkPromotion($user, $progress);
         }
     }
 
+    /**
+     * PROMOTION LOGIC
+     */
     private function checkPromotion(User $user, UserMatrixProgress $progress)
     {
-        if ($progress->tier_1_count == 3 && $progress->tier_2_count == 9 && $progress->tier_3_count == 27) {
+        if (
+            $progress->tier_1_count >= 3 &&
+            $progress->tier_2_count >= 9 &&
+            $progress->tier_3_count >= 27
+        ) {
+
+            /**
+             * SAVE HISTORY BEFORE RESET
+             */
+            DB::table('user_matrix_rank_history')->insert([
+                'user_id' => $user->id,
+                'rank_level' => $progress->rank_level,
+                'tier_1_count' => $progress->tier_1_count,
+                'tier_2_count' => $progress->tier_2_count,
+                'tier_3_count' => $progress->tier_3_count,
+                'created_at' => now(),
+            ]);
+
+            /**
+             * PROMOTE USER
+             */
             $progress->update([
                 'rank_level' => $progress->rank_level + 1,
                 'tier_1_count' => 0,

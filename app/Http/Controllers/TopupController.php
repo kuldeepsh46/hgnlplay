@@ -172,9 +172,10 @@ class TopupController extends Controller
                 4, 5 => "Congratulations! You have successfully paid ₹{$finalAmount} for Member {$memberId}. Vouchers have been issued.",
                 default => "Top-up successful! ₹{$finalAmount} deducted from your wallet for Member {$memberId}.",
             };
-            $matrixService = new \App\Services\MatrixService();
-            $matrixService->processCommission($currentUser);
-
+            if ($package->amount == 2000) {
+                $matrixService = new \App\Services\MatrixService();
+                $matrixService->processCommission($currentUser);
+            }
             return back()->with('success', $successMessage);
         } catch (\Exception $e) {
             DB::rollBack();

@@ -2,10 +2,6 @@
 @section('title', 'Dashboard')
 @section('main')
     <style>
-        /* =========================================
-                       1. YOUR ORIGINAL BASE & LAYOUT CSS
-                       (Untouched to keep the rest of the page working)
-                    ========================================= */
         :root {
             --bg: #0b0e12;
             --card: #12181f;
@@ -538,9 +534,9 @@
 
 
         /* =========================================
-                       2. NEW DASHBOARD STATS CSS
-                       (Appended safely so it only affects the new UI)
-                    ========================================= */
+                               2. NEW DASHBOARD STATS CSS
+                               (Appended safely so it only affects the new UI)
+                            ========================================= */
         .dashboard-stats-container {
             display: flex;
             flex-direction: column;
@@ -699,8 +695,86 @@
                 grid-template-columns: 1fr;
             }
         }
+
+
+
+
+
+        .card-flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            align-items: stretch;
+        }
+
+        .referral-left {
+            flex: 1 1 55%;
+        }
+
+        /* Updated for Dark Mode */
+        .matrix-right {
+            flex: 1 1 40%;
+            background-color: rgba(255, 255, 255, 0.03);
+            /* Subtle dark panel */
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            /* Matches your bottom panels */
+            border-left: 4px solid #3b82f6;
+            /* Keeps the blue accent */
+        }
+
+        .matrix-header {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #f8fafc;
+            /* White text */
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .rank-badge {
+            background-color: #3b82f6;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        .tier-progress-wrapper {
+            margin-bottom: 15px;
+        }
+
+        .tier-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #94a3b8;
+            /* Soft slate-grey text */
+            font-weight: 600;
+        }
+
+        .progress-track {
+            background: #334155;
+            /* Dark grey track */
+            border-radius: 4px;
+            height: 8px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
     </style>
     @if (Auth::user()->hasRole('customer'))
+        {{-- {{dd($progress)}} --}}
+
         <!-- Main Content -->
         <div class="header">
             <h1>Dashboard</h1>
@@ -712,7 +786,7 @@
         </div>
 
 
-        <div class="card">
+        {{-- <div class="card">
             <h2>Referral Center</h2>
 
             <div>
@@ -740,6 +814,85 @@
                 <span id="downline-count">{{ $leftDownline ?? 0 }}</span>
             </div>
 
+        </div> --}}
+
+        <div class="card card-flex">
+
+            <div class="referral-left">
+                <h2>Referral Center</h2>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="margin-right: 15px; cursor: pointer;">
+                        <input type="radio" name="leg" value="1" checked> Left
+                    </label>
+
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="leg" value="2"> Right
+                    </label>
+                </div>
+
+                <div class="referral-controls" style="margin-bottom: 20px;">
+                    <input type="text" id="refLink"
+                        value="{{ url('/register') }}?refid={{ Auth::user()->id }}&leg=1&name={{ urlencode(Auth::user()->username ?? Auth::user()->name) }}"
+                        readonly
+                        style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;">
+
+                    <div>
+                        <button class="btn btn-copy" onclick="copyLink()">Copy Link</button>
+                        <button class="btn btn-whatsapp" onclick="shareWhatsApp()">Share</button>
+                    </div>
+                </div>
+
+                <div style="margin-top:15px; padding-top: 15px; border-top: 1px solid #eee;">
+                    <strong>Total Downline: </strong>
+                    <span id="downline-count" style="color: #3b82f6; font-weight: bold; font-size: 1.1rem;">
+                        {{ $leftDownline ?? 0 }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="matrix-right">
+                <h3 class="matrix-header">
+                    Current Rank: <span class="rank-badge">Level {{ $user->rank_level }}</span>
+                </h3>
+
+                <div class="tier-progress-wrapper">
+                    <div class="tier-info">
+                        <span>Tier 1 Progress</span>
+                        <span>{{ $progress->tier_1_count ?? 0 }} / 3</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill"
+                            style="width: {{ (($progress->tier_1_count ?? 0) / 3) * 100 }}%; background-color: #00b050;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tier-progress-wrapper">
+                    <div class="tier-info">
+                        <span>Tier 2 Progress</span>
+                        <span>{{ $progress->tier_2_count ?? 0 }} / 9</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill"
+                            style="width: {{ (($progress->tier_2_count ?? 0) / 9) * 100 }}%; background-color: #f59e0b;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tier-progress-wrapper">
+                    <div class="tier-info">
+                        <span>Tier 3 Progress</span>
+                        <span>{{ $progress->tier_3_count ?? 0 }} / 27</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill"
+                            style="width: {{ (($progress->tier_3_count ?? 0) / 27) * 100 }}%; background-color: #3b82f6;">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
         <!-- Performance -->
         <div class="card performance-card">
