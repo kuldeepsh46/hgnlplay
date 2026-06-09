@@ -8,69 +8,167 @@ use App\Models\User;
 
 class TreeController extends Controller
 {
+    // public function index(Request $request)
+    // {
+    //     $user = Auth::user();
+
+    //     // You can allow ?user_id=XYZ to see someone else's tree (optional)
+    //     $rootId = $request->get('user_id', $user->id);
+
+    //     $tree = $this->buildTree($rootId);
+
+    //     $MAX_DEPTH = 8;
+    //     // $user = auth()->user();
+
+    //     $levels = [];
+    //     $levels[0] = [
+    //         [
+    //             'id' => $user->id,
+    //             'username' => $user->username,
+    //             'name' => $user->name,
+    //             'color' => $this->getColor($user->investment_count ?? 0),
+    //             // 'nm' => 'ks'
+    //         ],
+    //     ];
+
+    //     for ($level = 1; $level < $MAX_DEPTH; $level++) {
+    //         $levels[$level] = [];
+
+    //         foreach ($levels[$level - 1] as $parent) {
+    //             if (isset($parent['blank'])) {
+    //                 // Blank parent → two blank children
+    //                 $levels[$level][] = ['blank' => true];
+    //                 $levels[$level][] = ['blank' => true];
+    //                 continue;
+    //             }
+
+    //             $children = User::where('placement_id', $parent['id'])->get();
+
+    //             $left = $children->where('position', 'left')->first();
+    //             $right = $children->where('position', 'right')->first();
+
+    //             $levels[$level][] = $left
+    //                 ? [
+    //                     'id' => $left->id,
+    //                     'username' => $left->username,
+    //                     'name' => $left->name,
+    //                     'color' => $this->getColor($left->investment_count ?? 0),
+    //                 ]
+    //                 : ['blank' => true];
+
+    //             $levels[$level][] = $right
+    //                 ? [
+    //                     'id' => $right->id,
+    //                     'username' => $right->username,
+    //                     'name' => $right->name,
+    //                     'color' => $this->getColor($right->investment_count ?? 0),
+    //                 ]
+    //                 : ['blank' => true];
+    //         }
+    //     }
+
+    //     return view('team_tree', compact('levels', 'user', 'tree'));
+
+    //     // return view('team_tree', compact('user', 'tree'));
+    // }
+
+
+
     public function index(Request $request)
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        // You can allow ?user_id=XYZ to see someone else's tree (optional)
-        $rootId = $request->get('user_id', $user->id);
+    // Allow ?user_id=XYZ to see someone else's tree (optional)
+    $rootId = $request->get('user_id', $user->id);
 
-        $tree = $this->buildTree($rootId);
+    $tree = $this->buildTree($rootId);
 
-        $MAX_DEPTH = 8;
-        $user = auth()->user();
+    $MAX_DEPTH = 8;
 
-        $levels = [];
-        $levels[0] = [
-            [
-                'id' => $user->id,
-                'username' => $user->username,
-                'name' => $user->name,
-                'color' => $this->getColor($user->investment_count ?? 0),
-                // 'nm' => 'ks'
-            ],
-        ];
+    // Initialize counters
+    $leftDownlineCount = 0;
+    $rightDownlineCount = 0;
 
-        for ($level = 1; $level < $MAX_DEPTH; $level++) {
-            $levels[$level] = [];
+    $levels = [];
+    $levels[0] = [
+        [
+            'id' => $user->id,
+            'username' => $user->username,
+            'name' => $user->name,
+            'color' => $this->getColor($user->investment_count ?? 0),
+        ],
+    ];
 
-            foreach ($levels[$level - 1] as $parent) {
-                if (isset($parent['blank'])) {
-                    // Blank parent → two blank children
-                    $levels[$level][] = ['blank' => true];
-                    $levels[$level][] = ['blank' => true];
-                    continue;
+    for ($level = 1; $level < $MAX_DEPTH; $level++) {
+        $levels[$level] = [];
+
+        foreach ($levels[$level - 1] as $parent) {
+            if (isset($parent['blank'])) {
+                // Blank parent → two blank children
+                $levels[$level][] = ['blank' => true];
+                $levels[$level][] = ['blank' => true];
+                continue;
+            }
+
+            // Determine which branch side these children inherit
+            if ($level == 1) {
+                // At level 1, the children are the direct left and right roots
+                $leftInheritedSide = 'left';
+                $rightInheritedSide = 'right';
+            } else {
+                // Deeper levels inherit whatever side their parent belongs to
+                $leftInheritedSide = $parent['side'] ?? 'left';
+                $rightInheritedSide = $parent['side'] ?? 'right';
+            }
+
+            $children = User::where('placement_id', $parent['id'])->get();
+
+            $left = $children->where('position', 'left')->first();
+            $right = $children->where('position', 'right')->first();
+
+            // Process Left Slot
+            if ($left) {
+                if ($leftInheritedSide === 'left') {
+                    $leftDownlineCount++;
+                } else {
+                    $rightDownlineCount++;
                 }
 
-                $children = User::where('placement_id', $parent['id'])->get();
+                $levels[$level][] = [
+                    'id' => $left->id,
+                    'username' => $left->username,
+                    'name' => $left->name,
+                    'color' => $this->getColor($left->investment_count ?? 0),
+                    'side' => $leftInheritedSide, // Pass side to next generation
+                ];
+            } else {
+                $levels[$level][] = ['blank' => true];
+            }
 
-                $left = $children->where('position', 'left')->first();
-                $right = $children->where('position', 'right')->first();
+            // Process Right Slot
+            if ($right) {
+                if ($rightInheritedSide === 'left') {
+                    $leftDownlineCount++;
+                } else {
+                    $rightDownlineCount++;
+                }
 
-                $levels[$level][] = $left
-                    ? [
-                        'id' => $left->id,
-                        'username' => $left->username,
-                        'name' => $left->name,
-                        'color' => $this->getColor($left->investment_count ?? 0),
-                    ]
-                    : ['blank' => true];
-
-                $levels[$level][] = $right
-                    ? [
-                        'id' => $right->id,
-                        'username' => $right->username,
-                        'name' => $right->name,
-                        'color' => $this->getColor($right->investment_count ?? 0),
-                    ]
-                    : ['blank' => true];
+                $levels[$level][] = [
+                    'id' => $right->id,
+                    'username' => $right->username,
+                    'name' => $right->name,
+                    'color' => $this->getColor($right->investment_count ?? 0),
+                    'side' => $rightInheritedSide, // Pass side to next generation
+                ];
+            } else {
+                $levels[$level][] = ['blank' => true];
             }
         }
-
-        return view('team_tree', compact('levels', 'user', 'tree'));
-
-        // return view('team_tree', compact('user', 'tree'));
     }
+
+    // Pass the counts directly to your view template
+    return view('team_tree', compact('levels', 'user', 'tree', 'leftDownlineCount', 'rightDownlineCount'));
+}
     // private function getBranchTotalRecursive($userId)
     // {
     //     $user = User::with('orders.package')->find($userId);
@@ -107,69 +205,6 @@ class TreeController extends Controller
 
         return $personalInvestment + ($left ? $this->getBranchTotalRecursive($left->id) : 0) + ($right ? $this->getBranchTotalRecursive($right->id) : 0);
     }
-    /**
-     * Build the entire binary tree recursively
-     */
-    // private function buildTree($userId)
-    // {
-    //     $user = User::find($userId);
-    //     if (!$user) {
-    //         return null;
-    //     }
-
-    //     $left = User::where('placement_id', $user->id)->where('position', 'left')->first();
-
-    //     $right = User::where('placement_id', $user->id)->where('position', 'right')->first();
-    //     $leftBusiness = $left ? $this->getTotalBranchBusiness($left->id) : 0;
-    //     $rightBusiness = $right ? $this->getTotalBranchBusiness($right->id) : 0;
-    //     return [
-    //         'id' => $user->id,
-    //         'username' => $user->username,
-    //         'investment_count' => $user->investment_count ?? 0,
-    //         'color' => $this->getColor($user->investment_count ?? 0),
-    //         'left' => $left ? $this->buildTree($left->id) : null,
-    //         'right' => $right ? $this->buildTree($right->id) : null,
-    //         // 'nm' => 'ks'
-    //         'left_business' => $leftBusiness,
-    //         'right_business' => $rightBusiness,
-    //     ];
-    // }
-    // private function buildTree($userId)
-    // {
-    //     $user = User::with('orders.package')->find($userId);
-    //     if (!$user) {
-    //         return null;
-    //     }
-
-    //     // Get personal investment using Eloquent
-    //     $currentUserInvestment = $user->orders->sum(function ($order) {
-    //         return $order->package->amount ?? 0;
-    //     });
-
-    //     $left = User::where('placement_id', $user->id)->where('position', 'left')->first();
-    //     $right = User::where('placement_id', $user->id)->where('position', 'right')->first();
-
-    //     // Calculate business beneath them
-    //     $leftBusiness = $left ? $this->getBranchTotalRecursive($left->id) : 0;
-    //     $rightBusiness = $right ? $this->getBranchTotalRecursive($right->id) : 0;
-
-    //     // Side Counts (Total people)
-    //     $leftCount = $left ? $this->getBranchCountRecursive($left->id) : 0;
-    //     $rightCount = $right ? $this->getBranchCountRecursive($right->id) : 0;
-
-    //     return [
-    //         'id' => $user->id,
-    //         'username' => $user->username,
-    //         'personal_investment' => $currentUserInvestment,
-    //         'investment_count' => $currentUserInvestment > 0 ? 1 : 0,
-    //         'left_business' => $leftBusiness,
-    //         'right_business' => $rightBusiness,
-    //         'left_count' => $leftCount,
-    //         'right_count' => $rightCount,
-    //         'left' => $left ? $this->buildTree($left->id) : null,
-    //         'right' => $right ? $this->buildTree($right->id) : null,
-    //     ];
-    // }
     private function buildTree($userIdOrMemberId)
     {
         // 1. Updated Search Logic: Find user by member_id OR internal id
@@ -326,72 +361,138 @@ class TreeController extends Controller
     //     return view('team.list', compact('user', 'teamMembers'));
     // }
 
-   public function list()
-    {
-        $user = \Illuminate\Support\Facades\Auth::user();
-        $allDownliners = [];
 
-        // 1. GATHER ALL DOWNLINE USERS 
-        // Changed to 'sponsor_id' and 'get()' to match your database query results
-        $leftDirects = \App\Models\User::where('sponsor_id', $user->id)
-            ->where('position', 'left')
-            ->get();
 
-        $rightDirects = \App\Models\User::where('sponsor_id', $user->id)
-            ->where('position', 'right')
-            ->get();
+    // public function list()
+    // {
+    //     $user = \Illuminate\Support\Facades\Auth::user();
+    //     $allDownliners = [];
 
-        // Loop through all left direct users and crawl their trees
-        foreach ($leftDirects as $leftRoot) {
-            $leftRoot->side = 'left';
-            $allDownliners[] = $leftRoot;
-            $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
+    //     // 1. GATHER ALL DOWNLINE USERS
+    //     // Changed to 'sponsor_id' and 'get()' to match your database query results
+    //     $leftDirects = \App\Models\User::where('sponsor_id', $user->id)->where('position', 'left')->get();
+
+    //     $rightDirects = \App\Models\User::where('sponsor_id', $user->id)->where('position', 'right')->get();
+
+    //     // Loop through all left direct users and crawl their trees
+    //     foreach ($leftDirects as $leftRoot) {
+    //         $leftRoot->side = 'left';
+    //         $allDownliners[] = $leftRoot;
+    //         $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
+    //     }
+
+    //     // Loop through all right direct users and crawl their trees
+    //     foreach ($rightDirects as $rightRoot) {
+    //         $rightRoot->side = 'right';
+    //         $allDownliners[] = $rightRoot;
+    //         $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
+    //     }
+
+    //     // 2. EXTRACT IDS
+    //     // Added unique() to prevent duplicates and replaced hardcoded '27' with $user->id
+    //     $downlineIds = collect($allDownliners)->pluck('id')->unique()->filter(fn($id) => $id != $user->id)->toArray();
+    //     // dd($downlineIds);
+
+    //     // 3. FETCH DATA WITH ACTIVATION DATE & TOTAL EMIS
+    //     if (empty($downlineIds)) {
+    //         $teamMembers = collect([]);
+    //     } else {
+    //         $teamMembers = \App\Models\User::query()
+    //             ->select('users.*')
+    //             ->addSelect([
+    //                 // First completed order date (Activation Date)
+    //                 'activation_date' => \DB::table('orders')->selectRaw('MIN(created_at)')->whereColumn('user_id', 'users.id')->where('status', 'completed')->limit(1),
+
+    //                 // Total completed orders (EMIs paid)
+    //                 'total_emis_paid' => \DB::table('orders')->selectRaw('COUNT(*)')->whereColumn('user_id', 'users.id')->where('status', 'completed'),
+    //             ])
+    //             ->whereIn('id', $downlineIds)
+    //             ->get() // 1. Fetch the data FIRST (keeps view mapping intact)
+    //             ->sortBy('created_at') // 2. Sort the Collection AFTER
+    //             ->values(); // 3. Reset the array keys
+    //     }
+
+    //     return view('team.list', compact('user', 'teamMembers'));
+    // }
+
+
+    public function list()
+{
+    $user = \Illuminate\Support\Facades\Auth::user();
+
+    // 1. GATHER ALL DOWNLINE IDS SEPARATED BY SIDE (Using placement_id matching your tree)
+    $leftIds = [];
+    $leftRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first();
+    if ($leftRoot) {
+        $leftIds[] = $leftRoot->id;
+        $parentIds = [$leftRoot->id];
+        while (count($parentIds) > 0) {
+            $childrenIds = \App\Models\User::whereIn('placement_id', $parentIds)->pluck('id')->toArray();
+            if (count($childrenIds) > 0) {
+                $leftIds = array_merge($leftIds, $childrenIds);
+                $parentIds = $childrenIds;
+            } else {
+                $parentIds = [];
+            }
         }
-
-        // Loop through all right direct users and crawl their trees
-        foreach ($rightDirects as $rightRoot) {
-            $rightRoot->side = 'right';
-            $allDownliners[] = $rightRoot;
-            $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
-        }
-
-        // 2. EXTRACT IDS
-        // Added unique() to prevent duplicates and replaced hardcoded '27' with $user->id
-        $downlineIds = collect($allDownliners)
-            ->pluck('id')
-            ->unique()
-            ->filter(fn($id) => $id != $user->id)
-            ->toArray();
-            // dd($downlineIds);
-
-        // 3. FETCH DATA WITH ACTIVATION DATE & TOTAL EMIS
-        if (empty($downlineIds)) {
-            $teamMembers = collect([]);
-        } else {
-            $teamMembers = \App\Models\User::query()
-                ->select('users.*')
-                ->addSelect([
-                    // First completed order date (Activation Date)
-                    'activation_date' => \DB::table('orders')
-                        ->selectRaw('MIN(created_at)')
-                        ->whereColumn('user_id', 'users.id')
-                        ->where('status', 'completed')
-                        ->limit(1),
-
-                    // Total completed orders (EMIs paid)
-                    'total_emis_paid' => \DB::table('orders')
-                        ->selectRaw('COUNT(*)')
-                        ->whereColumn('user_id', 'users.id')
-                        ->where('status', 'completed'),
-                ])
-                ->whereIn('id', $downlineIds)
-                ->get()                 // 1. Fetch the data FIRST (keeps view mapping intact)
-                ->sortBy('created_at')  // 2. Sort the Collection AFTER
-                ->values();             // 3. Reset the array keys
-        }
-
-        return view('team.list', compact('user', 'teamMembers'));
     }
+
+    $rightIds = [];
+    $rightRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first();
+    if ($rightRoot) {
+        $rightIds[] = $rightRoot->id;
+        $parentIds = [$rightRoot->id];
+        while (count($parentIds) > 0) {
+            $childrenIds = \App\Models\User::whereIn('placement_id', $parentIds)->pluck('id')->toArray();
+            if (count($childrenIds) > 0) {
+                $rightIds = array_merge($rightIds, $childrenIds);
+                $parentIds = $childrenIds;
+            } else {
+                $parentIds = [];
+            }
+        }
+    }
+
+    // Combine all gathered branch IDs
+    $downlineIds = array_merge($leftIds, $rightIds);
+
+    // 2. FETCH REAL-TIME EMI DATA FOR COLLECTED MEMBERS
+    if (empty($downlineIds)) {
+        $teamMembers = collect([]);
+    } else {
+        $teamMembers = \App\Models\User::query()
+            ->select('users.*')
+            ->addSelect([
+                // First completed order date (Activation Date)
+                'activation_date' => \DB::table('orders')
+                    ->selectRaw('MIN(created_at)')
+                    ->whereColumn('user_id', 'users.id')
+                    ->where('status', 'completed')
+                    ->limit(1),
+
+                // Total completed orders (EMIs paid)
+                'total_emis_paid' => \DB::table('orders')
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('user_id', 'users.id')
+                    ->where('status', 'completed')
+            ])
+            ->whereIn('id', $downlineIds)
+            ->get()
+            ->sortBy('created_at')
+            ->values();
+
+        // 3. RE-TAG THE CORRECT BINARY SIDE TO EACH FETCHED ELUQUENT MODEL
+        $teamMembers->each(function ($member) use ($leftIds, $rightIds) {
+            if (in_array($member->id, $leftIds)) {
+                $member->side = 'left';
+            } elseif (in_array($member->id, $rightIds)) {
+                $member->side = 'right';
+            }
+        });
+    }
+
+    return view('team.list', compact('user', 'teamMembers'));
+}
 
     /**
      * STRICT CRAWLER

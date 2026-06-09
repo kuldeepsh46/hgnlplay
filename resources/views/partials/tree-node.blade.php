@@ -321,6 +321,7 @@
             👤 {{ Auth::user()->username ?? Auth::user()->email }}
         </div>
     </div>
+    
     <div class="card">
         <div class="tree">
             {!! renderTreeUL($node) !!}

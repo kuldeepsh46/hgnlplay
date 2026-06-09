@@ -239,6 +239,7 @@
             </thead>
 
             <tbody>
+                {{dd($teamMembers)}}
                 @foreach ($teamMembers as $member)
                     {{-- {{dd($member)}} --}}
                     @php

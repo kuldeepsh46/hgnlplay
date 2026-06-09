@@ -99,6 +99,7 @@
     </style>
     <!-- Password Change Modal -->
     <div id="passwordModal" class="modal">
+        
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
             <h2>Change Password</h2>
