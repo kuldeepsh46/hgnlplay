@@ -326,56 +326,68 @@ class TreeController extends Controller
     //     return view('team.list', compact('user', 'teamMembers'));
     // }
 
-    public function list()
+   public function list()
     {
         $user = \Illuminate\Support\Facades\Auth::user();
         $allDownliners = [];
 
-        // 1. GATHER ALL DOWNLINE USERS (Using your existing crawling logic)
-        $leftBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first();
-        $rightBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first();
+        // 1. GATHER ALL DOWNLINE USERS 
+        // Changed to 'sponsor_id' and 'get()' to match your database query results
+        $leftDirects = \App\Models\User::where('sponsor_id', $user->id)
+            ->where('position', 'left')
+            ->get();
 
-        if ($leftRoot = $leftBranchRoot) {
+        $rightDirects = \App\Models\User::where('sponsor_id', $user->id)
+            ->where('position', 'right')
+            ->get();
+
+        // Loop through all left direct users and crawl their trees
+        foreach ($leftDirects as $leftRoot) {
+            $leftRoot->side = 'left';
+            $allDownliners[] = $leftRoot;
             $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
         }
-        if ($rightRoot = $rightBranchRoot) {
+
+        // Loop through all right direct users and crawl their trees
+        foreach ($rightDirects as $rightRoot) {
+            $rightRoot->side = 'right';
+            $allDownliners[] = $rightRoot;
             $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
         }
 
-        // 2. EXTRACT IDS AND FETCH DATA WITH ACTIVATION DATE IN ONE QUERY
-        $downlineIds = collect($allDownliners)->pluck('id')->filter(fn($id) => $id != 27);
+        // 2. EXTRACT IDS
+        // Added unique() to prevent duplicates and replaced hardcoded '27' with $user->id
+        $downlineIds = collect($allDownliners)
+            ->pluck('id')
+            ->unique()
+            ->filter(fn($id) => $id != $user->id)
+            ->toArray();
+            // dd($downlineIds);
 
-        if ($downlineIds->isEmpty()) {
+        // 3. FETCH DATA WITH ACTIVATION DATE & TOTAL EMIS
+        if (empty($downlineIds)) {
             $teamMembers = collect([]);
         } else {
-            // $teamMembers = \App\Models\User::query()
-            //     ->select('users.*')
-            //     // Add the subquery for the first order date
-            //     ->addSelect(['activation_date' => \DB::table('orders')->selectRaw('MIN(created_at)')->whereColumn('user_id', 'users.id')->where('status', 'completed')->limit(1)])
-            //     ->whereIn('id', $downlineIds)
-            //     ->get()
-            //     ->sortBy('created_at');
-                // dd($teamMembers);
+            $teamMembers = \App\Models\User::query()
+                ->select('users.*')
+                ->addSelect([
+                    // First completed order date (Activation Date)
+                    'activation_date' => \DB::table('orders')
+                        ->selectRaw('MIN(created_at)')
+                        ->whereColumn('user_id', 'users.id')
+                        ->where('status', 'completed')
+                        ->limit(1),
 
-               $teamMembers = \App\Models\User::query()
-            ->select('users.*')
-            ->addSelect([
-                // First completed order date (Activation Date)
-                'activation_date' => \DB::table('orders')
-                    ->selectRaw('MIN(created_at)')
-                    ->whereColumn('user_id', 'users.id')
-                    ->where('status', 'completed')
-                    ->limit(1),
-
-                // Total completed orders (EMIs paid)
-                'total_emis_paid' => \DB::table('orders')
-                    ->selectRaw('COUNT(*)')
-                    ->whereColumn('user_id', 'users.id')
-                    ->where('status', 'completed')
-            ])
-            ->whereIn('id', $downlineIds)
-            ->orderBy('created_at')
-            ->get();
+                    // Total completed orders (EMIs paid)
+                    'total_emis_paid' => \DB::table('orders')
+                        ->selectRaw('COUNT(*)')
+                        ->whereColumn('user_id', 'users.id')
+                        ->where('status', 'completed'),
+                ])
+                ->whereIn('id', $downlineIds)
+                ->get()                 // 1. Fetch the data FIRST (keeps view mapping intact)
+                ->sortBy('created_at')  // 2. Sort the Collection AFTER
+                ->values();             // 3. Reset the array keys
         }
 
         return view('team.list', compact('user', 'teamMembers'));
