@@ -321,11 +321,11 @@
             👤 {{ Auth::user()->username ?? Auth::user()->email }}
         </div>
     </div>
-  <div class="stats-container">
+  {{-- <div class="stats-container">
     <p><strong>Left Downline Nodes:</strong> {{ $tree['left_count'] ?? 0 }}</p>
     <p><strong>Right Downline Nodes:</strong> {{ $tree['right_count'] ?? 0 }}</p>
     <p><strong>Total Nodes:</strong> {{ $tree['total_count'] ?? 0 }}</p>
-</div>
+</div> --}}
     <div class="card">
         <div class="tree">
             {!! renderTreeUL($node) !!}
