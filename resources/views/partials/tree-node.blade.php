@@ -20,8 +20,8 @@
         }
 
         /* ======================
-                               TREE BASE
-                            ====================== */
+                                   TREE BASE
+                                ====================== */
         .tree {
             display: flex;
             justify-content: center;
@@ -153,8 +153,8 @@
         }
 
         /* =====================================================
-                               ✅ ONLY NEW CSS (EMPTY LEAF USER – NOTHING ELSE TOUCHED)
-                            ===================================================== */
+                                   ✅ ONLY NEW CSS (EMPTY LEAF USER – NOTHING ELSE TOUCHED)
+                                ===================================================== */
         .tree li.leaf .node span:empty {
             color: #999;
             /* different look */
@@ -321,7 +321,11 @@
             👤 {{ Auth::user()->username ?? Auth::user()->email }}
         </div>
     </div>
-    
+  <div class="stats-container">
+    <p><strong>Left Downline Nodes:</strong> {{ $tree['left_count'] ?? 0 }}</p>
+    <p><strong>Right Downline Nodes:</strong> {{ $tree['right_count'] ?? 0 }}</p>
+    <p><strong>Total Nodes:</strong> {{ $tree['total_count'] ?? 0 }}</p>
+</div>
     <div class="card">
         <div class="tree">
             {!! renderTreeUL($node) !!}
@@ -525,7 +529,9 @@
 
             // Logic: Green (g1) if is_active is true, otherwise Red (r1) for pending/zero investment
             $image =
-                isset($item['is_active']) && $item['is_active'] ? asset('assets/images/g1.png') : asset('assets/images/r1.png');
+                isset($item['is_active']) && $item['is_active']
+                    ? asset('assets/images/g1.png')
+                    : asset('assets/images/r1.png');
 
             $url = route('team.tree', ['user_id' => $item['id']]);
             $pkgAmount = number_format($item['personal_investment'] ?? 0, 2);

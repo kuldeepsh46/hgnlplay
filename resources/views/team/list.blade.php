@@ -245,7 +245,7 @@
                     @php
                         $isPaid = ($member->investment_count ?? 0) > 0;
                     @endphp
-                    <tr data-position="{{ strtolower(trim($member->position)) }}"
+                    <tr data-position="{{ strtolower(trim($member->side)) }}"
                         data-status="{{ $isPaid ? 'active' : 'pending' }}">
 
                         <td>{{ $member->member_id }}</td>
@@ -306,7 +306,7 @@
                                 <span style="color: #666; font-style: italic;">N/A</span>
                             @endif
                         </td>
-                        <td>{{ $member->position }}</td>
+                        <td>{{ $member->side }}</td>
                         <td>{{ $member->investment_count ?? 0 }}</td>
                         <td>
                             @if (($member->investment_count ?? 0) === 0)
