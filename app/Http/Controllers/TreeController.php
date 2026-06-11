@@ -316,72 +316,64 @@ class TreeController extends Controller
     //     return view('team.list', compact('user', 'teamMembers'));
     // }
 
-   public function list()
-{
-    $user = \Illuminate\Support\Facades\Auth::user();
+    public function list()
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
 
-    // Build same tree used by tree page
-    $tree = $this->buildTree($user->id);
+        // Build same tree used by tree page
+        $tree = $this->buildTree($user->id);
 
-    // Left side = everything under A's left root
-    // Right side = everything under A's right root
-    $leftIds = $this->collectTreeIds($tree['left'] ?? null);
-    $rightIds = $this->collectTreeIds($tree['right'] ?? null);
+        // Left side = everything under A's left root
+        // Right side = everything under A's right root
+        $leftIds = $this->collectTreeIds($tree['left'] ?? null);
+        $rightIds = $this->collectTreeIds($tree['right'] ?? null);
 
-    $downlineIds = array_merge($leftIds, $rightIds);
+        $downlineIds = array_merge($leftIds, $rightIds);
 
-    if (empty($downlineIds)) {
-        $teamMembers = collect([]);
-    } else {
-        $teamMembers = \App\Models\User::query()
-            ->select('users.*')
-            ->addSelect([
-                'activation_date' => \DB::table('orders')
-                    ->selectRaw('MIN(created_at)')
-                    ->whereColumn('user_id', 'users.id')
-                    ->where('status', 'completed')
-                    ->limit(1),
+        if (empty($downlineIds)) {
+            $teamMembers = collect([]);
+        } else {
+            $teamMembers = \App\Models\User::query()
+                ->select('users.*')
+                ->addSelect([
+                    'activation_date' => \DB::table('orders')->selectRaw('MIN(created_at)')->whereColumn('user_id', 'users.id')->where('status', 'completed')->limit(1),
+                    'total_emis_paid' => \DB::table('orders')->selectRaw('COUNT(*)')->whereColumn('user_id', 'users.id')->where('status', 'completed'),
+                ])
+                ->whereIn('id', $downlineIds)
+                ->get()
+                ->sortBy('created_at')
+                ->values();
 
-                'total_emis_paid' => \DB::table('orders')
-                    ->selectRaw('COUNT(*)')
-                    ->whereColumn('user_id', 'users.id')
-                    ->where('status', 'completed'),
-            ])
-            ->whereIn('id', $downlineIds)
-            ->get()
-            ->sortBy('created_at')
-            ->values();
+            // IMPORTANT: side is based on root branch, not user's own position
+            $teamMembers->each(function ($member) use ($leftIds, $rightIds) {
+                if (in_array($member->id, $leftIds)) {
+                    $member->side = 'left';
+                } elseif (in_array($member->id, $rightIds)) {
+                    $member->side = 'right';
+                }
+            });
+        }
 
-        // IMPORTANT: side is based on root branch, not user's own position
-        $teamMembers->each(function ($member) use ($leftIds, $rightIds) {
-            if (in_array($member->id, $leftIds)) {
-                $member->side = 'left';
-            } elseif (in_array($member->id, $rightIds)) {
-                $member->side = 'right';
-            }
-        });
+        return view('team.list', compact('user', 'teamMembers'));
     }
-
-    return view('team.list', compact('user', 'teamMembers'));
-}
 
     private function collectTreeIds($node)
-{
-    if (!$node) {
-        return [];
+    {
+        if (!$node) {
+            return [];
+        }
+
+        $ids = [];
+
+        if (!empty($node['id'])) {
+            $ids[] = $node['id'];
+        }
+
+        $ids = array_merge($ids, $this->collectTreeIds($node['left'] ?? null));
+        $ids = array_merge($ids, $this->collectTreeIds($node['right'] ?? null));
+
+        return $ids;
     }
-
-    $ids = [];
-
-    if (!empty($node['id'])) {
-        $ids[] = $node['id'];
-    }
-
-    $ids = array_merge($ids, $this->collectTreeIds($node['left'] ?? null));
-    $ids = array_merge($ids, $this->collectTreeIds($node['right'] ?? null));
-
-    return $ids;
-}
 
     /**
      * STRICT CRAWLER

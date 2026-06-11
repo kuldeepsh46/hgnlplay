@@ -221,14 +221,10 @@ class DashboardController extends Controller
             // dd($teamMembers);
             $totalDownline = $teamMembers->count();
 
-$leftDownline = $teamMembers
-    ->where('position', 'left')
-    ->count();
+            $leftDownline = $teamMembers->where('position', 'left')->count();
 
-$rightDownline = $teamMembers
-    ->where('position', 'right')
-    ->count();
-    // dd($totalDownline, $leftDownline, $rightDownline);
+            $rightDownline = $teamMembers->where('position', 'right')->count();
+            // dd($totalDownline, $leftDownline, $rightDownline);
 
             // 6️⃣ Lucky Cycle Logic (Your existing code)
             $cycle = DB::table('lucky_cycles')
@@ -258,7 +254,7 @@ $rightDownline = $teamMembers
                 $voucherGroups = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->orderBy('month_no')->get()->groupBy('month_no');
                 $rewards = DB::table('lucky_rewards')->where('cycle_id', $cycle->id)->get();
             }
-// dd($totalDownline, $leftDownline, $rightDownline);
+            // dd($totalDownline, $leftDownline, $rightDownline);
             return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'walletBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning', 'progress'));
         }
 

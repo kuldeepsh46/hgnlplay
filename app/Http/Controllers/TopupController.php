@@ -121,28 +121,44 @@ class TopupController extends Controller
 
             // ✅ 8. Trigger pair bonus check for ALL uplines
             // (ONLY for standard packages < 50,000)
-            if ($package->amount < 50000) {
-                $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
-                while ($sponsor) {
-                    if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
-                        $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount);
+            $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
+            $emisData = \DB::table('orders')->where('user_id', $sponsor->id)->where('status', 'completed')->selectRaw('MIN(created_at) as activation_date, COUNT(*) as total_emis_paid')->first();
+
+            if (!$emisData || !$emisData->activation_date) {
+                return;
+            }
+
+            $activationDate = \Carbon\Carbon::parse($emisData->activation_date);
+
+            $activationMonth = $activationDate->year * 12 + $activationDate->month;
+            $currentMonth = now()->year * 12 + now()->month;
+
+            $totalEmisSupposedToPay = $currentMonth - $activationMonth + 1;
+
+            $totalEmisPaid = $emisData->total_emis_paid ?? 0;
+            if ($totalEmisPaid <= $totalEmisSupposedToPay) {
+                if ($package->amount < 50000) {
+                    // $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
+                    while ($sponsor) {
+                        if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
+                            $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount);
+                        }
+                        if (empty($sponsor->placement_id)) {
+                            break;
+                        }
+                        $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
                     }
-                    if (empty($sponsor->placement_id)) {
-                        break;
-                    }
-                    $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
                 }
-            }
+                // ✅ 9. Reward logic (unchanged)
+                if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
+                    $this->rewardAfterFullEmi($receiver);
+                }
 
-            // ✅ 9. Reward logic (unchanged)
-            if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
-                $this->rewardAfterFullEmi($receiver);
-            }
-
-            // ✅ 10. Distribute Commissions (Only for first time investment)
-            if ($currentCount == 0) {
-                if (method_exists($this, 'distributeCommission')) {
-                    $this->distributeCommission($receiver->id, $package->amount);
+                // ✅ 10. Distribute Commissions (Only for first time investment)
+                if ($currentCount == 0) {
+                    if (method_exists($this, 'distributeCommission')) {
+                        $this->distributeCommission($receiver->id, $package->amount);
+                    }
                 }
             }
 
@@ -165,11 +181,11 @@ class TopupController extends Controller
 
     private function checkAndDistributePairCompletionBonus($sponsor, $amount)
     {
+        // dd($sponsor, $amount);
         // 1. STRICT CAP: No pair income for packages 50k and above
         if (!$sponsor || $amount >= 50000) {
             return;
         }
-
         $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
         $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
 

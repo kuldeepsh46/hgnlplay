@@ -39,7 +39,22 @@ class MatrixService
         ];
 
         foreach ($upline as $tier => $user) {
-            if (!$user) {
+            $emisData = \DB::table('orders')->where('user_id', $user->id)->where('status', 'completed')->selectRaw('MIN(created_at) as activation_date, COUNT(*) as total_emis_paid')->first();
+
+            if (!$emisData || !$emisData->activation_date) {
+                return;
+            }
+
+            $activationDate = \Carbon\Carbon::parse($emisData->activation_date);
+
+            $activationMonth = $activationDate->year * 12 + $activationDate->month;
+            $currentMonth = now()->year * 12 + now()->month;
+
+            $totalEmisSupposedToPay = $currentMonth - $activationMonth + 1;
+
+            $totalEmisPaid = $emisData->total_emis_paid ?? 0;
+            // dd($totalEmisSupposedToPay, $totalEmisPaid);
+            if (!$user || $totalEmisPaid < $totalEmisSupposedToPay) {
                 continue;
             }
 
@@ -85,7 +100,7 @@ class MatrixService
                     'user_id' => $user->id,
                     'amount' => $amount,
                     'type' => 'credit',
-                    'remarks' => "Level Income (Tier {$tier}) to {$user->member_id}",",
+                    'remarks' => "Level Income (Tier {$tier}) to {$user->member_id}",
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
