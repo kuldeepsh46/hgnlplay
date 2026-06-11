@@ -534,9 +534,9 @@
 
 
         /* =========================================
-                               2. NEW DASHBOARD STATS CSS
-                               (Appended safely so it only affects the new UI)
-                            ========================================= */
+                                   2. NEW DASHBOARD STATS CSS
+                                   (Appended safely so it only affects the new UI)
+                                ========================================= */
         .dashboard-stats-container {
             display: flex;
             flex-direction: column;
@@ -815,7 +815,7 @@
             </div>
 
         </div> --}}
-
+{{-- {{dd($totalDownline, $leftDownline, $rightDownline)}} --}}
         <div class="card card-flex">
 
             <div class="referral-left">
@@ -845,8 +845,8 @@
 
                 <div style="margin-top:15px; padding-top: 15px; border-top: 1px solid #eee;">
                     <strong>Total Downline: </strong>
-                    <span id="downline-count" style="color: #3b82f6; font-weight: bold; font-size: 1.1rem;">
-                        {{ $leftDownline ?? 0 }}
+                    <span style="color: #3b82f6; font-weight: bold; font-size: 1.1rem;">
+                        {{ $totalDownline ?? 0 }}
                     </span>
                 </div>
             </div>
@@ -911,13 +911,13 @@
                         <h3>{{ $totalDownline ?? 0 }}</h3>
                         <p>Total Downline</p>
                     </div>
-                    {{-- <div class="stat-box">
-                        <h3 id="downline-count">{{ $leftDownline ?? 0 }}</h3>
-                        <p>Total Downline</p>
-                    </div> --}}
                     <div class="stat-box">
                         <h3>₹{{ number_format($directIncome ?? 0, 2) }}</h3>
                         <p>Direct Income</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>₹{{ number_format($totalLevelIncome ?? 0, 2) }}</h3>
+                        <p>Level Income</p>
                     </div>
                 </div>
 

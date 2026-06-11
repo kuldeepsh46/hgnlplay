@@ -178,6 +178,7 @@ class DashboardController extends Controller
         $thirteenTotal = $packageSums['13000.00'] ?? 0;
         $fiftyKTotal = $packageSums['50000.00'] ?? 0;
         $oneLakhTotal = $packageSums['100000.00'] ?? 0;
+        $totalLevelIncome = DB::table('transactions')->where('user_id', $user->id)->where('type', 'credit')->where('remarks', 'like', 'Level Income%')->sum('amount');
 
         if ($user->hasRole('customer')) {
             // 1️⃣ Payouts
@@ -217,23 +218,17 @@ class DashboardController extends Controller
 
             // 4. PREPARE THE COLLECTION
             $teamMembers = collect($allDownliners)->reject(fn($m) => $m->id == 27)->sortBy('created_at');
+            // dd($teamMembers);
             $totalDownline = $teamMembers->count();
 
-            // 5️⃣ SPLIT Downline (For Radio Buttons)
-            // We filter by 'leg' column (1 = Left, 2 = Right)
-            $leftDownline = DB::table('users')
-                ->where('leg', 1)
-                ->where(function ($query) use ($user) {
-                    $query->where('sponsor_id', $user->id)->orWhere('placement_id', $user->id);
-                })
-                ->count();
+$leftDownline = $teamMembers
+    ->where('position', 'left')
+    ->count();
 
-            $rightDownline = DB::table('users')
-                ->where('leg', 2)
-                ->where(function ($query) use ($user) {
-                    $query->where('sponsor_id', $user->id)->orWhere('placement_id', $user->id);
-                })
-                ->count();
+$rightDownline = $teamMembers
+    ->where('position', 'right')
+    ->count();
+    // dd($totalDownline, $leftDownline, $rightDownline);
 
             // 6️⃣ Lucky Cycle Logic (Your existing code)
             $cycle = DB::table('lucky_cycles')
@@ -263,12 +258,12 @@ class DashboardController extends Controller
                 $voucherGroups = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->orderBy('month_no')->get()->groupBy('month_no');
                 $rewards = DB::table('lucky_rewards')->where('cycle_id', $cycle->id)->get();
             }
-
+// dd($totalDownline, $leftDownline, $rightDownline);
             return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'walletBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning', 'progress'));
         }
 
         // Admin dashboard view
-        return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal', 'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData'));
+        return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal', 'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData', 'totalLevelIncome'));
     }
     private function crawlAndForceSide($node, $side, &$list)
     {
@@ -365,82 +360,58 @@ class DashboardController extends Controller
 
     //     return view('admin.manage-users', compact('users'));
     // }
-public function manageUsers()
-{
-    $users = DB::table('users as u')
-        ->select('u.*')
+    public function manageUsers()
+    {
+        $users = DB::table('users as u')
+            ->select('u.*')
 
-        // Wallet balance
-        ->addSelect([
-            'wallet_balance' => DB::table('wallets as w')
-                ->selectRaw('COALESCE(w.balance, 0)')
-                ->whereColumn('w.user_id', 'u.id')
-                ->limit(1)
-        ])
+            // Wallet balance
+            ->addSelect([
+                'wallet_balance' => DB::table('wallets as w')->selectRaw('COALESCE(w.balance, 0)')->whereColumn('w.user_id', 'u.id')->limit(1),
+            ])
 
-        // Total invested
-        ->addSelect([
-            'total_invested' => DB::table('orders as o')
-                ->selectRaw('COALESCE(SUM(o.amount), 0)')
-                ->whereColumn('o.user_id', 'u.id')
-        ])
+            // Total invested
+            ->addSelect([
+                'total_invested' => DB::table('orders as o')->selectRaw('COALESCE(SUM(o.amount), 0)')->whereColumn('o.user_id', 'u.id'),
+            ])
 
-        // Withdraw completed
-        ->addSelect([
-            'withdraw_completed' => DB::table('withdraw_requests as wr')
-                ->selectRaw('COALESCE(SUM(wr.net_amount), 0)')
-                ->whereColumn('wr.user_id', 'u.id')
-                ->where('wr.status', 'completed')
-        ])
+            // Withdraw completed
+            ->addSelect([
+                'withdraw_completed' => DB::table('withdraw_requests as wr')->selectRaw('COALESCE(SUM(wr.net_amount), 0)')->whereColumn('wr.user_id', 'u.id')->where('wr.status', 'completed'),
+            ])
 
-        // Withdraw pending
-        ->addSelect([
-            'withdraw_pending' => DB::table('withdraw_requests as wr')
-                ->selectRaw('COALESCE(SUM(wr.net_amount), 0)')
-                ->whereColumn('wr.user_id', 'u.id')
-                ->where('wr.status', 'pending')
-        ])
+            // Withdraw pending
+            ->addSelect([
+                'withdraw_pending' => DB::table('withdraw_requests as wr')->selectRaw('COALESCE(SUM(wr.net_amount), 0)')->whereColumn('wr.user_id', 'u.id')->where('wr.status', 'pending'),
+            ])
 
-        // Activation date (first completed order)
-        ->addSelect([
-            'activation_date' => DB::table('orders as o')
-                ->selectRaw('MIN(o.created_at)')
-                ->whereColumn('o.user_id', 'u.id')
-                ->where('o.status', 'completed')
-        ])
+            // Activation date (first completed order)
+            ->addSelect([
+                'activation_date' => DB::table('orders as o')->selectRaw('MIN(o.created_at)')->whereColumn('o.user_id', 'u.id')->where('o.status', 'completed'),
+            ])
 
-        // EMI paid count
-        ->addSelect([
-            'total_emis_paid' => DB::table('orders as o')
-                ->selectRaw('COUNT(*)')
-                ->whereColumn('o.user_id', 'u.id')
-                ->where('o.status', 'completed')
-        ])
+            // EMI paid count
+            ->addSelect([
+                'total_emis_paid' => DB::table('orders as o')->selectRaw('COUNT(*)')->whereColumn('o.user_id', 'u.id')->where('o.status', 'completed'),
+            ])
 
-        ->orderByDesc('u.id')
-        ->get();
+            ->orderByDesc('u.id')
+            ->get();
 
-    foreach ($users as $user) {
+        foreach ($users as $user) {
+            $firstOrder = DB::table('orders as o')->join('packages as p', 'o.package_id', '=', 'p.id')->where('o.user_id', $user->id)->where('o.status', 'completed')->select('p.name as package_name', 'o.amount')->orderBy('o.created_at', 'asc')->first();
 
-        $firstOrder = DB::table('orders as o')
-            ->join('packages as p', 'o.package_id', '=', 'p.id')
-            ->where('o.user_id', $user->id)
-            ->where('o.status', 'completed')
-            ->select('p.name as package_name', 'o.amount')
-            ->orderBy('o.created_at', 'asc')
-            ->first();
-
-        if ($firstOrder) {
-            $user->first_package = $firstOrder->package_name;
-            $user->price = $firstOrder->amount;
-        } else {
-            $user->first_package = 'N/A';
-            $user->price = 'N/A';
+            if ($firstOrder) {
+                $user->first_package = $firstOrder->package_name;
+                $user->price = $firstOrder->amount;
+            } else {
+                $user->first_package = 'N/A';
+                $user->price = 'N/A';
+            }
         }
-    }
 
-    return view('admin.manage-users', compact('users'));
-}
+        return view('admin.manage-users', compact('users'));
+    }
     public function manageUsersOLD()
     {
         $users = DB::table('users')

@@ -10,7 +10,9 @@ class MatrixService
 {
     public function processCommission(User $buyer)
     {
-        if (!$buyer->sponsor_id) return;
+        if (!$buyer->sponsor_id) {
+            return;
+        }
 
         /**
          * BUYER LEVEL DECIDES COMMISSION MATRIX
@@ -37,11 +39,12 @@ class MatrixService
         ];
 
         foreach ($upline as $tier => $user) {
-
-            if (!$user) continue;
+            if (!$user) {
+                continue;
+            }
 
             $progress = UserMatrixProgress::firstOrCreate([
-                'user_id' => $user->id
+                'user_id' => $user->id,
             ]);
 
             $tierField = "tier_{$tier}_count";
@@ -49,25 +52,14 @@ class MatrixService
             $maxLimit = [
                 1 => 3,
                 2 => 9,
-                3 => 27
+                3 => 27,
             ][$tier];
 
-            DB::transaction(function () use (
-                $user,
-                $progress,
-                $tierField,
-                $tier,
-                $maxLimit,
-                $commissionMatrix,
-                $buyerRank
-            ) {
-
+            DB::transaction(function () use ($user, $progress, $tierField, $tier, $maxLimit, $commissionMatrix, $buyerRank) {
                 /**
                  * LOCK ROW (Prevent race condition)
                  */
-                $progress = UserMatrixProgress::where('id', $progress->id)
-                    ->lockForUpdate()
-                    ->first();
+                $progress = UserMatrixProgress::where('id', $progress->id)->lockForUpdate()->first();
 
                 /**
                  * STOP if limit reached
@@ -84,18 +76,16 @@ class MatrixService
                 /**
                  * UPDATE WALLET
                  */
-                DB::table('wallets')
-                    ->where('user_id', $user->id)
-                    ->increment('balance', $amount);
+                DB::table('wallets')->where('user_id', $user->id)->increment('balance', $amount);
 
                 /**
                  * INSERT TRANSACTION (NEW)
                  */
                 DB::table('transactions')->insert([
-                    'user_id'    => $user->id,
-                    'amount'     => $amount,
-                    'type'       => 'credit',
-                    'remarks'    => "Pair Completion Bonus (Tier {$tier}) to {$user->member_id}",
+                    'user_id' => $user->id,
+                    'amount' => $amount,
+                    'type' => 'credit',
+                    'remarks' => "Level Income (Tier {$tier}) to {$user->member_id}",",
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -123,33 +113,28 @@ class MatrixService
      */
     private function checkPromotion(User $user, UserMatrixProgress $progress)
     {
-        if (
-            $progress->tier_1_count >= 3 &&
-            $progress->tier_2_count >= 9 &&
-            $progress->tier_3_count >= 27
-        ) {
-
+        if ($progress->tier_1_count >= 3 && $progress->tier_2_count >= 9 && $progress->tier_3_count >= 27) {
             /**
              * SAVE HISTORY BEFORE RESET
              */
             DB::table('user_matrix_rank_history')->insert([
-                'user_id'       => $user->id,
-                'rank_level'    => $progress->rank_level,
-                'tier_1_count'  => $progress->tier_1_count,
-                'tier_2_count'  => $progress->tier_2_count,
-                'tier_3_count'  => $progress->tier_3_count,
-                'created_at'    => now(),
-                'updated_at'    => now(),
+                'user_id' => $user->id,
+                'rank_level' => $progress->rank_level,
+                'tier_1_count' => $progress->tier_1_count,
+                'tier_2_count' => $progress->tier_2_count,
+                'tier_3_count' => $progress->tier_3_count,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             /**
              * PROMOTE USER
              */
             $progress->update([
-                'rank_level'     => $progress->rank_level + 1,
-                'tier_1_count'   => 0,
-                'tier_2_count'   => 0,
-                'tier_3_count'   => 0,
+                'rank_level' => $progress->rank_level + 1,
+                'tier_1_count' => 0,
+                'tier_2_count' => 0,
+                'tier_3_count' => 0,
             ]);
         }
     }
