@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
-
+use App\Enums\BonusType;
 class DashboardController extends Controller
 {
     public function index()
@@ -178,8 +178,13 @@ class DashboardController extends Controller
         $thirteenTotal = $packageSums['13000.00'] ?? 0;
         $fiftyKTotal = $packageSums['50000.00'] ?? 0;
         $oneLakhTotal = $packageSums['100000.00'] ?? 0;
-        $totalLevelIncome = DB::table('transactions')->where('user_id', $user->id)->where('type', 'credit')->where('remarks', 'like', 'Level Income%')->sum('amount');
-
+        // $totalLevelIncome = DB::table('transactions')->where('user_id', $user->id)->where('type', 'credit')->where('remarks', 'like', 'Level Income%')->sum('amount');
+        $totalLevelIncome = DB::table('transactions')
+    ->where('user_id', $user->id)
+    ->where('type', 'credit')
+    ->where('bonus_type', BonusType::LevelIncome->value)
+    ->sum('amount');
+// dd($totalLevelIncome);
         if ($user->hasRole('customer')) {
             // 1️⃣ Payouts
             // dd($user->id);
@@ -190,8 +195,21 @@ class DashboardController extends Controller
 
             // 2️⃣ Incomes
             // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Direct 10% Commission%')->sum('amount');
-            $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', '%Commission%')->sum('amount');
-            $pairIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
+            // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', '%Commission%')->sum('amount');
+            // $pairIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
+            $directIncome = DB::table('transactions')
+    ->where('user_id', $user->id)
+    ->where('bonus_type', BonusType::DirectIncome->value)
+    ->sum('amount');
+
+$pairIncome = DB::table('transactions')
+    ->where('user_id', $user->id)
+    ->whereIn('bonus_type', [
+        BonusType::PairBonusNormal->value,
+        // BonusType::PairBonus2000->value,
+        BonusType::PairBonus->value,
+    ])
+    ->sum('amount');
 
             // 3️⃣ Wallet & Earnings
             $walletBalance = DB::table('wallets')->where('user_id', $user->id)->value('balance') ?? 0;
@@ -255,11 +273,11 @@ class DashboardController extends Controller
                 $rewards = DB::table('lucky_rewards')->where('cycle_id', $cycle->id)->get();
             }
             // dd($totalDownline, $leftDownline, $rightDownline);
-            return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'walletBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning', 'progress'));
+            return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'walletBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning', 'progress', 'totalLevelIncome'));
         }
 
         // Admin dashboard view
-        return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal', 'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData', 'totalLevelIncome'));
+        return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal', 'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData'));
     }
     private function crawlAndForceSide($node, $side, &$list)
     {

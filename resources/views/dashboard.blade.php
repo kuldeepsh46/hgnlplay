@@ -816,6 +816,7 @@
 
         </div> --}}
 {{-- {{dd($totalDownline, $leftDownline, $rightDownline)}} --}}
+{{-- {{dd($totalLevelIncome)}} --}}
         <div class="card card-flex">
 
             <div class="referral-left">
@@ -931,7 +932,7 @@
                         <p>Topup Wallet</p>
                     </div>
                     <div class="stat-box">
-                        <h3>₹{{ number_format($pairIncome ?? 0, 2) }}</h3>
+                        <h3>₹{{ number_format($totalLevelIncome ?? 0, 2) }}</h3>
                         <p>Pair Income</p>
                     </div>
                     <div class="stat-box">

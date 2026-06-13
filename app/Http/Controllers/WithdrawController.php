@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Enums\BonusType;
 
 class WithdrawController extends Controller
 {
@@ -106,7 +107,7 @@ class WithdrawController extends Controller
         // Record both transactions (optional)
         DB::table('transactions')->insert([
             ['user_id' => $request->user_id, 'type' => 'Debit', 'amount' => $request->amount, 'remarks' => 'Withdrawal processed', 'created_at' => now()],
-            ['user_id' => 1, 'type' => 'Credit', 'amount' => $request->tax_amount, 'remarks' => 'Withdrawal Tax Received', 'created_at' => now()]
+            ['user_id' => 1, 'type' => 'Credit', 'bonus_type' => BonusType::Withdrawal->value, 'amount' => $request->tax_amount, 'remarks' => 'Withdrawal Tax Received', 'created_at' => now()]
         ]);
     }
 

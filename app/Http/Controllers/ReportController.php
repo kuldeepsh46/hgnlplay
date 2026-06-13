@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-
+use App\Enums\BonusType;
 class ReportController extends Controller
 {
     // public function index(Request $request)
@@ -85,12 +85,24 @@ class ReportController extends Controller
         $to = $request->input('to');
 
         // Updated Query: Using 'Pair%Bonus' to catch "Pair Completion Bonus"
+        // $matchQuery = DB::table('transactions')
+        //     ->where('user_id', $user->id)
+        //     ->where('remarks', 'LIKE', '%Pair%Bonus%') // Matches "Pair Completion Bonus..."
+        //     ->orderByDesc('id');
         $matchQuery = DB::table('transactions')
-            ->where('user_id', $user->id)
-            ->where('remarks', 'LIKE', '%Pair%Bonus%') // Matches "Pair Completion Bonus..."
-            ->orderByDesc('id');
+    ->where('user_id', $user->id)
+    ->whereIn('bonus_type', [
+        BonusType::PairBonusNormal->value,
+        BonusType::PairBonus2000->value,
+        BonusType::PairBonus->value,
+    ])
+    ->orderByDesc('id');
 
-        $directQuery = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'LIKE', '%Commission%')->orderByDesc('id');
+        // $directQuery = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'LIKE', '%Commission%')->orderByDesc('id');
+        $directQuery = DB::table('transactions')
+    ->where('user_id', $user->id)
+    ->where('bonus_type', BonusType::DirectIncome->value)
+    ->orderByDesc('id');
 
         // Date Filters (Single or Range)
         if ($from && $to) {
@@ -225,13 +237,26 @@ class ReportController extends Controller
         // dd($from, $to);
         $query = DB::table('transactions')->where('user_id', $user->id);
 
+        // if ($type === 'matching') {
+        //     $query->where('remarks', 'LIKE', '%Pair%Bonus%');
+        //     $label = 'matching';
+        // } else {
+        //     $query->where('remarks', 'LIKE', '%Commission%');
+        //     $label = 'direct';
+        // }
         if ($type === 'matching') {
-            $query->where('remarks', 'LIKE', '%Pair%Bonus%');
-            $label = 'matching';
-        } else {
-            $query->where('remarks', 'LIKE', '%Commission%');
-            $label = 'direct';
-        }
+    $query->whereIn('bonus_type', [
+        BonusType::PairBonusNormal->value,
+        // BonusType::PairBonus2000->value,
+        BonusType::PairBonus->value,
+    ]);
+
+    $label = 'matching';
+} else {
+    $query->where('bonus_type', BonusType::DirectIncome->value);
+
+    $label = 'direct';
+}
 
         // APPLY FILTERS TO THE EXPORT
         if ($from && $to) {

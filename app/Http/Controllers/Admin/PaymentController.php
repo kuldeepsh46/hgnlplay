@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Enums\BonusType;
+
 
 class PaymentController extends Controller
 {
@@ -55,9 +57,11 @@ class PaymentController extends Controller
             );
 
             // ✅ Log transaction (optional)
+            
             DB::table('transactions')->insert([
                 'user_id' => $payment->user_id,
                 'type' => 'Credit',
+                'bonus_type' => BonusType::FundRequestApproved->value,
                 'amount' => $payment->amount,
                 'remarks' => 'Fund request approved by admin',
                 'created_at' => now(),

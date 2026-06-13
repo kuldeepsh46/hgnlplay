@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Enums\BonusType;
 
 class PayoutController extends Controller
 {
@@ -65,6 +66,7 @@ class PayoutController extends Controller
             DB::table('transactions')->insert([
                 'user_id' => $payout->user_id,
                 'type' => 'Debit',
+                'bonus_type' => BonusType::Payout->value,
                 'amount' => $payout->amount,
                 'remarks' => 'Payout Approved by Admin',
                 'created_at' => now(),
