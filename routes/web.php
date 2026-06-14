@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Mail\WelcomeMemberMail;
 use App\Models\User;
 use App\Http\Controllers\ManageUsersRolesController;
+use App\enums\BonusType;
 Route::get('/', function () {
     return view('welcome');
 });
