@@ -17,4 +17,5 @@ enum BonusType: string
     case FundRequest = 'fund_request';
     case commission = 'commission';
     case reward = 'reward';
+    case other = 'other';
 }
