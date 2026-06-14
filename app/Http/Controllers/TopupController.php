@@ -58,6 +58,7 @@ class TopupController extends Controller
 
         $finalAmount = $isFirstPurchase ? $package->discounted_amount ?? $package->actual_amount : $package->actual_amount;
 // dd($finalAmount);
+
         $currentCount = $receiver->investment_count ?? 0;
         $registrationFee = $currentCount == 0 ? 100 : 0;
         $finalAmount = (float) $finalAmount + $registrationFee;

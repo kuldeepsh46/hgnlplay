@@ -180,3 +180,9 @@ Route::resource('admin/packages', PackageController::class)->names([
     'update' => 'packages.update',
     'destroy' => 'packages.destroy',
 ]);
+Route::get('/check-bonus-enum', function () {
+    return [
+        'class_exists' => class_exists(\App\Enums\BonusType::class),
+        'value' => \App\Enums\BonusType::LevelIncome->value,
+    ];
+});
