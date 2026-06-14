@@ -44,7 +44,7 @@ class TopupController extends Controller
         //         $matrixService = new \App\Services\MatrixService();
         //         $matrixService->processCommission($currentUser);
         //     }
-            // die;
+        // die;
         // dd($package);
         $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
 
@@ -57,7 +57,7 @@ class TopupController extends Controller
         // dd($isFirstPurchase);
 
         $finalAmount = $isFirstPurchase ? $package->discounted_amount ?? $package->actual_amount : $package->actual_amount;
-// dd($finalAmount);
+        // dd($finalAmount);
 
         $currentCount = $receiver->investment_count ?? 0;
         $registrationFee = $currentCount == 0 ? 100 : 0;
@@ -94,8 +94,8 @@ class TopupController extends Controller
                     'balance' => $wallet->balance - $finalAmount,
                     'updated_at' => now(),
                 ]);
-                // dd($wallet->balance, $finalAmount);
-$bonusType = BonusType::EmiPayment->value;
+            // dd($wallet->balance, $finalAmount);
+            $bonusType = BonusType::EmiPayment->value;
             // ✅ 5. Record debit transaction
             DB::table('transactions')->insert([
                 'user_id' => $currentUser->id,
@@ -133,7 +133,7 @@ $bonusType = BonusType::EmiPayment->value;
             // (ONLY for standard packages < 50,000)
             $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
             $emisData = \DB::table('orders')->where('user_id', $sponsor->id)->where('status', 'completed')->selectRaw('MIN(created_at) as activation_date, COUNT(*) as total_emis_paid')->first();
-// dd($emisData);
+            // dd($emisData);
             // if (!$emisData || !$emisData->activation_date) {
             //     return;
             // }
@@ -148,30 +148,30 @@ $bonusType = BonusType::EmiPayment->value;
             $totalEmisPaid = $emisData->total_emis_paid ?? 0;
             // dd($activationDate, $totalEmisPaid, $totalEmisSupposedToPay);
             // if ($totalEmisPaid >= $totalEmisSupposedToPay) {
-                if ($package->amount < 50000) {
-                    // $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
-                    while ($sponsor) {
-                        if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
-                            // dd($sponsor, $package->amount);
-                            $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount);
-                        }
-                        if (empty($sponsor->placement_id)) {
-                            break;
-                        }
-                        $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
+            if ($package->amount < 50000) {
+                // $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
+                while ($sponsor) {
+                    if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
+                        // dd($sponsor, $package->amount);
+                        $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount);
                     }
+                    if (empty($sponsor->placement_id)) {
+                        break;
+                    }
+                    $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
                 }
-                // ✅ 9. Reward logic (unchanged)
-                if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
-                    $this->rewardAfterFullEmi($receiver);
-                }
+            }
+            // ✅ 9. Reward logic (unchanged)
+            if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
+                $this->rewardAfterFullEmi($receiver);
+            }
 
-                // ✅ 10. Distribute Commissions (Only for first time investment)
-                if ($currentCount == 0) {
-                    if (method_exists($this, 'distributeCommission')) {
-                        $this->distributeCommission($receiver->id, $package->amount);
-                    }
+            // ✅ 10. Distribute Commissions (Only for first time investment)
+            if ($currentCount == 0) {
+                if (method_exists($this, 'distributeCommission')) {
+                    $this->distributeCommission($receiver->id, $package->amount);
                 }
+            }
             // }
 
             DB::commit();
@@ -182,7 +182,8 @@ $bonusType = BonusType::EmiPayment->value;
             };
             if ($package->amount == 2000) {
                 $matrixService = new \App\Services\MatrixService();
-                $matrixService->processCommission($currentUser);
+                // $matrixService->processCommission($currentUser);
+                $matrixService->processCommission($receiver, $currentUser);
             }
             return back()->with('success', $successMessage);
         } catch (\Exception $e) {
@@ -274,177 +275,119 @@ $bonusType = BonusType::EmiPayment->value;
     //         ]);
     //     });
     // }
-   private function checkAndDistributePairCompletionBonus($sponsor, $amount)
-{
-    // dd($sponsor, $amount);
-    // 1. STRICT CAP: No pair income for packages 50k and above
-    if (!$sponsor || $amount >= 50000) {
-        return;
-    }
+    private function checkAndDistributePairCompletionBonus($sponsor, $amount)
+    {
+        // dd($sponsor, $amount);
+        // 1. STRICT CAP: No pair income for packages 50k and above
+        if (!$sponsor || $amount >= 50000) {
+            return;
+        }
 
-    $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
-    $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
+        $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
+        $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
 
-    if (empty($leftUsers) || empty($rightUsers)) {
-        return;
-    }
+        if (empty($leftUsers) || empty($rightUsers)) {
+            return;
+        }
 
-    $leftUserIds = collect($leftUsers)->pluck('id')->toArray();
-    $rightUserIds = collect($rightUsers)->pluck('id')->toArray();
+        $leftUserIds = collect($leftUsers)->pluck('id')->toArray();
+        $rightUserIds = collect($rightUsers)->pluck('id')->toArray();
 
-    $isSpecial2000Package = ((int) $amount === 2000);
+        $isSpecial2000Package = (int) $amount === 2000;
 
-    $bonusType = $isSpecial2000Package
-        ? BonusType::PairBonus2000->value
-        : BonusType::PairBonusNormal->value;
+        $bonusType = $isSpecial2000Package ? BonusType::PairBonus2000->value : BonusType::PairBonusNormal->value;
 
-    // 2. Calculate Pure Investment Volume
-    if ($isSpecial2000Package) {
+        // 2. Calculate Pure Investment Volume
+        if ($isSpecial2000Package) {
+            /*
+             * SPECIAL ₹2000 PACKAGE RULE:
+             * ₹2000 package matches ONLY with ₹2000 package.
+             * ₹1000 + ₹1000 will NOT match with ₹2000.
+             */
 
-        /*
-         * SPECIAL ₹2000 PACKAGE RULE:
-         * ₹2000 package matches ONLY with ₹2000 package.
-         * ₹1000 + ₹1000 will NOT match with ₹2000.
-         */
+            $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->where('status', 'completed')->where('amount', 2000)->sum('amount');
 
-        $leftTotalVolume = DB::table('orders')
-            ->whereIn('user_id', $leftUserIds)
-            ->where('status', 'completed')
-            ->where('amount', 2000)
-            ->sum('amount');
+            $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->where('status', 'completed')->where('amount', 2000)->sum('amount');
+        } else {
+            /*
+             * NORMAL PACKAGE RULE:
+             * Normal packages should NOT include ₹2000 package volume.
+             */
 
-        $rightTotalVolume = DB::table('orders')
-            ->whereIn('user_id', $rightUserIds)
-            ->where('status', 'completed')
-            ->where('amount', 2000)
-            ->sum('amount');
+            $leftUniqueInvestors = DB::table('orders')->whereIn('user_id', $leftUserIds)->where('status', 'completed')->where('amount', '!=', 2000)->distinct('user_id')->count();
 
-    } else {
+            $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->where('status', 'completed')->where('amount', '!=', 2000)->sum('amount') - $leftUniqueInvestors * 100;
 
-        /*
-         * NORMAL PACKAGE RULE:
-         * Normal packages should NOT include ₹2000 package volume.
-         */
+            $rightUniqueInvestors = DB::table('orders')->whereIn('user_id', $rightUserIds)->where('status', 'completed')->where('amount', '!=', 2000)->distinct('user_id')->count();
 
-        $leftUniqueInvestors = DB::table('orders')
-            ->whereIn('user_id', $leftUserIds)
-            ->where('status', 'completed')
-            ->where('amount', '!=', 2000)
-            ->distinct('user_id')
-            ->count();
+            $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->where('status', 'completed')->where('amount', '!=', 2000)->sum('amount') - $rightUniqueInvestors * 100;
+        }
 
-        $leftTotalVolume = DB::table('orders')
-            ->whereIn('user_id', $leftUserIds)
-            ->where('status', 'completed')
-            ->where('amount', '!=', 2000)
-            ->sum('amount') - ($leftUniqueInvestors * 100);
+        // 3. Lifetime matchable ceiling
+        $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
 
-        $rightUniqueInvestors = DB::table('orders')
-            ->whereIn('user_id', $rightUserIds)
-            ->where('status', 'completed')
-            ->where('amount', '!=', 2000)
-            ->distinct('user_id')
-            ->count();
+        // 4. Already paid volume calculation using bonus_type
+        $totalPaidBonus = DB::table('transactions')->where('user_id', $sponsor->id)->where('bonus_type', $bonusType)->sum('amount');
 
-        $rightTotalVolume = DB::table('orders')
-            ->whereIn('user_id', $rightUserIds)
-            ->where('status', 'completed')
-            ->where('amount', '!=', 2000)
-            ->sum('amount') - ($rightUniqueInvestors * 100);
-    }
+        $alreadyMatchedVolume = $totalPaidBonus * 10;
 
-    // 3. Lifetime matchable ceiling
-    $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
+        $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
 
-    // 4. Already paid volume calculation using bonus_type
-    $totalPaidBonus = DB::table('transactions')
-        ->where('user_id', $sponsor->id)
-        ->where('bonus_type', $bonusType)
-        ->sum('amount');
+        if ($newVolumeToPay < 1000) {
+            return;
+        }
 
-    $alreadyMatchedVolume = $totalPaidBonus * 10;
+        // 5. Bonus percentage logic
+        // ₹2000 package also gives 10%
+        $binaryBonusPercentage = $amount == 16000 ? 20 : 10;
 
-    $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
+        $pairBonus = $newVolumeToPay * ($binaryBonusPercentage / 100);
 
-    if ($newVolumeToPay < 1000) {
-        return;
-    }
+        // ================================
+        // DAILY CAP LOGIC (₹5000/day)
+        // ================================
 
-    // 5. Bonus percentage logic
-    // ₹2000 package also gives 10%
-    $binaryBonusPercentage = $amount == 16000 ? 20 : 10;
-
-    $pairBonus = $newVolumeToPay * ($binaryBonusPercentage / 100);
-
-    // ================================
-    // DAILY CAP LOGIC (₹5000/day)
-    // ================================
-
-    $todayPairIncome = DB::table('transactions')
-        ->where('user_id', $sponsor->id)
-        ->whereIn('bonus_type', [
-            BonusType::PairBonusNormal->value,
-            BonusType::PairBonus2000->value,
-        ])
-        ->whereDate('created_at', now()->toDateString())
-        ->sum('amount');
-
-    $dailyCap = 5000;
-    $remainingCap = $dailyCap - $todayPairIncome;
-
-    if ($remainingCap <= 0) {
-        return;
-    }
-
-    // Apply cap
-    $pairBonus = min($pairBonus, $remainingCap);
-
-    if ($pairBonus <= 0) {
-        return;
-    }
-
-    // 6. Final payout - ONLY ONCE
-    DB::transaction(function () use (
-        $sponsor,
-        $pairBonus,
-        $newVolumeToPay,
-        $isSpecial2000Package,
-        $bonusType,
-        $binaryBonusPercentage,
-        $leftTotalVolume,
-        $rightTotalVolume,
-        $dailyCap
-    ) {
-        DB::table('wallets')
+        $todayPairIncome = DB::table('transactions')
             ->where('user_id', $sponsor->id)
-            ->increment('balance', $pairBonus);
+            ->whereIn('bonus_type', [BonusType::PairBonusNormal->value, BonusType::PairBonus2000->value])
+            ->whereDate('created_at', now()->toDateString())
+            ->sum('amount');
 
-        $receiverId = $sponsor->member_id ?? $sponsor->id;
+        $dailyCap = 5000;
+        $remainingCap = $dailyCap - $todayPairIncome;
 
-        $packageType = $isSpecial2000Package
-            ? '₹2000 Special Package'
-            : 'Normal Package';
+        if ($remainingCap <= 0) {
+            return;
+        }
 
-        $remarks = 'Pair Completion Bonus - ' . $packageType .
-            ': Credited ₹' . number_format($pairBonus, 2) .
-            ' to ' . $receiverId .
-            ' | Matched Volume ₹' . number_format($newVolumeToPay, 2) .
-            ' | Bonus Rate ' . $binaryBonusPercentage . '%' .
-            ' | Left Volume ₹' . number_format($leftTotalVolume, 2) .
-            ' | Right Volume ₹' . number_format($rightTotalVolume, 2) .
-            ' | Daily Cap ₹' . number_format($dailyCap, 2);
+        // Apply cap
+        $pairBonus = min($pairBonus, $remainingCap);
 
-        DB::table('transactions')->insert([
-            'user_id' => $sponsor->id,
-            'type' => 'credit',
-            'bonus_type' => $bonusType,
-            'amount' => $pairBonus,
-            'remarks' => $remarks,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    });
-}
+        if ($pairBonus <= 0) {
+            return;
+        }
+
+        // 6. Final payout - ONLY ONCE
+        DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay, $isSpecial2000Package, $bonusType, $binaryBonusPercentage, $leftTotalVolume, $rightTotalVolume, $dailyCap) {
+            DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
+
+            $receiverId = $sponsor->member_id ?? $sponsor->id;
+
+            $packageType = $isSpecial2000Package ? '₹2000 Special Package' : 'Normal Package';
+
+            $remarks = 'Pair Completion Bonus - ' . $packageType . ': Credited ₹' . number_format($pairBonus, 2) . ' to ' . $receiverId . ' | Matched Volume ₹' . number_format($newVolumeToPay, 2) . ' | Bonus Rate ' . $binaryBonusPercentage . '%' . ' | Left Volume ₹' . number_format($leftTotalVolume, 2) . ' | Right Volume ₹' . number_format($rightTotalVolume, 2) . ' | Daily Cap ₹' . number_format($dailyCap, 2);
+
+            DB::table('transactions')->insert([
+                'user_id' => $sponsor->id,
+                'type' => 'credit',
+                'bonus_type' => $bonusType,
+                'amount' => $pairBonus,
+                'remarks' => $remarks,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
+    }
 
     // private function checkAndDistributePairCompletionBonus($sponsor, $amount)
     // {
@@ -666,7 +609,7 @@ $bonusType = BonusType::EmiPayment->value;
             DB::table('wallets')->updateOrInsert(['user_id' => $targetUserId], ['updated_at' => now()]);
 
             DB::table('wallets')->where('user_id', $targetUserId)->increment('balance', $commissionAmount);
-$bonusType = BonusType::DirectIncome->value;
+            $bonusType = BonusType::DirectIncome->value;
             // 2. Insert Transaction Record
             DB::table('transactions')->insert([
                 'user_id' => $targetUserId,
@@ -684,7 +627,7 @@ $bonusType = BonusType::DirectIncome->value;
 
         // Credit reward to wallet
         DB::table('wallets')->where('user_id', $user->id)->increment('balance', $rewardAmount);
-$bonusType = BonusType::RewardAfterFullEmi->value;
+        $bonusType = BonusType::RewardAfterFullEmi->value;
 
         // Record credit transaction
         DB::table('transactions')->insert([
@@ -736,7 +679,7 @@ $bonusType = BonusType::RewardAfterFullEmi->value;
                 // ✅ Add pair bonus
                 $bonusAmount = 1000;
                 DB::table('wallets')->where('user_id', $parent->id)->increment('balance', $bonusAmount);
-$bonusType = BonusType::PairBonus->value;
+                $bonusType = BonusType::PairBonus->value;
                 DB::table('transactions')->insert([
                     'user_id' => $parent->id,
                     'type' => 'Credit',
