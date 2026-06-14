@@ -14,4 +14,7 @@ enum BonusType: string
     case Withdrawal = 'withdrawal';
     case FundRequestApproved = 'fund_request_approved';
     case Payout = 'payout';
+    case FundRequest = 'fund_request';
+    case commission = 'commission';
+    case reward = 'reward';
 }

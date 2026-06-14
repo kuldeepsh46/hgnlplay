@@ -609,7 +609,7 @@ class TopupController extends Controller
             DB::table('wallets')->updateOrInsert(['user_id' => $targetUserId], ['updated_at' => now()]);
 
             DB::table('wallets')->where('user_id', $targetUserId)->increment('balance', $commissionAmount);
-            $bonusType = BonusType::DirectIncome->value;
+            $bonusType = BonusType::commission->value;
             // 2. Insert Transaction Record
             DB::table('transactions')->insert([
                 'user_id' => $targetUserId,
