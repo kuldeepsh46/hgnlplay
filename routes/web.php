@@ -19,7 +19,7 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Mail\WelcomeMemberMail;
 use App\Models\User;
 use App\Http\Controllers\ManageUsersRolesController;
-use App\enums\BonusType;
+// use App\enums\BonusType;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -181,9 +181,9 @@ Route::resource('admin/packages', PackageController::class)->names([
     'update' => 'packages.update',
     'destroy' => 'packages.destroy',
 ]);
-Route::get('/check-bonus-enum', function () {
-    return [
-        'class_exists' => class_exists(\App\Enums\BonusType::class),
-        'value' => \App\Enums\BonusType::LevelIncome->value,
-    ];
-});
+// Route::get('/check-bonus-enum', function () {
+//     return [
+//         'class_exists' => class_exists(\App\Enums\BonusType::class),
+//         'value' => \App\Enums\BonusType::LevelIncome->value,
+//     ];
+// });
