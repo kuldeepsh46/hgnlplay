@@ -70,7 +70,8 @@
             margin-top: 10px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #1e2b36;
             padding: 10px;
             text-align: center;
@@ -169,11 +170,12 @@
                 <input type="date" name="to" value="{{ $to }}" onchange="this.form.submit()"
                     style="padding:8px;border-radius:6px;background:#141c22;border:1px solid #1f2832;color:#fff;">
             </div>
-            
+
             <button class="btn btn-copy" type="submit">Filter</button>
             <a href="{{ route('reports.index') }}" class="btn btn-whatsapp">Reset</a>
 
-            <button type="submit" id="dynamicExportBtn" formaction="{{ route('reports.export', 'matching') }}" class="btn btn-copy">
+            <button type="submit" id="dynamicExportBtn" formaction="{{ route('reports.export', 'matching') }}"
+                class="btn btn-copy">
                 ⬇ Export CSV
             </button>
         </form>
@@ -181,6 +183,7 @@
         <div style="display:flex;gap:10px;margin-bottom:16px;">
             <button class="btn" id="matchingBtn">Matching Income</button>
             <button class="btn" id="directBtn" style="background:#333;color:#fff;">Direct Income</button>
+            <button class="btn" id="levelBtn" style="background:#333;color:#fff;">Level Income</button>
         </div>
 
         <div id="matchingTab">
@@ -204,7 +207,9 @@
                                 <td>{{ $r->remarks }}</td>
                             </tr>
                         @empty
-                            <tr><td colspan="4">No records found.</td></tr>
+                            <tr>
+                                <td colspan="4">No records found.</td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -233,12 +238,45 @@
                                 <td>{{ $r->remarks }}</td>
                             </tr>
                         @empty
-                            <tr><td colspan="4">No records found.</td></tr>
+                            <tr>
+                                <td colspan="4">No records found.</td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             {{ $directIncomes->appends(request()->query())->links() }}
+        </div>
+
+        <div id="levelTab" style="display:none;">
+            <h3 style="color:var(--accent)">Level Income</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($levelIncomes as $r)
+                            <tr>
+                                <td>{{ ($levelIncomes->currentPage() - 1) * $levelIncomes->perPage() + $loop->iteration }}</td>
+                                <td>{{ date('d M Y, h:i A', strtotime($r->created_at)) }}</td>
+                                <td>₹{{ number_format($r->amount, 2) }}</td>
+                                <td>{{ $r->remarks }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4">No records found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            {{ $levelIncomes->appends(request()->query())->links() }}
         </div>
     </div>
 
@@ -254,7 +292,8 @@
                 </div>
                 <div class="form-group">
                     <label for="new_password_confirmation">Confirm Password</label>
-                    <input type="password" name="new_password_confirmation" id="new_password_confirmation" required minlength="6">
+                    <input type="password" name="new_password_confirmation" id="new_password_confirmation" required
+                        minlength="6">
                 </div>
                 <button type="submit" class="btn btn-copy" style="width:100%;">Update Password</button>
             </form>
@@ -264,45 +303,82 @@
     <script>
         const matchTab = document.getElementById('matchingTab');
         const directTab = document.getElementById('directTab');
+        const levelTab = document.getElementById('levelTab');
+
         const matchBtn = document.getElementById('matchingBtn');
         const directBtn = document.getElementById('directBtn');
+        const levelBtn = document.getElementById('levelBtn');
+
         const exportBtn = document.getElementById('dynamicExportBtn');
 
         // Routes for dynamic export
         const matchingExportRoute = "{{ route('reports.export', 'matching') }}";
         const directExportRoute = "{{ route('reports.export', 'direct') }}";
+        const levelExportRoute = "{{ route('reports.export', 'level') }}";
 
         function setMatchActive() {
-            matchTab.style.display = 'block'; 
+            matchTab.style.display = 'block';
             directTab.style.display = 'none';
-            matchBtn.style.background = 'var(--accent)'; 
+            levelTab.style.display = 'none';
+
+            matchBtn.style.background = 'var(--accent)';
             matchBtn.style.color = '#000';
-            directBtn.style.background = '#333'; 
+
+            directBtn.style.background = '#333';
             directBtn.style.color = '#fff';
-            // Update button to export matching data
+
+            levelBtn.style.background = '#333';
+            levelBtn.style.color = '#fff';
+
             exportBtn.setAttribute('formaction', matchingExportRoute);
         }
 
         function setDirectActive() {
-            matchTab.style.display = 'none'; 
+            matchTab.style.display = 'none';
             directTab.style.display = 'block';
-            directBtn.style.background = 'var(--accent)'; 
+            levelTab.style.display = 'none';
+
+            directBtn.style.background = 'var(--accent)';
             directBtn.style.color = '#000';
-            matchBtn.style.background = '#333'; 
+
+            matchBtn.style.background = '#333';
             matchBtn.style.color = '#fff';
-            // Update button to export direct data
+
+            levelBtn.style.background = '#333';
+            levelBtn.style.color = '#fff';
+
             exportBtn.setAttribute('formaction', directExportRoute);
+        }
+
+        function setLevelActive() {
+            matchTab.style.display = 'none';
+            directTab.style.display = 'none';
+            levelTab.style.display = 'block';
+
+            levelBtn.style.background = 'var(--accent)';
+            levelBtn.style.color = '#000';
+
+            matchBtn.style.background = '#333';
+            matchBtn.style.color = '#fff';
+
+            directBtn.style.background = '#333';
+            directBtn.style.color = '#fff';
+
+            exportBtn.setAttribute('formaction', levelExportRoute);
         }
 
         matchBtn.onclick = setMatchActive;
         directBtn.onclick = setDirectActive;
+        levelBtn.onclick = setLevelActive;
 
         // Persist tab on page load
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('direct_page')) { 
-            setDirectActive(); 
-        } else { 
-            setMatchActive(); 
+        if (urlParams.has('direct_page')) {
+            setDirectActive();
+        } else if (urlParams.has('level_page')) {
+            setLevelActive();
+        } else {
+            setMatchActive();
         }
 
         /* Original Password Modal Logic */
@@ -312,12 +388,18 @@
                 item.parentElement.addEventListener("click", () => passwordModal.style.display = "flex");
             }
         });
-        function closeModal() { passwordModal.style.display = "none"; }
-        window.onclick = (e) => { if (e.target === passwordModal) closeModal(); };
+
+        function closeModal() {
+            passwordModal.style.display = "none";
+        }
+
+        window.onclick = (e) => {
+            if (e.target === passwordModal) closeModal();
+        };
 
         /* Original Logout Logic */
         const logoutLink = document.getElementById('logout-link');
-        if(logoutLink) {
+        if (logoutLink) {
             logoutLink.addEventListener('click', function(e) {
                 e.preventDefault();
                 document.getElementById('logout-form').submit();

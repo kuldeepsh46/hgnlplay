@@ -932,7 +932,7 @@
                         <p>Topup Wallet</p>
                     </div>
                     <div class="stat-box">
-                        <h3>₹{{ number_format($totalLevelIncome ?? 0, 2) }}</h3>
+                        <h3>₹{{ number_format($pairIncome ?? 0, 2) }}</h3>
                         <p>Pair Income</p>
                     </div>
                     <div class="stat-box">
