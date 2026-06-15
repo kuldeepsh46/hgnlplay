@@ -163,7 +163,7 @@ class TopupController extends Controller
             }
 
             // ✅ 10. Distribute Commissions (Only for first time investment)
-            if ($currentCount == 0) {
+            if ($currentCount == 0 && $package->name != 'HIMALAYA PAY WELLNESS') {
                 if (method_exists($this, 'distributeCommission')) {
                     $this->distributeCommission($receiver->id, $package->amount);
                 }
