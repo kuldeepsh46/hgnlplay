@@ -135,11 +135,7 @@ class MatrixService
                 /**
                  * CHECK RECEIVER EMI STATUS
                  */
-                $emisData = DB::table('orders')
-                    ->where('user_id', $receiver->id)
-                    ->where('status', 'completed')
-                    ->selectRaw('MIN(created_at) as activation_date, COUNT(*) as total_emis_paid')
-                    ->first();
+                $emisData = DB::table('orders')->where('user_id', $receiver->id)->where('status', 'completed')->selectRaw('MIN(created_at) as activation_date, COUNT(*) as total_emis_paid')->first();
 
                 Log::info('EMI data fetched for receiver', [
                     'tier' => $tier,
@@ -161,10 +157,10 @@ class MatrixService
 
                 $activationDate = \Carbon\Carbon::parse($emisData->activation_date);
 
-                $activationMonth = ($activationDate->year * 12) + $activationDate->month;
-                $currentMonth = (now()->year * 12) + now()->month;
+                $activationMonth = $activationDate->year * 12 + $activationDate->month;
+                $currentMonth = now()->year * 12 + now()->month;
 
-                $totalEmisSupposedToPay = ($currentMonth - $activationMonth) + 1;
+                $totalEmisSupposedToPay = $currentMonth - $activationMonth + 1;
                 $totalEmisPaid = $emisData->total_emis_paid ?? 0;
 
                 Log::info('EMI status calculated', [
@@ -198,7 +194,7 @@ class MatrixService
                         'tier_1_count' => 0,
                         'tier_2_count' => 0,
                         'tier_3_count' => 0,
-                    ]
+                    ],
                 );
 
                 $tierField = $this->getTierField($tier);
@@ -214,22 +210,11 @@ class MatrixService
                     'max_limit' => $maxLimit,
                 ]);
 
-                DB::transaction(function () use (
-                    $receiver,
-                    $progress,
-                    $tierField,
-                    $tier,
-                    $maxLimit,
-                    $topupUserRank,
-                    $topupUser,
-                    $payer
-                ) {
+                DB::transaction(function () use ($receiver, $progress, $tierField, $tier, $maxLimit, $topupUserRank, $topupUser, $payer) {
                     /**
                      * LOCK ROW TO PREVENT RACE CONDITION
                      */
-                    $progress = UserMatrixProgress::where('id', $progress->id)
-                        ->lockForUpdate()
-                        ->first();
+                    $progress = UserMatrixProgress::where('id', $progress->id)->lockForUpdate()->first();
 
                     if (!$progress) {
                         Log::error('Matrix progress missing after lockForUpdate', [
@@ -323,12 +308,55 @@ class MatrixService
                         'amount' => $amount,
                     ]);
 
+                    // /**
+                    //  * UPDATE WALLET
+                    //  */
+                    // $walletUpdated = DB::table('wallets')
+                    //     ->where('user_id', $receiver->id)
+                    //     ->increment('balance', $amount);
+                    //     dd($walletUpdated);
+
+                    // Log::info('Wallet increment attempted', [
+                    //     'receiver_user_id' => $receiver->id,
+                    //     'receiver_member_id' => $receiver->member_id ?? null,
+                    //     'amount' => $amount,
+                    //     'wallet_update_result' => $walletUpdated,
+                    // ]);
+
+                    // if (!$walletUpdated) {
+                    //     Log::error('Wallet update failed or wallet row missing', [
+                    //         'receiver_user_id' => $receiver->id,
+                    //         'receiver_member_id' => $receiver->member_id ?? null,
+                    //         'amount' => $amount,
+                    //     ]);
+
+                    //     throw new \Exception("Wallet not found or not updated for user ID {$receiver->id}");
+                    // }
+
                     /**
                      * UPDATE WALLET
+                     *
+                     * If receiver wallet does not exist yet, create it first.
+                     * This handles users whose package was bought by parent/admin/cash
+                     * and who never added funds themselves.
                      */
-                    $walletUpdated = DB::table('wallets')
-                        ->where('user_id', $receiver->id)
-                        ->increment('balance', $amount);
+                    $wallet = DB::table('wallets')->where('user_id', $receiver->id)->lockForUpdate()->first();
+
+                    if (!$wallet) {
+                        DB::table('wallets')->insert([
+                            'user_id' => $receiver->id,
+                            'balance' => 0,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                        Log::info('Wallet created before level income credit', [
+                            'receiver_user_id' => $receiver->id,
+                            'receiver_member_id' => $receiver->member_id ?? null,
+                        ]);
+                    }
+
+                    $walletUpdated = DB::table('wallets')->where('user_id', $receiver->id)->increment('balance', $amount);
 
                     Log::info('Wallet increment attempted', [
                         'receiver_user_id' => $receiver->id,
@@ -338,7 +366,7 @@ class MatrixService
                     ]);
 
                     if (!$walletUpdated) {
-                        Log::error('Wallet update failed or wallet row missing', [
+                        Log::error('Wallet update failed after wallet create/check', [
                             'receiver_user_id' => $receiver->id,
                             'receiver_member_id' => $receiver->member_id ?? null,
                             'amount' => $amount,
@@ -347,21 +375,13 @@ class MatrixService
                         throw new \Exception("Wallet not found or not updated for user ID {$receiver->id}");
                     }
 
-                    $payerText = $payer
-                        ? " | Paid By: " . ($payer->member_id ?? $payer->id)
-                        : "";
+                    $payerText = $payer ? ' | Paid By: ' . ($payer->member_id ?? $payer->id) : '';
 
                     /**
                      * Keep Product User and Product User ID in remarks.
                      * This makes future eligibility checks more reliable.
                      */
-                    $remarks = "Level Income (Tier {$tier})"
-                        . " | Product User: " . ($topupUser->member_id ?? $topupUser->id)
-                        . " | Product User ID: " . $topupUser->id
-                        . " | Receiver: " . ($receiver->member_id ?? $receiver->id)
-                        . " | Receiver ID: " . $receiver->id
-                        . " | Topup Rank: {$topupUserRank}"
-                        . $payerText;
+                    $remarks = "Level Income (Tier {$tier})" . ' | Product User: ' . ($topupUser->member_id ?? $topupUser->id) . ' | Product User ID: ' . $topupUser->id . ' | Receiver: ' . ($receiver->member_id ?? $receiver->id) . ' | Receiver ID: ' . $receiver->id . " | Topup Rank: {$topupUserRank}" . $payerText;
 
                     /**
                      * INSERT TRANSACTION
@@ -426,7 +446,6 @@ class MatrixService
                 'payer_id' => $payer?->id,
                 'payer_member_id' => $payer?->member_id,
             ]);
-
         } catch (Throwable $e) {
             Log::error('MatrixService failed', [
                 'topup_user_id' => $topupUser->id ?? null,
@@ -534,11 +553,8 @@ class MatrixService
         ];
     }
 
-    private function hasCompletedTierRequirement(
-        User $receiver,
-        int $completedTier,
-        UserMatrixProgress $progress
-    ): array {
+    private function hasCompletedTierRequirement(User $receiver, int $completedTier, UserMatrixProgress $progress): array
+    {
         $reasons = [];
 
         $requiredCount = $this->getTierLimit($completedTier);
@@ -588,11 +604,7 @@ class MatrixService
             $activeDirectChildren = $this->getActiveDirectChildren($receiver);
             $activeDirectChildrenCount = $activeDirectChildren->count();
 
-            $receivedFromActiveDirectChildrenCount = $this->countActiveDirectChildrenWithTierIncome(
-                $receiver,
-                $completedTier,
-                $activeDirectChildren
-            );
+            $receivedFromActiveDirectChildrenCount = $this->countActiveDirectChildrenWithTierIncome($receiver, $completedTier, $activeDirectChildren);
 
             $details['active_direct_children_count'] = $activeDirectChildrenCount;
             $details['received_from_active_direct_children_count'] = $receivedFromActiveDirectChildrenCount;
@@ -619,10 +631,7 @@ class MatrixService
             ->select(['id', 'member_id', 'username', 'sponsor_id'])
             ->where('sponsor_id', $receiver->id)
             ->whereExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('orders')
-                    ->whereColumn('orders.user_id', 'users.id')
-                    ->where('orders.status', 'completed');
+                $query->select(DB::raw(1))->from('orders')->whereColumn('orders.user_id', 'users.id')->where('orders.status', 'completed');
             })
             ->get();
     }
@@ -652,8 +661,7 @@ class MatrixService
                         $query->orWhere('remarks', 'LIKE', "%Product User: {$child->member_id}%");
                     }
 
-                    $query->orWhere('remarks', 'LIKE', "%Product User: {$child->id}%")
-                        ->orWhere('remarks', 'LIKE', "%Product User ID: {$child->id}%");
+                    $query->orWhere('remarks', 'LIKE', "%Product User: {$child->id}%")->orWhere('remarks', 'LIKE', "%Product User ID: {$child->id}%");
                 })
                 ->exists();
 
@@ -677,11 +685,7 @@ class MatrixService
                 'tier_3_count' => $progress->tier_3_count,
             ]);
 
-            if (
-                $progress->tier_1_count >= $this->getTierLimit(1) &&
-                $progress->tier_2_count >= $this->getTierLimit(2) &&
-                $progress->tier_3_count >= $this->getTierLimit(3)
-            ) {
+            if ($progress->tier_1_count >= $this->getTierLimit(1) && $progress->tier_2_count >= $this->getTierLimit(2) && $progress->tier_3_count >= $this->getTierLimit(3)) {
                 DB::table('user_matrix_rank_history')->insert([
                     'user_id' => $user->id,
                     'rank_level' => $user->rank_level ?? 1,

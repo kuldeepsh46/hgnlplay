@@ -206,7 +206,8 @@ class TopupController extends Controller
         $leftUserIds = collect($leftUsers)->pluck('id')->toArray();
         $rightUserIds = collect($rightUsers)->pluck('id')->toArray();
 
-        $bonusType = $packageType ? BonusType::PairBonus2000->value : BonusType::PairBonusNormal->value;
+        $bonusType = BonusType::PairBonusNormal->value;
+        // dd($bonusType);
         $himalyaPayWellnessPackageId = DB::table('packages')->where('name', 'HIMALAYA PAY WELLNESS')->value('id');
 
         $leftUniqueInvestors = DB::table('orders')->whereIn('user_id', $leftUserIds)->where('status', 'completed')->where('package_id', '!=', $himalyaPayWellnessPackageId)->distinct('user_id')->count();
@@ -243,7 +244,7 @@ class TopupController extends Controller
 
         $todayPairIncome = DB::table('transactions')
             ->where('user_id', $sponsor->id)
-            ->whereIn('bonus_type', [BonusType::PairBonusNormal->value, BonusType::PairBonus2000->value])
+            ->whereIn('bonus_type', [BonusType::PairBonusNormal->value])
             ->whereDate('created_at', now()->toDateString())
             ->sum('amount');
 
