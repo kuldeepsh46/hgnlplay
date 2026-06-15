@@ -53,10 +53,10 @@ class TopupController extends Controller
         $finalAmount = $isFirstPurchase ? $package->discounted_amount ?? $package->actual_amount : $package->actual_amount;
         // dd($finalAmount);
 
-        // $currentCount = $receiver->investment_count ?? 0;
-        $currentCount = \App\Models\Order::where('user_id', $receiver->id)->where('package_id', $package->id)->count() ?? 0;
+        $currentCount = $receiver->investment_count ?? 0;
+        // $currentCount = \App\Models\Order::where('user_id', $receiver->id)->where('package_id', $package->id)->count() ?? 0;
         // $registrationFee = $currentCount == 0 ? 100 : 0;
-        $registrationFee = ($currentCount == 0 && strtolower($package->name) !== strtolower('HIMALAYA PAY WELLNESS')) ? 100 : 0;
+        $registrationFee = ($currentCount == 0 && strtolower($package->name) !== strtolower('REPURCHASE BOOSTER PACKAGE')) ? 100 : 0;
         $finalAmount = (float) $finalAmount + $registrationFee;
 
         // 4. Calculate increment value based on package ID
@@ -149,7 +149,7 @@ class TopupController extends Controller
                 while ($sponsor) {
                     if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
                         // dd($sponsor, $package->amount);
-                        $packageType = $package->name == 'HIMALAYA PAY WELLNESS' ? 'Himalaya Pay Wellness Package' : 'Normal Package';
+                        $packageType = $package->name == 'REPURCHASE BOOSTER PACKAGE' ? 'REPURCHASE BOOSTER PACKAGE Package' : 'Normal Package';
                         $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount, $packageType);
                     }
                     if (empty($sponsor->placement_id)) {
@@ -164,7 +164,7 @@ class TopupController extends Controller
             }
 
             // ✅ 10. Distribute Commissions (Only for first time investment)
-            if ($currentCount == 0 && $package->name != 'HIMALAYA PAY WELLNESS') {
+            if ($currentCount == 0 && $package->name != 'REPURCHASE BOOSTER PACKAGE') {
                 if (method_exists($this, 'distributeCommission')) {
                     $this->distributeCommission($receiver->id, $package->amount);
                 }
@@ -178,7 +178,7 @@ class TopupController extends Controller
                 default => "Top-up successful! ₹{$finalAmount} deducted from your wallet for Member {$memberId}.",
             };
             // dd($package);
-            if ($package->name == 'HIMALAYA PAY WELLNESS') {
+            if ($package->name == 'REPURCHASE BOOSTER PACKAGE') {
                 $matrixService = new \App\Services\MatrixService();
                 $matrixService->processCommission($receiver, $currentUser);
             }
@@ -209,7 +209,7 @@ class TopupController extends Controller
 
         $bonusType = BonusType::PairBonusNormal->value;
         // dd($bonusType);
-        $himalyaPayWellnessPackageId = DB::table('packages')->where('name', 'HIMALAYA PAY WELLNESS')->value('id');
+        $himalyaPayWellnessPackageId = DB::table('packages')->where('name', 'REPURCHASE BOOSTER PACKAGE')->value('id');
 
         $leftUniqueInvestors = DB::table('orders')->whereIn('user_id', $leftUserIds)->where('status', 'completed')->where('package_id', '!=', $himalyaPayWellnessPackageId)->distinct('user_id')->count();
 
