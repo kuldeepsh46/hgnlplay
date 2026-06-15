@@ -53,7 +53,8 @@ class TopupController extends Controller
         $finalAmount = $isFirstPurchase ? $package->discounted_amount ?? $package->actual_amount : $package->actual_amount;
         // dd($finalAmount);
 
-        $currentCount = $receiver->investment_count ?? 0;
+        // $currentCount = $receiver->investment_count ?? 0;
+        $currentCount = \App\Models\Order::where('user_id', $receiver->id)->where('package_id', $package->id)->count() ?? 0;
         // $registrationFee = $currentCount == 0 ? 100 : 0;
         $registrationFee = ($currentCount == 0 && strtolower($package->name) !== strtolower('HIMALAYA PAY WELLNESS')) ? 100 : 0;
         $finalAmount = (float) $finalAmount + $registrationFee;

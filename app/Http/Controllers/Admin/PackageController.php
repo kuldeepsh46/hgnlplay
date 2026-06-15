@@ -39,11 +39,13 @@ class PackageController extends Controller
             'name' => 'required|string|max:255',
             'actual_amount' => 'required|integer|min:0',
             'discounted_amount' => 'nullable|integer|min:0',
+            // 'amount' => 'required|integer|min:0',
             'pv' => 'required|integer|min:0',
             'direct_bonus' => 'required|integer|min:0',
             'pair_bonus' => 'required|integer|min:0',
         ]);
-
+        // dd($data);
+$data['amount'] = $data['actual_amount'];
         Package::create($data);
 
         return redirect()->route('packages.index')->with('success', 'Package created successfully!');
