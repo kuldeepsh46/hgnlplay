@@ -24,170 +24,363 @@ class TopupController extends Controller
 
         return view('member-topup', compact('user', 'packages', 'wallet', 'walletTransactions'));
     }
+    // public function store(Request $r)
+    // {
+    //     // dd($r->all());
+    //     // 1. Validate using member_id instead of email
+    //     $r->validate([
+    //         'member_id' => 'required|string|exists:users,member_id',
+    //         'package_id' => 'required|integer|exists:packages,id',
+    //         'payment_by' => 'required|string',
+    //     ]);
+
+    //     $currentUser = Auth::user();
+    //     $memberId = strtoupper(trim($r->member_id));
+
+    //     // 2. Fetch data using member_id
+    //     $receiver = \App\Models\User::where('member_id', $memberId)->first();
+    //     $package = DB::table('packages')->where('id', $r->package_id)->first();
+    //     $isRepurchaseBooster = strtoupper(trim($package->name)) === 'REPURCHASE BOOSTER PACKAGE';
+    //     $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
+
+    //     if (!$receiver) {
+    //         return back()->with('error', 'Member not found.');
+    //     }
+
+    //     // 3. INTERNAL FINAL AMOUNT CALCULATION
+    //     $isFirstPurchase = !\App\Models\Order::where('user_id', $receiver->id)->exists();
+    //     // dd($isFirstPurchase);
+
+    //     $finalAmount = $isFirstPurchase ? $package->discounted_amount ?? $package->actual_amount : $package->actual_amount;
+    //     // dd($finalAmount);
+
+    //     $currentCount = $receiver->investment_count ?? 0;
+    //     // $currentCount = \App\Models\Order::where('user_id', $receiver->id)->where('package_id', $package->id)->count() ?? 0;
+    //     // $registrationFee = $currentCount == 0 ? 100 : 0;
+    //     // $registrationFee = ($currentCount == 0 && strtolower($package->name) != $isRepurchaseBooster) ? 100 : 0;
+    //     $registrationFee = ($currentCount == 0 && !$isRepurchaseBooster) ? 100 : 0;
+    //     $finalAmount = (float) $finalAmount + $registrationFee;
+
+    //     // 4. Calculate increment value based on package ID
+    //     // We keep this to track total investment progress, but we no longer block based on it
+    //     $packageId = (int) $r->package_id;
+    //     $incrementValue = match ($packageId) {
+    //         1 => 1,
+    //         2 => 8,
+    //         3 => 16,
+    //         default => 1,
+    //     };
+
+    //     $newTotal = $currentCount + $incrementValue;
+
+    //     // ✅ Wallet balance validation
+    //     if (!$wallet || $wallet->balance < $finalAmount) {
+    //         return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
+    //     }
+
+    //     // ✅ Lucky Service logic for specialized packages
+    //     if (in_array($packageId, [4, 5])) {
+    //         \App\Services\LuckyService::createCycleIfNotExists($receiver->id, $packageId);
+    //     }
+
+    //     DB::beginTransaction();
+    //     try {
+    //         // ✅ 4. Deduct wallet balance
+    //         DB::table('wallets')
+    //             ->where('user_id', $currentUser->id)
+    //             ->update([
+    //                 'balance' => $wallet->balance - $finalAmount,
+    //                 'updated_at' => now(),
+    //             ]);
+    //         // dd($wallet->balance, $finalAmount);
+    //         $bonusType = BonusType::EmiPayment->value;
+    //         // ✅ 5. Record debit transaction
+    //         DB::table('transactions')->insert([
+    //             'user_id' => $currentUser->id,
+    //             'type' => 'Debit',
+    //             'amount' => $finalAmount,
+    //             'bonus_type' => $bonusType,
+    //             'remarks' => 'EMI payment for ' . $receiver->username . " ({$memberId})",
+    //             'created_at' => now(),
+    //         ]);
+    //         // dd('Transaction recorded with bonus type: ' . $bonusType);
+
+    //         // ✅ 6. Record order
+    //         DB::table('orders')->insert([
+    //             'user_id' => $receiver->id,
+    //             'from_user_id' => $currentUser->id,
+    //             'package_id' => $package->id,
+    //             'amount' => $finalAmount,
+    //             'payment_by' => $r->payment_by,
+    //             'status' => 'completed',
+    //             'created_at' => now(),
+    //             'updated_at' => now(),
+    //         ]);
+
+    //         // ✅ 7. Update investment_count and status
+    //         // We set status to completed ONLY if they hit 16 or more, but we don't block them if they go over.
+    //         DB::table('users')
+    //             ->where('id', $receiver->id)
+    //             ->update([
+    //                 'investment_count' => $newTotal,
+    //                 'emi_status' => $newTotal >= 16 ? 'completed' : 'ongoing',
+    //                 'updated_at' => now(),
+    //             ]);
+
+    //         // ✅ 8. Trigger pair bonus check for ALL uplines
+    //         // (ONLY for standard packages < 50,000)
+    //         $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
+    //         $emisData = \DB::table('orders')->where('user_id', $sponsor->id)->where('status', 'completed')->selectRaw('MIN(created_at) as activation_date, COUNT(*) as total_emis_paid')->first();
+    //         // dd($emisData);
+    //         // if (!$emisData || !$emisData->activation_date) {
+    //         //     return;
+    //         // }
+
+    //         $activationDate = \Carbon\Carbon::parse($emisData->activation_date);
+
+    //         $activationMonth = $activationDate->year * 12 + $activationDate->month;
+    //         $currentMonth = now()->year * 12 + now()->month;
+
+    //         $totalEmisSupposedToPay = $currentMonth - $activationMonth + 1;
+
+    //         $totalEmisPaid = $emisData->total_emis_paid ?? 0;
+    //         // dd($activationDate, $totalEmisPaid, $totalEmisSupposedToPay);
+    //         // if ($totalEmisPaid >= $totalEmisSupposedToPay) {
+    //         if ($package->amount < 50000 && !$isRepurchaseBooster) {
+    //             // $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
+    //             while ($sponsor) {
+    //                 if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
+    //                     // dd($sponsor, $package->amount);
+    //                     $packageType = $package->name == 'Normal Package';
+    //                     $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount, $packageType);
+    //                 }
+    //                 if (empty($sponsor->placement_id)) {
+    //                     break;
+    //                 }
+    //                 $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
+    //             }
+    //         }
+    //         // ✅ 9. Reward logic (unchanged)
+    //         if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
+    //             $this->rewardAfterFullEmi($receiver);
+    //         }
+
+    //         // ✅ 10. Distribute Commissions (Only for first time investment)
+    //         if ($currentCount == 0 && $package->name != 'REPURCHASE BOOSTER PACKAGE') {
+    //             if (method_exists($this, 'distributeCommission')) {
+    //                 $this->distributeCommission($receiver->id, $package->amount);
+    //             }
+    //         }
+    //         // }
+
+    //         DB::commit();
+
+    //         $successMessage = match ($packageId) {
+    //             4, 5 => "Congratulations! You have successfully paid ₹{$finalAmount} for Member {$memberId}. Vouchers have been issued.",
+    //             default => "Top-up successful! ₹{$finalAmount} deducted from your wallet for Member {$memberId}.",
+    //         };
+    //         // dd($package);
+    //         if ($package->name == 'REPURCHASE BOOSTER PACKAGE') {
+    //             $matrixService = new \App\Services\MatrixService();
+    //             $matrixService->processCommission($receiver, $currentUser);
+    //         }
+    //         return back()->with('success', $successMessage);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+    //     }
+    // }
+
     public function store(Request $r)
-    {
-        // dd($r->all());
-        // 1. Validate using member_id instead of email
-        $r->validate([
-            'member_id' => 'required|string|exists:users,member_id',
-            'package_id' => 'required|integer|exists:packages,id',
-            'payment_by' => 'required|string',
-        ]);
+{
+    // 1. Validate using member_id instead of email
+    $r->validate([
+        'member_id' => 'required|string|exists:users,member_id',
+        'package_id' => 'required|integer|exists:packages,id',
+        'payment_by' => 'required|string',
+    ]);
 
-        $currentUser = Auth::user();
-        $memberId = strtoupper(trim($r->member_id));
+    $currentUser = Auth::user();
+    $memberId = strtoupper(trim($r->member_id));
 
-        // 2. Fetch data using member_id
-        $receiver = \App\Models\User::where('member_id', $memberId)->first();
-        $package = DB::table('packages')->where('id', $r->package_id)->first();
-        $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
+    // 2. Fetch data using member_id
+    $receiver = \App\Models\User::where('member_id', $memberId)->first();
+    $package = DB::table('packages')->where('id', $r->package_id)->first();
 
-        if (!$receiver) {
-            return back()->with('error', 'Member not found.');
-        }
+    if (!$receiver) {
+        return back()->with('error', 'Member not found.');
+    }
 
-        // 3. INTERNAL FINAL AMOUNT CALCULATION
-        $isFirstPurchase = !\App\Models\Order::where('user_id', $receiver->id)->exists();
-        // dd($isFirstPurchase);
+    if (!$package) {
+        return back()->with('error', 'Package not found.');
+    }
 
-        $finalAmount = $isFirstPurchase ? $package->discounted_amount ?? $package->actual_amount : $package->actual_amount;
-        // dd($finalAmount);
+    $packageName = strtoupper(trim($package->name));
+    $isRepurchaseBooster = $packageName === 'REPURCHASE BOOSTER PACKAGE';
 
-        $currentCount = $receiver->investment_count ?? 0;
-        // $currentCount = \App\Models\Order::where('user_id', $receiver->id)->where('package_id', $package->id)->count() ?? 0;
-        // $registrationFee = $currentCount == 0 ? 100 : 0;
-        $registrationFee = ($currentCount == 0 && strtolower($package->name) !== strtolower('REPURCHASE BOOSTER PACKAGE')) ? 100 : 0;
-        $finalAmount = (float) $finalAmount + $registrationFee;
+    $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
 
-        // 4. Calculate increment value based on package ID
-        // We keep this to track total investment progress, but we no longer block based on it
-        $packageId = (int) $r->package_id;
-        $incrementValue = match ($packageId) {
-            1 => 1,
-            2 => 8,
-            3 => 16,
-            default => 1,
-        };
+    // 3. INTERNAL FINAL AMOUNT CALCULATION
+    $isFirstPurchase = !\App\Models\Order::where('user_id', $receiver->id)->exists();
 
-        $newTotal = $currentCount + $incrementValue;
+    $finalAmount = $isFirstPurchase
+        ? ($package->discounted_amount ?? $package->actual_amount)
+        : $package->actual_amount;
 
-        // ✅ Wallet balance validation
-        if (!$wallet || $wallet->balance < $finalAmount) {
-            return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
-        }
+    $currentCount = $receiver->investment_count ?? 0;
 
-        // ✅ Lucky Service logic for specialized packages
-        if (in_array($packageId, [4, 5])) {
-            \App\Services\LuckyService::createCycleIfNotExists($receiver->id, $packageId);
-        }
+    // No registration fee for REPURCHASE BOOSTER PACKAGE
+    $registrationFee = ($currentCount == 0 && !$isRepurchaseBooster) ? 100 : 0;
 
-        DB::beginTransaction();
-        try {
-            // ✅ 4. Deduct wallet balance
-            DB::table('wallets')
-                ->where('user_id', $currentUser->id)
-                ->update([
-                    'balance' => $wallet->balance - $finalAmount,
-                    'updated_at' => now(),
-                ]);
-            // dd($wallet->balance, $finalAmount);
-            $bonusType = BonusType::EmiPayment->value;
-            // ✅ 5. Record debit transaction
-            DB::table('transactions')->insert([
-                'user_id' => $currentUser->id,
-                'type' => 'Debit',
-                'amount' => $finalAmount,
-                'bonus_type' => $bonusType,
-                'remarks' => 'EMI payment for ' . $receiver->username . " ({$memberId})",
-                'created_at' => now(),
-            ]);
-            // dd('Transaction recorded with bonus type: ' . $bonusType);
+    $finalAmount = (float) $finalAmount + $registrationFee;
 
-            // ✅ 6. Record order
-            DB::table('orders')->insert([
-                'user_id' => $receiver->id,
-                'from_user_id' => $currentUser->id,
-                'package_id' => $package->id,
-                'amount' => $finalAmount,
-                'payment_by' => $r->payment_by,
-                'status' => 'completed',
-                'created_at' => now(),
+    // 4. Calculate increment value based on package ID
+    $packageId = (int) $r->package_id;
+
+    $incrementValue = match ($packageId) {
+        1 => 1,
+        2 => 8,
+        3 => 16,
+        default => 1,
+    };
+
+    $newTotal = $currentCount + $incrementValue;
+
+    // Wallet balance validation
+    if (!$wallet || $wallet->balance < $finalAmount) {
+        return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
+    }
+
+    // Lucky Service logic for specialized packages
+    if (in_array($packageId, [4, 5])) {
+        \App\Services\LuckyService::createCycleIfNotExists($receiver->id, $packageId);
+    }
+
+    DB::beginTransaction();
+
+    try {
+        // 5. Deduct wallet balance
+        DB::table('wallets')
+            ->where('user_id', $currentUser->id)
+            ->update([
+                'balance' => $wallet->balance - $finalAmount,
                 'updated_at' => now(),
             ]);
 
-            // ✅ 7. Update investment_count and status
-            // We set status to completed ONLY if they hit 16 or more, but we don't block them if they go over.
-            DB::table('users')
-                ->where('id', $receiver->id)
-                ->update([
-                    'investment_count' => $newTotal,
-                    'emi_status' => $newTotal >= 16 ? 'completed' : 'ongoing',
-                    'updated_at' => now(),
-                ]);
+        // 6. Record debit transaction
+        DB::table('transactions')->insert([
+            'user_id' => $currentUser->id,
+            'type' => 'Debit',
+            'amount' => $finalAmount,
+            'bonus_type' => BonusType::EmiPayment->value,
+            'remarks' => 'EMI payment for ' . $receiver->username . " ({$memberId})",
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-            // ✅ 8. Trigger pair bonus check for ALL uplines
-            // (ONLY for standard packages < 50,000)
-            $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
-            $emisData = \DB::table('orders')->where('user_id', $sponsor->id)->where('status', 'completed')->selectRaw('MIN(created_at) as activation_date, COUNT(*) as total_emis_paid')->first();
-            // dd($emisData);
-            // if (!$emisData || !$emisData->activation_date) {
-            //     return;
-            // }
+        // 7. Record order
+        DB::table('orders')->insert([
+            'user_id' => $receiver->id,
+            'from_user_id' => $currentUser->id,
+            'package_id' => $package->id,
+            'amount' => $finalAmount,
+            'payment_by' => $r->payment_by,
+            'status' => 'completed',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-            $activationDate = \Carbon\Carbon::parse($emisData->activation_date);
+        // 8. Update investment_count and EMI status
+        DB::table('users')
+            ->where('id', $receiver->id)
+            ->update([
+                'investment_count' => $newTotal,
+                'emi_status' => $newTotal >= 16 ? 'completed' : 'ongoing',
+                'updated_at' => now(),
+            ]);
 
-            $activationMonth = $activationDate->year * 12 + $activationDate->month;
-            $currentMonth = now()->year * 12 + now()->month;
+        /*
+         |--------------------------------------------------------------------------
+         | Pair Bonus
+         |--------------------------------------------------------------------------
+         | REPURCHASE BOOSTER PACKAGE should NOT give pair income.
+         | Pair income runs only for normal packages below ₹50,000.
+         */
+        if (!$isRepurchaseBooster && $package->amount < 50000) {
+            $sponsor = DB::table('users')
+                ->where('id', $receiver->placement_id)
+                ->first();
 
-            $totalEmisSupposedToPay = $currentMonth - $activationMonth + 1;
-
-            $totalEmisPaid = $emisData->total_emis_paid ?? 0;
-            // dd($activationDate, $totalEmisPaid, $totalEmisSupposedToPay);
-            // if ($totalEmisPaid >= $totalEmisSupposedToPay) {
-            if ($package->amount < 50000) {
-                // $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
-                while ($sponsor) {
-                    if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
-                        // dd($sponsor, $package->amount);
-                        $packageType = $package->name == 'REPURCHASE BOOSTER PACKAGE' ? 'REPURCHASE BOOSTER PACKAGE Package' : 'Normal Package';
-                        $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount, $packageType);
-                    }
-                    if (empty($sponsor->placement_id)) {
-                        break;
-                    }
-                    $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
+            while ($sponsor) {
+                if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
+                    $this->checkAndDistributePairCompletionBonus(
+                        $sponsor,
+                        $package->amount,
+                        'Normal Package'
+                    );
                 }
-            }
-            // ✅ 9. Reward logic (unchanged)
-            if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
-                $this->rewardAfterFullEmi($receiver);
-            }
 
-            // ✅ 10. Distribute Commissions (Only for first time investment)
-            if ($currentCount == 0 && $package->name != 'REPURCHASE BOOSTER PACKAGE') {
-                if (method_exists($this, 'distributeCommission')) {
-                    $this->distributeCommission($receiver->id, $package->amount);
+                if (empty($sponsor->placement_id)) {
+                    break;
                 }
-            }
-            // }
 
-            DB::commit();
-
-            $successMessage = match ($packageId) {
-                4, 5 => "Congratulations! You have successfully paid ₹{$finalAmount} for Member {$memberId}. Vouchers have been issued.",
-                default => "Top-up successful! ₹{$finalAmount} deducted from your wallet for Member {$memberId}.",
-            };
-            // dd($package);
-            if ($package->name == 'REPURCHASE BOOSTER PACKAGE') {
-                $matrixService = new \App\Services\MatrixService();
-                $matrixService->processCommission($receiver, $currentUser);
+                $sponsor = DB::table('users')
+                    ->where('id', $sponsor->placement_id)
+                    ->first();
             }
-            return back()->with('success', $successMessage);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
+
+        /*
+         |--------------------------------------------------------------------------
+         | Reward Logic
+         |--------------------------------------------------------------------------
+         */
+        if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
+            $this->rewardAfterFullEmi($receiver);
+        }
+
+        /*
+         |--------------------------------------------------------------------------
+         | Direct Commission
+         |--------------------------------------------------------------------------
+         | REPURCHASE BOOSTER PACKAGE should NOT give direct income.
+         | Direct commission runs only on first purchase for normal packages.
+         */
+        if ($currentCount == 0 && !$isRepurchaseBooster) {
+            if (method_exists($this, 'distributeCommission')) {
+                $this->distributeCommission($receiver->id, $package->amount);
+            }
+        }
+
+        DB::commit();
+
+        /*
+         |--------------------------------------------------------------------------
+         | Matrix Service
+         |--------------------------------------------------------------------------
+         | REPURCHASE BOOSTER PACKAGE should ONLY trigger MatrixService.
+         | No pair income. No direct income.
+         */
+        if ($isRepurchaseBooster) {
+            // dd('MatrixService would be triggered here for ' . $receiver->username);
+            $matrixService = new \App\Services\MatrixService();
+            $matrixService->processCommission($receiver, $currentUser);
+        }
+
+        $successMessage = match ($packageId) {
+            4, 5 => "Congratulations! You have successfully paid ₹{$finalAmount} for Member {$memberId}. Vouchers have been issued.",
+            default => "Top-up successful! ₹{$finalAmount} deducted from your wallet for Member {$memberId}.",
+        };
+
+        return back()->with('success', $successMessage);
+    } catch (\Exception $e) {
+        if (DB::transactionLevel() > 0) {
+            DB::rollBack();
+        }
+
+        return back()->with('error', 'Something went wrong: ' . $e->getMessage());
     }
+}
 
     private function checkAndDistributePairCompletionBonus($sponsor, $amount, $packageType)
     {
