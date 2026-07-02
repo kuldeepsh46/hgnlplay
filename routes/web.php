@@ -187,3 +187,61 @@ Route::resource('admin/packages', PackageController::class)->names([
 //         'value' => \App\Enums\BonusType::LevelIncome->value,
 //     ];
 // });
+use Illuminate\Support\Facades\Artisan;
+
+// Route::get('/clear-cache-temp', function () {
+//     Artisan::call('config:clear');
+//     Artisan::call('cache:clear');
+//     Artisan::call('config:cache');
+
+//     return 'Cache cleared';
+// });
+use Illuminate\Support\Facades\Mail;
+
+// Route::get('/test-mail', function () {
+//     try {
+//         Mail::raw('This is a test email from HGNL Pay Laravel project.', function ($message) {
+//             $message->to('hhh444@yopmail.com')
+//                 ->subject('HGNL Pay SMTP Test');
+//         });
+
+//         return 'Test email sent successfully.';
+//     } catch (\Exception $e) {
+//         return 'Mail failed: ' . $e->getMessage();
+//     }
+// });
+use App\Mail\HgnlNotificationMail;
+
+use App\Services\MailNotificationService;
+
+Route::get('/test-mail-service', function (MailNotificationService $mailService) {
+    $mailService->send(
+        'hhh444@yopmail.com',
+        'HGNL Pay Service Test',
+        'test_mail_service',
+        [
+            'title' => 'Mail Service Working',
+            'greeting' => 'Hello,',
+            'message' => 'This email was sent using MailNotificationService.',
+            'rows' => [
+                'Status' => 'Working',
+                'Mailer' => 'Hostinger SMTP',
+                'Time' => now()->format('d M Y h:i A'),
+            ],
+            'note' => 'This confirms the reusable mail service is working.',
+        ],
+        null
+    );
+
+    return 'Mail service test executed.';
+});
+Route::get('/mail-config-check', function () {
+    return response()->json([
+        'app_name' => config('app.name'),
+        'mail_from_address' => config('mail.from.address'),
+        'mail_from_name' => config('mail.from.name'),
+        'support_address' => config('mail.support.address'),
+        'support_name' => config('mail.support.name'),
+        'env_mail_from_name' => env('MAIL_FROM_NAME'),
+    ]);
+});
