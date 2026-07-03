@@ -18,6 +18,3 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::get('/packages', [PackagesController::class, 'index']);
 Route::get('/packages/{id}', [PackagesController::class, 'show']);
-Route::get('/test', function () {
-    return response()->json(['message' => 'API working']);
-});
