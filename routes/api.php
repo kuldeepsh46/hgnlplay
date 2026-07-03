@@ -18,6 +18,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    });
     Route::get('/packages', [PackagesController::class, 'index']);
     Route::get('/packages/{id}', [PackagesController::class, 'show']);
-});
