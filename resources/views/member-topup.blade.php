@@ -222,6 +222,56 @@
 
     <div class="card">
         <h2>New Topup</h2>
+        {{-- <form method="POST" action="{{ route('member.topup.store') }}" id="topupForm">
+            @csrf
+
+            <div class="form-group">
+                <label>Member ID</label>
+                <input type="text" name="member_id" id="member_id_input" value="{{ old('member_id') }}"
+                    style="border: 1px solid {{ $errors->has('member_id') ? 'red' : '#ccc' }};" placeholder="e.g. HGNL1041"
+                    required>
+
+                @error('member_id')
+                    <div style="color: #dc3545; font-size: 13px; margin-top: 5px; font-weight: 600;">
+                        {{ $message }}
+                    </div>
+                @enderror
+
+                <div id="member_status" style="margin-top:5px; font-size:13px; font-weight:600;"></div>
+            </div>
+
+            <div class="form-group" id="name_group" style="display:none;">
+                <label>Member Name</label>
+                <input type="text" id="member_name_display" class="form-control" readonly
+                    style="background-color: #f0f0f0;">
+            </div>
+            <div class="form-group">
+                <label>Package</label>
+                <select name="package_id" id="packageSelect" required>
+                    <option value="">-- Select Package --</option>
+                    @foreach ($packages as $p)
+                        <option value="{{ $p->id }}" data-amount="{{ $p->actual_amount }}">
+
+                            {{ $p->name }} —
+                            ₹{{ $p->actual_amount }}
+
+                            @if ($p->discounted_amount)
+                                (First Buy: ₹{{ $p->discounted_amount }})
+                            @endif
+                        </option>
+                    @endforeach
+                </select>
+                <div id="priceBreakdown" style="margin-top:10px;font-size:14px;color:var(--accent);font-weight:600;"></div>
+            </div>
+            <div class="form-group">
+                <label>Payment By</label>
+                <select name="payment_by" required>
+                    <option value="Wallet">Wallet</option>
+                    <option value="Online">Online</option>
+                </select>
+            </div>
+            <button type="submit" class="btn" style="width:100%">Submit Payment</button>
+        </form> --}}
         <form method="POST" action="{{ route('member.topup.store') }}" id="topupForm">
             @csrf
             {{-- <div class="form-group">
@@ -284,7 +334,7 @@
                     <option value="Online">Online</option>
                 </select>
             </div>
-            <button type="submit" class="btn" style="width:100%">Submit Payment</button>
+            <button type="submit" class="btn" id="topupSubmitBtn" style="width:100%">Submit Payment</button>
         </form>
     </div>
 
@@ -553,4 +603,25 @@
             }
         });
     </script>
+    <script>
+document.getElementById('topupForm').addEventListener('submit', function (e) {
+    var btn = document.getElementById('topupSubmitBtn');
+
+    // If already submitted once, block any further submit attempts
+    // (covers double-click, double Enter-key press, etc.)
+    if (btn.dataset.submitted === 'true') {
+        e.preventDefault();
+        return false;
+    }
+
+    btn.dataset.submitted = 'true';
+    btn.disabled = true;
+    btn.innerText = 'Processing...';
+
+    // Form submits normally (this is a real POST navigation, not AJAX),
+    // so no need to re-enable the button here — if validation fails server-side
+    // and the page reloads via back()->with('error', ...), the DOM is fresh
+    // and the button is naturally re-enabled.
+});
+</script>
 @endsection

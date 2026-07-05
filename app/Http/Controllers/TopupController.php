@@ -27,7 +27,6 @@ class TopupController extends Controller
 
     // public function store(Request $r)
     // {
-    //     // 1. Validate using member_id instead of email
     //     $r->validate([
     //         'member_id' => 'required|string|exists:users,member_id',
     //         'package_id' => 'required|integer|exists:packages,id',
@@ -37,7 +36,6 @@ class TopupController extends Controller
     //     $currentUser = Auth::user();
     //     $memberId = strtoupper(trim($r->member_id));
 
-    //     // 2. Fetch data using member_id
     //     $receiver = \App\Models\User::where('member_id', $memberId)->first();
     //     $package = DB::table('packages')->where('id', $r->package_id)->first();
 
@@ -49,24 +47,32 @@ class TopupController extends Controller
     //         return back()->with('error', 'Package not found.');
     //     }
 
-    //     $packageName = strtoupper(trim($package->name));
+    //     $packageName = strtoupper(trim((string) $package->name));
     //     $isRepurchaseBooster = $packageName === 'REPURCHASE BOOSTER PACKAGE';
 
     //     $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
 
-    //     // 3. INTERNAL FINAL AMOUNT CALCULATION
+    //     /*
+    // |--------------------------------------------------------------------------
+    // | Final Amount Calculation
+    // |--------------------------------------------------------------------------
+    // */
     //     $isFirstPurchase = !\App\Models\Order::where('user_id', $receiver->id)->exists();
 
-    //     $finalAmount = $isFirstPurchase ? $package->discounted_amount ?? $package->actual_amount : $package->actual_amount;
+    //     $baseAmount = $isFirstPurchase ? $package->discounted_amount ?? ($package->actual_amount ?? $package->amount) : $package->actual_amount ?? $package->amount;
 
     //     $currentCount = $receiver->investment_count ?? 0;
 
     //     // No registration fee for REPURCHASE BOOSTER PACKAGE
     //     $registrationFee = $currentCount == 0 && !$isRepurchaseBooster ? 100 : 0;
 
-    //     $finalAmount = (float) $finalAmount + $registrationFee;
+    //     $finalAmount = (float) $baseAmount + $registrationFee;
 
-    //     // 4. Calculate increment value based on package ID
+    //     /*
+    // |--------------------------------------------------------------------------
+    // | Investment Count Increment
+    // |--------------------------------------------------------------------------
+    // */
     //     $packageId = (int) $r->package_id;
 
     //     $incrementValue = match ($packageId) {
@@ -78,12 +84,20 @@ class TopupController extends Controller
 
     //     $newTotal = $currentCount + $incrementValue;
 
-    //     // Wallet balance validation
+    //     /*
+    // |--------------------------------------------------------------------------
+    // | Wallet Balance Validation
+    // |--------------------------------------------------------------------------
+    // */
     //     if (!$wallet || $wallet->balance < $finalAmount) {
     //         return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
     //     }
 
-    //     // Lucky Service logic for specialized packages
+    //     /*
+    // |--------------------------------------------------------------------------
+    // | Lucky Service Logic
+    // |--------------------------------------------------------------------------
+    // */
     //     if (in_array($packageId, [4, 5])) {
     //         \App\Services\LuckyService::createCycleIfNotExists($receiver->id, $packageId);
     //     }
@@ -91,7 +105,11 @@ class TopupController extends Controller
     //     DB::beginTransaction();
 
     //     try {
-    //         // 5. Deduct wallet balance
+    //         /*
+    //     |--------------------------------------------------------------------------
+    //     | Deduct Wallet Balance
+    //     |--------------------------------------------------------------------------
+    //     */
     //         DB::table('wallets')
     //             ->where('user_id', $currentUser->id)
     //             ->update([
@@ -99,7 +117,11 @@ class TopupController extends Controller
     //                 'updated_at' => now(),
     //             ]);
 
-    //         // 6. Record debit transaction
+    //         /*
+    //     |--------------------------------------------------------------------------
+    //     | Record Debit Transaction
+    //     |--------------------------------------------------------------------------
+    //     */
     //         DB::table('transactions')->insert([
     //             'user_id' => $currentUser->id,
     //             'type' => 'Debit',
@@ -110,7 +132,11 @@ class TopupController extends Controller
     //             'updated_at' => now(),
     //         ]);
 
-    //         // 7. Record order
+    //         /*
+    //     |--------------------------------------------------------------------------
+    //     | Record Order
+    //     |--------------------------------------------------------------------------
+    //     */
     //         DB::table('orders')->insert([
     //             'user_id' => $receiver->id,
     //             'from_user_id' => $currentUser->id,
@@ -122,7 +148,11 @@ class TopupController extends Controller
     //             'updated_at' => now(),
     //         ]);
 
-    //         // 8. Update investment_count and EMI status
+    //         /*
+    //     |--------------------------------------------------------------------------
+    //     | Update Investment Count And EMI Status
+    //     |--------------------------------------------------------------------------
+    //     */
     //         DB::table('users')
     //             ->where('id', $receiver->id)
     //             ->update([
@@ -132,61 +162,56 @@ class TopupController extends Controller
     //             ]);
 
     //         /*
-    //      |--------------------------------------------------------------------------
-    //      | Pair Bonus
-    //      |--------------------------------------------------------------------------
-    //      | REPURCHASE BOOSTER PACKAGE should NOT give pair income.
-    //      | Pair income runs only for normal packages below ₹50,000.
-    //      */
-    //         if (!$isRepurchaseBooster && $package->amount < 50000) {
-    //             $sponsor = DB::table('users')->where('id', $receiver->placement_id)->first();
+    //     |--------------------------------------------------------------------------
+    //     | Binary / Pair Income
+    //     |--------------------------------------------------------------------------
+    //     | Conditions:
+    //     | - No pair income for REPURCHASE BOOSTER PACKAGE.
+    //     | - No pair income for packages 50,000 and above.
+    //     | - Traverse upward from receiver's placement parent.
+    //     | - Pay 10% of newly matched business.
+    //     | - Daily cap: 5,000 per user per day.
+    //     |--------------------------------------------------------------------------
+    //     */
+    //         $packageBusinessAmount = (float) ($package->amount ?? ($package->actual_amount ?? $finalAmount));
 
-    //             while ($sponsor) {
-    //                 if (method_exists($this, 'checkAndDistributePairCompletionBonus')) {
-    //                     $this->checkAndDistributePairCompletionBonus($sponsor, $package->amount, 'Normal Package');
-    //                 }
-
-    //                 if (empty($sponsor->placement_id)) {
-    //                     break;
-    //                 }
-
-    //                 $sponsor = DB::table('users')->where('id', $sponsor->placement_id)->first();
-    //             }
+    //         if (!$isRepurchaseBooster && $packageBusinessAmount < 50000) {
+    //             $this->processBinaryPairIncomeForTopup($receiver, $packageBusinessAmount);
     //         }
 
     //         /*
-    //      |--------------------------------------------------------------------------
-    //      | Reward Logic
-    //      |--------------------------------------------------------------------------
-    //      */
+    //     |--------------------------------------------------------------------------
+    //     | Reward Logic
+    //     |--------------------------------------------------------------------------
+    //     */
     //         if ($newTotal >= 16 && method_exists($this, 'rewardAfterFullEmi')) {
     //             $this->rewardAfterFullEmi($receiver);
     //         }
 
     //         /*
-    //      |--------------------------------------------------------------------------
-    //      | Direct Commission
-    //      |--------------------------------------------------------------------------
-    //      | REPURCHASE BOOSTER PACKAGE should NOT give direct income.
-    //      | Direct commission runs only on first purchase for normal packages.
-    //      */
+    //     |--------------------------------------------------------------------------
+    //     | Direct Commission
+    //     |--------------------------------------------------------------------------
+    //     | REPURCHASE BOOSTER PACKAGE should not give direct income.
+    //     | Direct commission runs only on first purchase for normal packages.
+    //     |--------------------------------------------------------------------------
+    //     */
     //         if ($currentCount == 0 && !$isRepurchaseBooster) {
     //             if (method_exists($this, 'distributeCommission')) {
-    //                 $this->distributeCommission($receiver->id, $package->amount);
+    //                 $this->distributeCommission($receiver->id, $packageBusinessAmount);
     //             }
     //         }
 
     //         DB::commit();
 
     //         /*
-    //      |--------------------------------------------------------------------------
-    //      | Matrix Service
-    //      |--------------------------------------------------------------------------
-    //      | REPURCHASE BOOSTER PACKAGE should ONLY trigger MatrixService.
-    //      | No pair income. No direct income.
-    //      */
+    //     |--------------------------------------------------------------------------
+    //     | Matrix Service
+    //     |--------------------------------------------------------------------------
+    //     | REPURCHASE BOOSTER PACKAGE should only trigger MatrixService.
+    //     |--------------------------------------------------------------------------
+    //     */
     //         if ($isRepurchaseBooster) {
-    //             // dd('MatrixService would be triggered here for ' . $receiver->username);
     //             $matrixService = new \App\Services\MatrixService();
     //             $matrixService->processCommission($receiver, $currentUser);
     //         }
@@ -205,33 +230,39 @@ class TopupController extends Controller
     //         return back()->with('error', 'Something went wrong: ' . $e->getMessage());
     //     }
     // }
-
     public function store(Request $r)
-    {
-        $r->validate([
-            'member_id' => 'required|string|exists:users,member_id',
-            'package_id' => 'required|integer|exists:packages,id',
-            'payment_by' => 'required|string',
-        ]);
+{
+    $r->validate([
+        'member_id' => 'required|string|exists:users,member_id',
+        'package_id' => 'required|integer|exists:packages,id',
+        'payment_by' => 'required|string',
+    ]);
 
-        $currentUser = Auth::user();
-        $memberId = strtoupper(trim($r->member_id));
+    $currentUser = Auth::user();
+    $memberId = strtoupper(trim($r->member_id));
 
-        $receiver = \App\Models\User::where('member_id', $memberId)->first();
-        $package = DB::table('packages')->where('id', $r->package_id)->first();
+    $receiver = \App\Models\User::where('member_id', $memberId)->first();
+    $package = DB::table('packages')->where('id', $r->package_id)->first();
 
-        if (!$receiver) {
-            return back()->with('error', 'Member not found.');
-        }
+    if (!$receiver) {
+        return back()->with('error', 'Member not found.');
+    }
 
-        if (!$package) {
-            return back()->with('error', 'Package not found.');
-        }
+    if (!$package) {
+        return back()->with('error', 'Package not found.');
+    }
 
+    // Prevent duplicate/double-click submissions for the same user from
+    // running this method concurrently and creating duplicate orders.
+    $lock = \Illuminate\Support\Facades\Cache::lock("topup-lock-user-{$currentUser->id}", 15);
+
+    if (!$lock->get()) {
+        return back()->with('error', 'Your previous top-up is still processing. Please wait a moment before retrying.');
+    }
+
+    try {
         $packageName = strtoupper(trim((string) $package->name));
         $isRepurchaseBooster = $packageName === 'REPURCHASE BOOSTER PACKAGE';
-
-        $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->first();
 
         /*
     |--------------------------------------------------------------------------
@@ -267,15 +298,6 @@ class TopupController extends Controller
 
         /*
     |--------------------------------------------------------------------------
-    | Wallet Balance Validation
-    |--------------------------------------------------------------------------
-    */
-        if (!$wallet || $wallet->balance < $finalAmount) {
-            return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
-        }
-
-        /*
-    |--------------------------------------------------------------------------
     | Lucky Service Logic
     |--------------------------------------------------------------------------
     */
@@ -286,6 +308,21 @@ class TopupController extends Controller
         DB::beginTransaction();
 
         try {
+            /*
+        |--------------------------------------------------------------------------
+        | Wallet Balance Validation (locked to prevent race with concurrent requests)
+        |--------------------------------------------------------------------------
+        */
+            $wallet = DB::table('wallets')
+                ->where('user_id', $currentUser->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$wallet || $wallet->balance < $finalAmount) {
+                DB::rollBack();
+                return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
+            }
+
             /*
         |--------------------------------------------------------------------------
         | Deduct Wallet Balance
@@ -410,7 +447,10 @@ class TopupController extends Controller
 
             return back()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
+    } finally {
+        $lock->release();
     }
+}
 
     private function processBinaryPairIncomeForTopup($receiver, float $packageAmount): void
     {
@@ -440,100 +480,6 @@ class TopupController extends Controller
             $parentId = $parent->placement_id ?? null;
         }
     }
-
-    // private function checkAndDistributePairCompletionBonus($sponsor, $amount, $packageType)
-    // {
-    //     // dd($sponsor, $amount);
-    //     // 1. STRICT CAP: No pair income for packages 50k and above
-    //     if (!$sponsor || $amount >= 50000) {
-    //         return;
-    //     }
-
-    //     $leftUsers = $this->getFullSubtreeUsers($sponsor->id, 'left');
-    //     $rightUsers = $this->getFullSubtreeUsers($sponsor->id, 'right');
-
-    //     if (empty($leftUsers) || empty($rightUsers)) {
-    //         return;
-    //     }
-
-    //     $leftUserIds = collect($leftUsers)->pluck('id')->toArray();
-    //     $rightUserIds = collect($rightUsers)->pluck('id')->toArray();
-
-    //     $bonusType = BonusType::PairBonusNormal->value;
-    //     // dd($bonusType);
-    //     $himalyaPayWellnessPackageId = DB::table('packages')->where('name', 'REPURCHASE BOOSTER PACKAGE')->value('id');
-
-    //     $leftUniqueInvestors = DB::table('orders')->whereIn('user_id', $leftUserIds)->where('status', 'completed')->where('package_id', '!=', $himalyaPayWellnessPackageId)->distinct('user_id')->count();
-
-    //     $leftTotalVolume = DB::table('orders')->whereIn('user_id', $leftUserIds)->where('status', 'completed')->where('package_id', '!=', $himalyaPayWellnessPackageId)->sum('amount') - $leftUniqueInvestors * 100;
-
-    //     $rightUniqueInvestors = DB::table('orders')->whereIn('user_id', $rightUserIds)->where('status', 'completed')->where('package_id', '!=', $himalyaPayWellnessPackageId)->distinct('user_id')->count();
-
-    //     $rightTotalVolume = DB::table('orders')->whereIn('user_id', $rightUserIds)->where('status', 'completed')->where('package_id', '!=', $himalyaPayWellnessPackageId)->sum('amount') - $rightUniqueInvestors * 100;
-    //     // }
-
-    //     // 3. Lifetime matchable ceiling
-    //     $currentMaxMatch = min($leftTotalVolume, $rightTotalVolume);
-
-    //     // 4. Already paid volume calculation using bonus_type
-    //     $totalPaidBonus = DB::table('transactions')->where('user_id', $sponsor->id)->where('bonus_type', $bonusType)->sum('amount');
-
-    //     $alreadyMatchedVolume = $totalPaidBonus * 10;
-
-    //     $newVolumeToPay = $currentMaxMatch - $alreadyMatchedVolume;
-
-    //     if ($newVolumeToPay < 1000) {
-    //         return;
-    //     }
-
-    //     // 5. Bonus percentage logic
-    //     $binaryBonusPercentage = $amount == 16000 ? 20 : 10;
-
-    //     $pairBonus = $newVolumeToPay * ($binaryBonusPercentage / 100);
-
-    //     // ================================
-    //     // DAILY CAP LOGIC (₹5000/day)
-    //     // ================================
-
-    //     $todayPairIncome = DB::table('transactions')
-    //         ->where('user_id', $sponsor->id)
-    //         ->whereIn('bonus_type', [BonusType::PairBonusNormal->value])
-    //         ->whereDate('created_at', now()->toDateString())
-    //         ->sum('amount');
-
-    //     $dailyCap = 5000;
-    //     $remainingCap = $dailyCap - $todayPairIncome;
-
-    //     if ($remainingCap <= 0) {
-    //         return;
-    //     }
-
-    //     // Apply cap
-    //     $pairBonus = min($pairBonus, $remainingCap);
-
-    //     if ($pairBonus <= 0) {
-    //         return;
-    //     }
-
-    //     // 6. Final payout - ONLY ONCE
-    //     DB::transaction(function () use ($sponsor, $pairBonus, $newVolumeToPay, $packageType, $bonusType, $binaryBonusPercentage, $leftTotalVolume, $rightTotalVolume, $dailyCap) {
-    //         DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
-
-    //         $receiverId = $sponsor->member_id ?? $sponsor->id;
-
-    //         $remarks = 'Pair Completion Bonus - ' . $packageType . ': Credited ₹' . number_format($pairBonus, 2) . ' to ' . $receiverId . ' | Matched Volume ₹' . number_format($newVolumeToPay, 2) . ' | Bonus Rate ' . $binaryBonusPercentage . '%' . ' | Left Volume ₹' . number_format($leftTotalVolume, 2) . ' | Right Volume ₹' . number_format($rightTotalVolume, 2) . ' | Daily Cap ₹' . number_format($dailyCap, 2);
-
-    //         DB::table('transactions')->insert([
-    //             'user_id' => $sponsor->id,
-    //             'type' => 'credit',
-    //             'bonus_type' => $bonusType,
-    //             'amount' => $pairBonus,
-    //             'remarks' => $remarks,
-    //             'created_at' => now(),
-    //             'updated_at' => now(),
-    //         ]);
-    //     });
-    // }
 
     private function checkAndDistributePairCompletionBonus($sponsor, $amount, $packageType)
     {
@@ -696,33 +642,6 @@ class TopupController extends Controller
             ->value('total');
     }
 
-    // private function getFullSubtreeUsers($rootId, $side)
-    // {
-    //     $result = [];
-
-    //     $start = DB::table('users')->where('placement_id', $rootId)->where('position', $side)->first();
-
-    //     if (!$start) {
-    //         return [];
-    //     }
-
-    //     $queue = [$start];
-
-    //     while (!empty($queue)) {
-    //         $node = array_shift($queue);
-
-    //         $result[] = $node;
-
-    //         $children = DB::table('users')->where('placement_id', $node->id)->get();
-
-    //         foreach ($children as $child) {
-    //             $queue[] = $child;
-    //         }
-    //     }
-
-    //     return $result;
-    // }
-
     private function getFullSubtreeUsers($rootId, $side)
     {
         $result = [];
@@ -821,69 +740,6 @@ class TopupController extends Controller
 
         return $result;
     }
-
-    // private function distributeCommission($userId, $amount)
-    // {
-    //     $user = DB::table('users')->find($userId);
-    //     if (!$user) {
-    //         return;
-    //     }
-
-    //     if ($amount < 50000) {
-    //         // --- DIRECT COMMISSION (10%) ---
-    //         $commPercentage = 10; // 10%
-    //         $commission = $amount * ($commPercentage / 100);
-    //         if ($user->sponsor_id) {
-    //             $this->distributeCommissionDBOpr($user->sponsor_id, $commission, "{$commPercentage}% Direct Commission from {$user->username}", $user, $amount);
-    //         }
-    //     } else {
-    //         // --- MULTI-LEVEL & INDIRECT (For 50k+ Packages) ---
-
-    //         // 1. Level Commission (Sponsor Chain)
-    //         $currentUserId = $user->sponsor_id;
-    //         $level = 1;
-    //         $levelPercentages = [1 => 0.05, 2 => 0.01, 3 => 0.01, 4 => 0.0075, 5 => 0.0075, 6 => 0.005, 7 => 0.0025, 8 => 0.0025, 9 => 0.0025, 10 => 0.0025];
-
-    //         while ($currentUserId && $level <= 10) {
-    //             $sponsor = DB::table('users')->where('id', $currentUserId)->first();
-    //             if (!$sponsor) {
-    //                 break;
-    //             }
-
-    //             $percentage = $levelPercentages[$level] ?? 0;
-    //             if ($percentage > 0) {
-    //                 $levelCommission = $amount * $percentage;
-    //                 $remarks = "L{$level} Commission (" . $percentage * 100 . "%) from {$user->username}";
-    //                 $this->distributeCommissionDBOpr($sponsor->id, $levelCommission, $remarks, $user, $amount, $level);
-    //                 // Note: Pair bonus call removed from here to prevent double-logic
-    //             }
-    //             $currentUserId = $sponsor->sponsor_id;
-    //             $level++;
-    //         }
-
-    //         // 2. Indirect Commission (Binary Chain)
-    //         $current = $user;
-    //         $idxLevel = 1;
-    //         while ($current && $idxLevel <= 10) {
-    //             $binaryNode = DB::table('binary_nodes')->where('user_id', $current->id)->first();
-    //             if (!$binaryNode || !$binaryNode->parent_id) {
-    //                 break;
-    //             }
-
-    //             $upline = DB::table('users')->find($binaryNode->parent_id);
-    //             if (!$upline) {
-    //                 break;
-    //             }
-
-    //             $indirectCommission = $amount * 0.05;
-    //             $remarks = "Indirect 5% Commission from {$user->username} - Level {$idxLevel}";
-    //             $this->distributeCommissionDBOpr($upline->id, $indirectCommission, $remarks, $user, $amount);
-
-    //             $current = $upline;
-    //             $idxLevel++;
-    //         }
-    //     }
-    // }
 
     private function distributeCommission($userId, $amount)
     {
