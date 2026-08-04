@@ -6,6 +6,7 @@ enum BonusType: string
 {
     case PairBonusNormal = 'pair_bonus_normal';
     case PairBonus2000 = 'pair_bonus_2000';
+    case PairBonusStarter = 'pair_bonus_starter';
     case LevelIncome = 'level_income';
     case DirectIncome = 'direct_income';
     case RewardAfterFullEmi = 'reward_after_full_emi';

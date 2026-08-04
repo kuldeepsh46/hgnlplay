@@ -82,7 +82,7 @@ class TopupController extends Controller
             if ($isStarterPackage && $currentCount > 0) {
                 $finalAmount = 1000;
             }
-// dd($finalAmount);
+
             /*
     |--------------------------------------------------------------------------
     | Investment Count Increment
@@ -188,23 +188,10 @@ class TopupController extends Controller
         | - No pair income for packages 50,000 and above.
         | - Traverse upward from receiver's placement parent.
         | - Pay 10% of newly matched business.
-        | - Daily cap: 5,000 per user per day (excess is flushed, never paid
-        |   on a later day — see checkAndDistributePairCompletionBonus()).
-        | - STARTER PACKAGE (₹1600 first purchase) is a special case: flat
-        |   ₹300 per matched pair, and only matches against STARTER PACKAGE
-        |   volume on the other leg. Its ₹1000 EMI/repurchase falls back to
-        |   normal 10%-of-matched-volume rules.
+        | - Daily cap: 5,000 per user per day.
         |--------------------------------------------------------------------------
         */
                 $packageBusinessAmount = (float) ($package->amount ?? ($package->actual_amount ?? $finalAmount));
-
-                // Starter package pair-income must reflect what was actually
-                // paid THIS event (₹1600 first purchase vs ₹1000 EMI), not the
-                // static catalog price — otherwise EMI repurchases would keep
-                // being treated as a ₹1600 first purchase forever.
-                if ($isStarterPackage) {
-                    $packageBusinessAmount = $finalAmount;
-                }
 
                 if (!$isRepurchaseBooster && $packageBusinessAmount < 50000) {
                     $this->processBinaryPairIncomeForTopup($receiver, $packageBusinessAmount, $package);
@@ -225,15 +212,10 @@ class TopupController extends Controller
         |--------------------------------------------------------------------------
         | REPURCHASE BOOSTER PACKAGE should not give direct income.
         | Direct commission runs only on first purchase for normal packages.
-        | STARTER PACKAGE first purchase pays a flat ₹500 direct income to
-        | the sponsor instead of the normal 10% commission. EMI/repurchase
-        | never reaches here (it only runs when $currentCount == 0).
         |--------------------------------------------------------------------------
         */
                 if ($currentCount == 0 && !$isRepurchaseBooster) {
-                    if ($isStarterPackage) {
-                        $this->distributeStarterDirectIncome($receiver->id, 500, $packageBusinessAmount);
-                    } elseif (method_exists($this, 'distributeCommission')) {
+                    if (method_exists($this, 'distributeCommission')) {
                         $this->distributeCommission($receiver->id, $packageBusinessAmount);
                     }
                 }
@@ -343,20 +325,46 @@ class TopupController extends Controller
             return;
         }
 
+        // $bonusType = BonusType::PairBonusNormal->value;
+
         /*
     |--------------------------------------------------------------------------
-    | Shared Daily Cap Pool (Normal + Starter)
+    | Business Volume Calculation
     |--------------------------------------------------------------------------
-    | Each user can receive max ₹5,000/day combined across normal pair
-    | income and starter pair income. Whatever matched volume can't be paid
-    | out today because the cap is hit is FLUSHED below (marked as
-    | processed regardless of payout) so it never gets paid on a later day.
-    | Tomorrow's counter naturally starts at 0 because this query only
-    | looks at today's transactions.
+    | Use package business amount, not order final amount.
+    | This avoids registration fee being counted in binary matching.
     |--------------------------------------------------------------------------
     */
-        $dailyCap = 5000;
+        $leftTotalVolume = $this->getNormalPackageBusinessVolume($leftUserIds);
+        $rightTotalVolume = $this->getNormalPackageBusinessVolume($rightUserIds);
 
+        $currentMatchedVolume = min($leftTotalVolume, $rightTotalVolume);
+
+        if ($currentMatchedVolume < 1000) {
+            return;
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Already Paid Matched Volume
+    |--------------------------------------------------------------------------
+    | Binary income is 10%.
+    | So paid matched volume = total paid pair bonus / 0.10.
+    |--------------------------------------------------------------------------
+    */
+        $isStarterPackage = strtoupper(trim((string) $package->name)) === 'STARTER PACKAGE';
+        $binaryBonusRate = 0.1;
+        $binaryBonusPercentage = 10;
+        $dailyCap = 5000;
+        // dd($isStarterPackage, $amount);
+        $bonusType = BonusType::PairBonusNormal->value;
+        // $todayPairIncome = (float) DB::table('transactions')
+        //     ->where('user_id', $sponsor->id)
+        //     ->where('bonus_type', $bonusType)
+        //     ->whereDate('created_at', now()->toDateString())
+        //     ->sum('amount');
+
+        // $remainingCap = $dailyCap - $todayPairIncome;
         $todayNormalPairIncome = (float) DB::table('transactions')
             ->where('user_id', $sponsor->id)
             ->where('bonus_type', BonusType::PairBonusNormal->value)
@@ -369,102 +377,64 @@ class TopupController extends Controller
             ->whereDate('created_at', now()->toDateString())
             ->sum('amount');
 
-        $remainingCap = max(0, $dailyCap - $todayNormalPairIncome - $todayStarterPairIncome);
+        $remainingCap = max(0, 5000 - $todayNormalPairIncome - $todayStarterPairIncome);
+        $alreadyProcessedMatchedVolume = (float) DB::table('transactions')->where('user_id', $sponsor->id)->where('bonus_type', BonusType::PairBonusNormal->value)->sum('processed_matched_volume');
 
-        $isStarterFirstPurchase = strtoupper(trim((string) $package->name)) === 'STARTER PACKAGE' && (float) $amount == 1600;
-
-        if ($isStarterFirstPurchase) {
-            /*
-        |--------------------------------------------------------------------------
-        | Starter Package (₹1600 first purchase) Matching
-        |--------------------------------------------------------------------------
-        | Flat ₹300 per matched pair. Matches ONLY against Starter Package
-        | volume on the other leg — a bigger amount from any other package
-        | on the opposite side does NOT count.
-        |--------------------------------------------------------------------------
-        */
-            $leftStarterVolume = $this->getStarterPackageBusinessVolume($leftUserIds);
-            $rightStarterVolume = $this->getStarterPackageBusinessVolume($rightUserIds);
-
-            $currentMatchedVolume = min($leftStarterVolume, $rightStarterVolume);
-
-            if ($currentMatchedVolume < 1600) {
-                // No (or not enough) Starter Package business on the other side.
-                return;
-            }
-
-            $alreadyProcessedVolume = (float) (DB::table('users')->where('id', $sponsor->id)->value('starter_pair_processed_volume') ?? 0);
-
-            $newVolume = max(0, $currentMatchedVolume - $alreadyProcessedVolume);
-
-            $matchedPairs = floor($newVolume / 1600);
-
-            if ($matchedPairs < 1) {
-                return;
-            }
-
-            $volumeToFlush = $matchedPairs * 1600;
-            $calculatedPairBonus = $matchedPairs * 300;
-
-            $pairBonus = min($calculatedPairBonus, $remainingCap);
-
-            // Flush the whole matched volume now — even if the daily cap
-            // reduces (or zeroes) the actual payout, this volume is
-            // considered "used" and will not be re-evaluated tomorrow.
-            DB::table('users')->where('id', $sponsor->id)->update([
-                'starter_pair_processed_volume' => $alreadyProcessedVolume + $volumeToFlush,
-            ]);
-
-            if ($pairBonus <= 0) {
-                return;
-            }
-
-            $bonusType = BonusType::PairBonusStarter->value;
-            $matchedVolumeForRemarks = $volumeToFlush;
+        $newVolumeToProcess = max(0, $currentMatchedVolume - $alreadyProcessedMatchedVolume);
+        if ($remainingCap <= 0) {
+            return;
+        }
+        if ($isStarterPackage && $amount == 1600) {
+            $calculatedPairBonus = 300; // Fixed bonus for Starter Package
         } else {
+            // $totalPaidPairBonus = (float) DB::table('transactions')->where('user_id', $sponsor->id)->where('bonus_type', $bonusType)->sum('amount');
+
+            $alreadyPaidMatchedVolume = $todayNormalPairIncome / $binaryBonusRate;
+
+            $newVolumeToPay = $currentMatchedVolume - $alreadyPaidMatchedVolume;
+
+            if ($newVolumeToPay < 1000) {
+                return;
+            }
+
             /*
-        |--------------------------------------------------------------------------
-        | Normal Package Matching (also covers Starter Package ₹1000 EMI)
-        |--------------------------------------------------------------------------
-        | Pay 10% of newly matched business volume, same-package matching
-        | is NOT required here.
-        |--------------------------------------------------------------------------
-        */
-            $binaryBonusRate = 0.1;
+    |--------------------------------------------------------------------------
+    | Daily Capping
+    |--------------------------------------------------------------------------
+    | Each user can receive max 5,000 per day as binary/pair income.
+    | Tomorrow starts fresh because the query checks today's created_at only.
+    |--------------------------------------------------------------------------
+    */
 
-            $leftTotalVolume = $this->getNormalPackageBusinessVolume($leftUserIds);
-            $rightTotalVolume = $this->getNormalPackageBusinessVolume($rightUserIds);
-
-            $currentMatchedVolume = min($leftTotalVolume, $rightTotalVolume);
-
-            if ($currentMatchedVolume < 1000) {
+            if ($remainingCap <= 0) {
                 return;
             }
 
-            $alreadyProcessedVolume = (float) (DB::table('users')->where('id', $sponsor->id)->value('normal_pair_processed_volume') ?? 0);
+            $calculatedPairBonus = $newVolumeToPay * $binaryBonusRate;
+        }
+        // dd($calculatedPairBonus);
 
-            $newVolumeToProcess = max(0, $currentMatchedVolume - $alreadyProcessedVolume);
+        // Apply daily cap
+        $pairBonus = min($calculatedPairBonus, $remainingCap);
 
-            if ($newVolumeToProcess < 1000) {
-                return;
-            }
+        if ($pairBonus <= 0) {
+            return;
+        }
 
-            $calculatedPairBonus = $newVolumeToProcess * $binaryBonusRate;
-
-            $pairBonus = min($calculatedPairBonus, $remainingCap);
-
-            // Flush the whole newly matched volume now, regardless of how
-            // much of it the daily cap actually let through.
-            DB::table('users')->where('id', $sponsor->id)->update([
-                'normal_pair_processed_volume' => $alreadyProcessedVolume + $newVolumeToProcess,
-            ]);
-
-            if ($pairBonus <= 0) {
-                return;
-            }
-
-            $bonusType = BonusType::PairBonusNormal->value;
-            $matchedVolumeForRemarks = $newVolumeToProcess;
+        /*
+    |--------------------------------------------------------------------------
+    | Actual Paid Matched Volume
+    |--------------------------------------------------------------------------
+    | If daily cap cuts the bonus, only the paid portion should be considered paid.
+    |--------------------------------------------------------------------------
+    */
+        // $paidMatchedVolume = $pairBonus / $binaryBonusRate;
+        if ($isStarterPackage) {
+            // If the daily cap allows the complete ₹300 bonus, paid volume is ₹1,600.
+            // If capped, calculate the proportional paid volume.
+            $paidMatchedVolume = ($pairBonus / 300.0) * 1600.0;
+        } else {
+            $paidMatchedVolume = $pairBonus / $binaryBonusRate;
         }
 
         /*
@@ -476,7 +446,7 @@ class TopupController extends Controller
 
         $receiverId = $sponsor->member_id ?? $sponsor->id;
 
-        $remarks = 'Pair Completion Bonus - ' . $packageType . ': Credited ₹' . number_format($pairBonus, 2) . ' to ' . $receiverId . ' | Matched Volume ₹' . number_format($matchedVolumeForRemarks, 2);
+        $remarks = 'Pair Completion Bonus - ' . $packageType . ': Credited ₹' . number_format($pairBonus, 2) . ' to ' . $receiverId . ' | Paid Matched Volume ₹' . number_format($paidMatchedVolume, 2);
 
         DB::table('transactions')->insert([
             'user_id' => $sponsor->id,
@@ -501,42 +471,7 @@ class TopupController extends Controller
             ->where('o.status', 'completed')
             ->whereRaw('UPPER(TRIM(p.name)) != ?', ['REPURCHASE BOOSTER PACKAGE'])
             ->whereRaw('COALESCE(p.amount, p.actual_amount, o.amount, 0) < ?', [50000])
-            // Starter Package's ₹1600 first-purchase volume is matched
-            // separately (same-package-only, flat ₹300 — see
-            // getStarterPackageBusinessVolume()). Only its ₹1000 EMI/
-            // repurchase volume feeds into this normal matching pool.
-            ->where(function ($q) {
-                $q->whereRaw('UPPER(TRIM(p.name)) != ?', ['STARTER PACKAGE'])
-                    ->orWhere('o.amount', '!=', 1600);
-            })
-            ->selectRaw("
-                COALESCE(SUM(
-                    CASE
-                        WHEN UPPER(TRIM(p.name)) = 'STARTER PACKAGE' THEN o.amount
-                        ELSE COALESCE(p.amount, p.actual_amount, o.amount, 0)
-                    END
-                ), 0) as total
-            ")
-            ->value('total');
-    }
-
-    private function getStarterPackageBusinessVolume(array $userIds): float
-    {
-        if (empty($userIds)) {
-            return 0;
-        }
-
-        // Only Starter Package first-purchase orders (₹1600) count toward
-        // the same-package-only matching pool. EMI/repurchase orders
-        // (₹1000) are intentionally excluded here — they flow into the
-        // normal matching pool instead (see getNormalPackageBusinessVolume).
-        return (float) DB::table('orders as o')
-            ->join('packages as p', 'p.id', '=', 'o.package_id')
-            ->whereIn('o.user_id', $userIds)
-            ->where('o.status', 'completed')
-            ->whereRaw('UPPER(TRIM(p.name)) = ?', ['STARTER PACKAGE'])
-            ->where('o.amount', 1600)
-            ->selectRaw('COALESCE(SUM(o.amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(COALESCE(p.amount, p.actual_amount, o.amount, 0)), 0) as total')
             ->value('total');
     }
 
@@ -759,28 +694,6 @@ class TopupController extends Controller
             ]);
         });
     }
-
-    private function distributeStarterDirectIncome($userId, $flatAmount, $totalAmount)
-    {
-        /*
-    |--------------------------------------------------------------------------
-    | Starter Package Direct Income (flat, first purchase only)
-    |--------------------------------------------------------------------------
-    | Unlike distributeCommission() (10% of amount), the direct sponsor of
-    | a Starter Package first purchase gets a flat ₹500 regardless of the
-    | package amount. Only called when $currentCount == 0, i.e. only on
-    | the ₹1600 first purchase — EMI/repurchase never reaches this method.
-    |--------------------------------------------------------------------------
-    */
-        $user = DB::table('users')->find($userId);
-
-        if (!$user || empty($user->sponsor_id)) {
-            return;
-        }
-
-        $this->distributeCommissionDBOpr($user->sponsor_id, $flatAmount, "Flat ₹{$flatAmount} Direct Commission (Starter Package) from {$user->username}", $user, $totalAmount);
-    }
-
     private static function rewardAfterFullEmi($user)
     {
         $rewardAmount = 5000; // or calculate dynamically

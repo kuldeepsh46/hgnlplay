@@ -310,19 +310,19 @@
                 <label>Package</label>
                 <select name="package_id" id="packageSelect" required>
                     <option value="">-- Select Package --</option>
-                    @foreach ($packages as $p)
-                        {{-- <option value="{{ $p->id }}" data-amount="{{ $p->amount }}">{{ $p->name }} —
-                            ₹{{ $p->amount }}</option> --}}
-                        <option value="{{ $p->id }}" data-amount="{{ $p->actual_amount }}">
+                   @foreach ($packages as $p)
+    {{-- <option value="{{ $p->id }}" data-amount="{{ $p->amount }}">{{ $p->name }} —
+        ₹{{ $p->amount }}</option> --}}
+    <option value="{{ $p->id }}" data-amount="{{ $p->actual_amount }}">
 
-                            {{ $p->name }} —
-                            ₹{{ $p->actual_amount }}
+        {{ $p->name }} —
+        ₹{{ $p->actual_amount }}
 
-                            @if ($p->discounted_amount)
-                                (First Buy: ₹{{ $p->discounted_amount }})
-                            @endif
-                        </option>
-                    @endforeach
+        @if (strtoupper(trim($p->name)) === 'STARTER PACKAGE' && $p->discounted_amount)
+            (₹{{ $p->discounted_amount }} after first purchase)
+        @endif
+    </option>
+@endforeach
                 </select>
                 {{-- REMOVED hidden final_amount to prevent validation errors --}}
                 <div id="priceBreakdown" style="margin-top:10px;font-size:14px;color:var(--accent);font-weight:600;"></div>
