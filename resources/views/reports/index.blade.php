@@ -212,6 +212,19 @@
                             </tr>
                         @endforelse
                     </tbody>
+                    <tfoot>
+    <tr class="fw-bold">
+        <td colspan="2" class="text-end">Total Pair Income</td>
+        <td>₹{{ number_format($matchingTotal, 2) }}</td>
+        <td>
+            @foreach($pairBreakdown as $bonusType => $amount)
+                <small class="d-block text-muted">
+                    {{ ucwords(str_replace('_', ' ', $bonusType)) }}: ₹{{ number_format($amount, 2) }}
+                </small>
+            @endforeach
+        </td>
+    </tr>
+</tfoot>
                 </table>
             </div>
             {{ $matchingIncomes->appends(request()->query())->links() }}
@@ -230,6 +243,19 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <tfoot>
+    <tr class="fw-bold">
+        <td colspan="2" class="text-end">Total Pair Income</td>
+        <td>₹{{ number_format($directTotal, 2) }}</td>
+        <td>
+            @foreach($pairBreakdown as $bonusType => $amount)
+                <small class="d-block text-muted">
+                    {{ ucwords(str_replace('_', ' ', $bonusType)) }}: ₹{{ number_format($amount, 2) }}
+                </small>
+            @endforeach
+        </td>
+    </tr>
+</tfoot>
                         @forelse($directIncomes as $r)
                             <tr>
                                 <td>{{ ($directIncomes->currentPage() - 1) * $directIncomes->perPage() + $loop->iteration }}</td>
@@ -274,6 +300,19 @@
                             </tr>
                         @endforelse
                     </tbody>
+                    <tfoot>
+    <tr class="fw-bold">
+        <td colspan="2" class="text-end">Total Pair Income</td>
+        <td>₹{{ number_format($levelTotal, 2) }}</td>
+        <td>
+            @foreach($pairBreakdown as $bonusType => $amount)
+                <small class="d-block text-muted">
+                    {{ ucwords(str_replace('_', ' ', $bonusType)) }}: ₹{{ number_format($amount, 2) }}
+                </small>
+            @endforeach
+        </td>
+    </tr>
+</tfoot>
                 </table>
             </div>
             {{ $levelIncomes->appends(request()->query())->links() }}

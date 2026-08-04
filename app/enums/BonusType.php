@@ -19,4 +19,12 @@ enum BonusType: string
     case commission = 'commission';
     case reward = 'reward';
     case other = 'other';
+    /** Every bonus type that counts as pair / matching income. */
+public static function pairTypes(): array
+{
+    return [
+        self::PairBonusNormal->value,
+        self::PairBonusStarter->value,
+    ];
+}
 }
