@@ -179,12 +179,50 @@ class DashboardController extends Controller
         $fiftyKTotal = $packageSums['50000.00'] ?? 0;
         $oneLakhTotal = $packageSums['100000.00'] ?? 0;
         // $totalLevelIncome = DB::table('transactions')->where('user_id', $user->id)->where('type', 'credit')->where('remarks', 'like', 'Level Income%')->sum('amount');
-        $totalLevelIncome = DB::table('transactions')
-    ->where('user_id', $user->id)
-    ->where('type', 'credit')
-    ->where('bonus_type', BonusType::LevelIncome->value)
-    ->sum('amount');
-// dd($totalLevelIncome);
+        $totalLevelIncome = DB::table('transactions')->where('user_id', $user->id)->where('type', 'credit')->where('bonus_type', BonusType::LevelIncome->value)->sum('amount');
+        // dd($totalLevelIncome);
+        // ============================
+// 📦 Product / Package Sales Stats (Today & All-Time)
+// Assumes: orders(package_id, amount, status, created_at) + packages(id, name)
+// ============================
+
+$todayPackageStats = DB::table('orders')
+    ->join('packages', 'packages.id', '=', 'orders.package_id')
+    ->select(
+        'packages.id as package_id',
+        'packages.name as package_name',
+        DB::raw('COUNT(orders.id) as qty'),
+        DB::raw('SUM(orders.amount) as amount')
+    )
+    ->whereBetween('orders.created_at', [$startOfTodayIST, $endOfTodayIST])
+    ->where('orders.status', 'completed') // remove if orders has no status column
+    ->groupBy('packages.id', 'packages.name')
+    ->orderByDesc('amount')
+    ->get();
+
+$allTimePackageStats = DB::table('orders')
+    ->join('packages', 'packages.id', '=', 'orders.package_id')
+    ->select(
+        'packages.id as package_id',
+        'packages.name as package_name',
+        DB::raw('COUNT(orders.id) as qty'),
+        DB::raw('SUM(orders.amount) as amount')
+    )
+    ->where('orders.status', 'completed') // remove if orders has no status column
+    ->groupBy('packages.id', 'packages.name')
+    ->orderByDesc('amount')
+    ->get();
+
+// These two power the summary-strip you pasted
+$todayPackageTotals = [
+    'qty'    => $todayPackageStats->sum('qty'),
+    'amount' => $todayPackageStats->sum('amount'),
+];
+
+$allTimePackageTotals = [
+    'qty'    => $allTimePackageStats->sum('qty'),
+    'amount' => $allTimePackageStats->sum('amount'),
+];
         if ($user->hasRole('customer')) {
             // 1️⃣ Payouts
             // dd($user->id);
@@ -197,19 +235,16 @@ class DashboardController extends Controller
             // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Direct 10% Commission%')->sum('amount');
             // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', '%Commission%')->sum('amount');
             // $pairIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
-            $directIncome = DB::table('transactions')
-    ->where('user_id', $user->id)
-    ->where('bonus_type', BonusType::DirectIncome->value)
-    ->sum('amount');
+            $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('bonus_type', BonusType::DirectIncome->value)->sum('amount');
 
-$pairIncome = DB::table('transactions')
-    ->where('user_id', $user->id)
-    ->whereIn('bonus_type', [
-        BonusType::PairBonusNormal->value,
-        // BonusType::PairBonus2000->value,
-        BonusType::PairBonus->value,
-    ])
-    ->sum('amount');
+            $pairIncome = DB::table('transactions')
+                ->where('user_id', $user->id)
+                ->whereIn('bonus_type', [
+                    BonusType::PairBonusNormal->value,
+                    // BonusType::PairBonus2000->value,
+                    BonusType::PairBonus->value,
+                ])
+                ->sum('amount');
 
             // 3️⃣ Wallet & Earnings
             $walletBalance = DB::table('wallets')->where('user_id', $user->id)->value('balance') ?? 0;
@@ -277,7 +312,13 @@ $pairIncome = DB::table('transactions')
         }
 
         // Admin dashboard view
-        return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal', 'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData'));
+        // return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal', 'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData'));
+        return view('dashboard', compact(
+    'user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws',
+    'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal',
+    'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData',
+    'todayPackageStats', 'allTimePackageStats', 'todayPackageTotals', 'allTimePackageTotals'
+));
     }
     private function crawlAndForceSide($node, $side, &$list)
     {

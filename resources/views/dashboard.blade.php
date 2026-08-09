@@ -2,288 +2,1088 @@
 @section('title', 'Dashboard')
 @section('main')
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap');
+
+        /* =========================================
+           TOKENS — "Live Network" concept.
+           Deep space base, gold = money, teal = growth,
+           coral = attention. Everything glows a little,
+           because this business is literally a live network.
+        ========================================= */
         :root {
-            --bg: #0b0e12;
-            --card: #12181f;
-            --text: #ffffff;
-            --muted: #a0acb3;
-            --accent: #a7ff1e;
-            /* Based on your original glow */
-            --border: #1f2832;
-            --radius: 12px;
+            --ink: #060811;
+            --ink-2: #0a0d17;
+            --glass: rgba(255, 255, 255, .035);
+            --glass-strong: rgba(255, 255, 255, .06);
+            --line: rgba(255, 255, 255, .09);
+            --line-soft: rgba(255, 255, 255, .05);
+            --text: #f6f7fb;
+            --text-muted: #9298ab;
+            --text-dim: #575e72;
+            --gold: #f0bd5a;
+            --gold-2: #ffd98a;
+            --teal: #35e0c9;
+            --teal-2: #7cf2e2;
+            --coral: #ff6f6f;
+            --radius: 22px;
+            --radius-sm: 12px;
+            --font-display: 'Manrope', 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
             margin: 0;
-            font-family: "Inter", sans-serif;
-            background: var(--bg);
+            font-family: var(--font-body);
+            background: var(--ink);
             color: var(--text);
             display: flex;
             min-height: 100vh;
+            position: relative;
         }
 
         .main {
             flex: 1;
-            padding: 20px;
+            padding: 28px 32px 60px;
             overflow-x: hidden;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Header */
-        .header {
+        /* ambient dot-grid texture, sits above canvas, below content */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background-image: radial-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px);
+            background-size: 26px 26px;
+            mask-image: radial-gradient(circle at 50% 0%, black, transparent 75%);
+            pointer-events: none;
+        }
+
+        #netCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            pointer-events: none;
+            opacity: .55;
+        }
+
+        a,
+        button,
+        input {
+            font-family: inherit;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--teal);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+        }
+
+        .mono {
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .grad-gold {
+            background: linear-gradient(120deg, var(--gold-2), var(--gold) 60%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .grad-teal {
+            background: linear-gradient(120deg, var(--teal-2), var(--teal) 60%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* =========================================
+           HEADER
+        ========================================= */
+        .page-head {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            font-size: 22px
-        }
-
-        .user-info {
-            background: #141c22;
-            padding: 8px 14px;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        /* ===== Referral Section ===== */
-        .card {
-            background: var(--card);
-            border: 1px solid #1f2832;
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: 0 0 20px #00000050;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 16px;
             margin-bottom: 24px;
         }
 
-        .card h2 {
-            font-size: 18px;
-            margin-top: 0
-        }
-
-        .referral-controls {
+        .page-head .eyebrow {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--teal);
+            margin: 0 0 8px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
             align-items: center;
-            margin-top: 10px;
+            gap: 8px;
         }
 
-        .referral-controls input {
-            width: 100%;
-            max-width: 420px;
-            background: #0f1620;
-            border: 1px solid #2a3442;
-            color: #fff;
-            padding: 10px 12px;
-            border-radius: 8px;
+        .page-head .eyebrow .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--teal);
+            box-shadow: 0 0 0 0 rgba(53, 224, 201, .6);
+            animation: pulseRing 2s ease-out infinite;
+        }
+
+        .page-head h1 {
+            font-family: var(--font-display);
+            font-size: clamp(26px, 3vw, 34px);
+            font-weight: 800;
+            margin: 0 0 4px;
+            letter-spacing: -.5px;
+        }
+
+        .page-head .sub {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                box-shadow: 0 0 0 0 rgba(53, 224, 201, .55);
+            }
+
+            70% {
+                box-shadow: 0 0 0 9px rgba(53, 224, 201, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(53, 224, 201, 0);
+            }
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--line);
+            padding: 8px 16px 8px 8px;
+            border-radius: 999px;
+        }
+
+        .user-chip .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--teal));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #0a0d17;
+            font-size: 13px;
+        }
+
+        .user-chip .name {
+            font-weight: 600;
             font-size: 14px;
         }
 
+        .user-chip .role {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        /* =========================================
+           BENTO GRID SYSTEM
+        ========================================= */
+        .bento {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .b-3 {
+            grid-column: span 3;
+        }
+
+        .b-4 {
+            grid-column: span 4;
+        }
+
+        .b-5 {
+            grid-column: span 5;
+        }
+
+        .b-6 {
+            grid-column: span 6;
+        }
+
+        .b-7 {
+            grid-column: span 7;
+        }
+
+        .b-8 {
+            grid-column: span 8;
+        }
+
+        .b-9 {
+            grid-column: span 9;
+        }
+
+        .b-12 {
+            grid-column: span 12;
+        }
+
+        @media (max-width: 1200px) {
+
+            .b-3,
+            .b-4,
+            .b-5 {
+                grid-column: span 6;
+            }
+
+            .b-7,
+            .b-8,
+            .b-9 {
+                grid-column: span 12;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .main {
+                padding: 84px 16px 40px;
+            }
+
+            .b-3,
+            .b-4,
+            .b-5,
+            .b-6 {
+                grid-column: span 12;
+            }
+        }
+
+        /* =========================================
+           GLASS PANEL + cursor spotlight + tilt
+        ========================================= */
+        .glass {
+            position: relative;
+            background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+            backdrop-filter: blur(22px) saturate(140%);
+            -webkit-backdrop-filter: blur(22px) saturate(140%);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 24px;
+            overflow: hidden;
+            transition: transform .35s cubic-bezier(.16, 1, .3, 1), border-color .3s ease, box-shadow .3s ease;
+        }
+
+        .glass::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 12%;
+            right: 12%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(240, 189, 90, .55), rgba(53, 224, 201, .55), transparent);
+            opacity: .7;
+        }
+
+        .glass::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .07), transparent 60%);
+            opacity: 0;
+            transition: opacity .35s ease;
+            pointer-events: none;
+        }
+
+        .glass:hover::before {
+            opacity: 1;
+        }
+
+        .glass:hover {
+            border-color: rgba(255, 255, 255, .16);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+        }
+
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel-head .eyebrow {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin: 0 0 4px;
+        }
+
+        .panel-head h2 {
+            font-family: var(--font-display);
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 11px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
+
+        .tag-teal {
+            background: rgba(53, 224, 201, .12);
+            color: var(--teal);
+            border: 1px solid rgba(53, 224, 201, .25);
+        }
+
+        .tag-gold {
+            background: rgba(240, 189, 90, .12);
+            color: var(--gold);
+            border: 1px solid rgba(240, 189, 90, .25);
+        }
+
+        .tag-coral {
+            background: rgba(255, 111, 111, .12);
+            color: var(--coral);
+            border: 1px solid rgba(255, 111, 111, .25);
+        }
+
+        /* =========================================
+           SCROLL REVEAL
+        ========================================= */
+        .reveal {
+            opacity: 0;
+            transform: translateY(26px);
+        }
+
+        .reveal.in {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1);
+        }
+
+        /* =========================================
+           HERO KPI
+        ========================================= */
+        .hero-figure {
+            font-family: var(--font-display);
+            font-size: clamp(38px, 5vw, 60px);
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -1px;
+            margin: 6px 0 10px;
+            filter: drop-shadow(0 0 22px rgba(240, 189, 90, .18));
+        }
+
+        .hero-figure.grad-teal {
+            filter: drop-shadow(0 0 22px rgba(53, 224, 201, .2));
+        }
+
+        .hero-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sparkline {
+            width: 100%;
+            height: 44px;
+            margin-top: 6px;
+        }
+
+        .sparkline polyline {
+            fill: none;
+            stroke-width: 2.4;
+        }
+
+        .sparkline .fill {
+            stroke: none;
+        }
+
+        /* =========================================
+           TICKER STRIP
+        ========================================= */
+        .ticker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .ticker-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--glass);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 10px 16px;
+            backdrop-filter: blur(14px);
+            transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+        }
+
+        .ticker-chip:hover {
+            transform: translateY(-2px);
+            border-color: rgba(53, 224, 201, .35);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .3);
+        }
+
+        .ticker-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--teal);
+            flex-shrink: 0;
+        }
+
+        .ticker-dot.live {
+            animation: pulseRing 1.8s ease-out infinite;
+        }
+
+        .ticker-dot.coral {
+            background: var(--coral);
+        }
+
+        .ticker-chip .t-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--text-muted);
+        }
+
+        .ticker-chip .t-value {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* =========================================
+           MINI STAT TILES (bento within bento)
+        ========================================= */
+        .tile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+        }
+
+        .tile {
+            background: rgba(255, 255, 255, .025);
+            border: 1px solid var(--line-soft);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            transition: transform .25s ease, background .25s ease;
+        }
+
+        .tile:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, .05);
+        }
+
+        .tile .tile-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-bottom: 10px;
+            background: rgba(53, 224, 201, .12);
+            color: var(--teal);
+        }
+
+        .tile.gold-icon .tile-icon {
+            background: rgba(240, 189, 90, .12);
+            color: var(--gold);
+        }
+
+        .tile.coral-icon .tile-icon {
+            background: rgba(255, 111, 111, .12);
+            color: var(--coral);
+        }
+
+        .tile .tile-label {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            margin-bottom: 6px;
+        }
+
+        .tile .tile-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* =========================================
+           NETWORK MAP (signature — customer)
+        ========================================= */
+        .netmap-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 460px;
+            margin: 0 auto;
+        }
+
+        .netmap-wrap svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .flow-path {
+            fill: none;
+            stroke-width: 2;
+            stroke-dasharray: 5 8;
+            animation: flowDash 1.1s linear infinite;
+        }
+
+        @keyframes flowDash {
+            to {
+                stroke-dashoffset: -26;
+            }
+        }
+
+        .node-pulse {
+            animation: nodeGrow 2.6s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        @keyframes nodeGrow {
+
+            0%,
+            100% {
+                r: var(--r);
+            }
+
+            50% {
+                r: calc(var(--r) + 2px);
+            }
+        }
+
+        .netmap-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            fill: var(--text-muted);
+        }
+
+        .netmap-count {
+            font-family: var(--font-display);
+            font-weight: 800;
+            fill: var(--text);
+        }
+
+        /* =========================================
+           RANK RINGS (signature — customer)
+        ========================================= */
+        .rings-wrap {
+            position: relative;
+            width: 190px;
+            height: 190px;
+            margin: 0 auto;
+        }
+
+        .rings-wrap svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .ring-track {
+            fill: none;
+            stroke: rgba(255, 255, 255, .07);
+        }
+
+        .ring-fill {
+            fill: none;
+            stroke-linecap: round;
+            animation: ringFill 1.5s cubic-bezier(.16, 1, .3, 1) forwards;
+            animation-delay: .25s;
+        }
+
+        @keyframes ringFill {
+            to {
+                stroke-dashoffset: var(--off);
+            }
+        }
+
+        .rings-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .rings-center .lvl {
+            font-family: var(--font-display);
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .rings-center .lvl-label {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        .ring-legend {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .ring-legend span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .ring-legend i {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* =========================================
+           BUTTONS & INPUTS
+        ========================================= */
         .btn {
-            padding: 10px 18px;
+            padding: 11px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: 600;
-            transition: .25s;
+            font-weight: 700;
+            font-size: 13px;
+            transition: transform .15s ease, opacity .15s ease, box-shadow .2s ease;
         }
 
-        .btn-copy {
-            background: linear-gradient(90deg, var(--accent), var(--accent));
-            color: #000;
+        .btn:hover {
+            opacity: .92;
+            transform: translateY(-1px);
         }
 
-        .btn-copy:hover {
-            opacity: .9
+        .btn:active {
+            transform: scale(.96);
+        }
+
+        .btn-primary {
+            background: linear-gradient(120deg, var(--gold-2), var(--gold));
+            color: #241a04;
+            box-shadow: 0 8px 24px rgba(240, 189, 90, .25);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 10px 30px rgba(240, 189, 90, .4);
+        }
+
+        .btn-secondary {
+            background: var(--glass-strong);
+            color: var(--text);
+            border: 1px solid var(--line);
         }
 
         .btn-whatsapp {
-            background: #e84e6d !important;
-            color: #fff;
+            background: #25d366;
+            color: #04220f;
         }
 
-        .btn-whatsapp:hover {
-            opacity: .9
+        .field-input {
+            width: 100%;
+            background: rgba(0, 0, 0, .35);
+            border: 1px solid var(--line);
+            color: var(--text);
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: var(--font-mono);
         }
 
-        /* ===== Performance Cards ===== */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 18px;
-        }
-
-        .stat {
-            background: #131a23;
-            border: 1px solid #1f2832;
-            border-radius: var(--radius);
-            padding: 18px;
-            text-align: center;
+        .leg-choice {
+            display: inline-flex;
+            gap: 4px;
+            background: rgba(0, 0, 0, .35);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 4px;
+            margin-bottom: 16px;
             position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 15px #00000030 inset;
         }
 
-        .stat h3 {
-            margin: 0;
-            font-size: 26px;
-            color: var(--accent);
+        .leg-choice label {
+            padding: 7px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-muted);
+            position: relative;
         }
 
-        .stat p {
-            margin: 6px 0 0;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .stat::after {
-            content: "";
+        .leg-choice input {
             position: absolute;
-            inset: -30px;
-            background: radial-gradient(600px 300px at 80% 0%, #a7ff1e0d, transparent 70%);
-            filter: blur(4px);
-            z-index: 0;
+            opacity: 0;
+            pointer-events: none;
         }
 
-        /* ===== Tables ===== */
+        .leg-choice label:has(input:checked) {
+            background: linear-gradient(120deg, var(--teal-2), var(--teal));
+            color: #04231f;
+            font-weight: 700;
+        }
+
+        /* =========================================
+           LEADERBOARD TILES (admin packages)
+        ========================================= */
+        .leaderboard {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .lb-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, .02);
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            color: inherit;
+            transition: background .2s ease, border-color .2s ease, transform .2s ease;
+        }
+
+        .lb-row:hover,
+        .lb-row:focus-visible {
+            background: rgba(255, 255, 255, .06);
+            border-color: var(--line);
+            transform: translateX(3px);
+        }
+
+        .mini-ring {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: conic-gradient(var(--teal) calc(var(--pct) * 1%), rgba(255, 255, 255, .08) 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mini-ring span {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #0d1119;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .lb-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .lb-main .lb-rank {
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            color: var(--text-dim);
+        }
+
+        .lb-main .lb-name {
+            font-size: 13.5px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .lb-amount {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--gold);
+            white-space: nowrap;
+        }
+
+        /* =========================================
+           TABLES & CHARTS
+        ========================================= */
         .table-wrap {
             overflow-x: auto;
         }
 
-        table {
+        table.data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            font-size: 13.5px;
         }
 
-        th,
-        td {
-            border: 1px solid #1e2b36;
-            padding: 10px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        th {
-            background: #161f29;
-            color: #a9b9c7;
-        }
-
-        td {
-            color: #d4dee8
-        }
-
-        /* ===== Additional Grids & Charts ===== */
-        canvas#growthChart {
-            background: #0b0e12;
-            border: 1px solid #1f2832;
-            border-radius: 12px;
-            padding: 10px;
-        }
-
-        .performance-card {
-            background: #12181f;
-            border-radius: 12px;
-            padding: 25px;
-            margin-top: 20px;
-            color: #e9eef3;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-        }
-
-        .section-title {
-            font-size: 18px;
+        table.data-table th {
+            text-align: left;
+            padding: 10px 12px;
+            color: var(--text-muted);
             font-weight: 600;
-            margin-bottom: 20px;
-            border-left: 4px solid var(--accent);
-            padding-left: 10px;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            border-bottom: 1px solid var(--line);
         }
 
-        .performance-grid {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
+        table.data-table td {
+            padding: 11px 12px;
+            border-bottom: 1px solid var(--line-soft);
         }
 
-        .col {
-            flex: 1;
+        table.data-table tbody tr {
+            transition: background .15s ease;
+        }
+
+        table.data-table tbody tr:hover {
+            background: rgba(255, 255, 255, .04);
+        }
+
+        canvas.chart-surface {
+            background: rgba(0, 0, 0, .25);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 12px;
+            max-height: 300px;
+        }
+
+        .chart-grid {
             display: grid;
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
         }
 
-        .stat-box {
-            background: #10171f;
-            border: 1px solid #1b222b;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            transition: 0.3s ease;
-            box-shadow: inset 0 0 10px rgba(167, 255, 30, 0.05);
+        .summary-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .stat-box:hover {
-            background: #162029;
-            box-shadow: 0 0 10px rgba(167, 255, 30, 0.2);
+        .summary-box {
+            background: rgba(0, 0, 0, .25);
+            border: 1px solid var(--line);
+            border-top: 3px solid var(--teal);
+            border-radius: 12px;
+            padding: 15px;
         }
 
-        .stat-box h3 {
-            color: #ffffffff;
-            font-size: 22px;
+        .summary-box.all-time {
+            border-top-color: var(--gold);
+        }
+
+        .summary-box p {
+            margin: 0 0 6px;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--text-muted);
+        }
+
+        .summary-box h3 {
             margin: 0;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        /* =========================================
+           QUEUE / ALERT CARD
+        ========================================= */
+        .queue-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 0;
+            border-bottom: 1px solid var(--line-soft);
+            position: relative;
+            z-index: 1;
+        }
+
+        .queue-row:last-child {
+            border-bottom: none;
+        }
+
+        .queue-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .queue-value {
+            font-weight: 700;
+            font-size: 15px;
+            font-family: var(--font-mono);
+        }
+
+        .status-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
             font-weight: 600;
+            margin-top: 10px;
+            position: relative;
+            z-index: 1;
         }
 
-        .stat-box p {
-            color: #a0acb3;
-            margin-top: 6px;
-            font-size: 14px;
+        .status-banner.ok {
+            background: rgba(53, 224, 201, .1);
+            color: var(--teal);
         }
 
-        /* ===== Original Password Modal ===== */
-        .modal {
+        .status-banner.alert {
+            background: rgba(255, 111, 111, .1);
+            color: var(--coral);
+        }
+
+        /* =========================================
+           MODALS
+        ========================================= */
+        .modal-backdrop {
             display: none;
             position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(11, 14, 18, 0.9);
-            justify-content: center;
+            inset: 0;
+            background: rgba(3, 4, 8, .75);
+            backdrop-filter: blur(10px);
+            z-index: 999;
             align-items: center;
-            backdrop-filter: blur(4px);
+            justify-content: center;
+            animation: fadeIn .2s ease-in-out;
         }
 
-        .modal-content {
-            background: var(--card);
-            border: 1px solid var(--border);
+        .modal-box {
+            background: linear-gradient(180deg, #141826, #0e121c);
+            border: 1px solid var(--line);
             border-radius: var(--radius);
-            padding: 24px;
-            width: 90%;
-            max-width: 400px;
-            color: var(--text);
+            width: 92%;
+            max-width: 460px;
+            padding: 26px;
             position: relative;
-            box-shadow: 0 0 30px #00000080;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, .6);
         }
 
-        .modal-content h2 {
-            margin-top: 0;
-            color: var(--accent);
-            text-align: center;
+        .modal-box.wide {
+            max-width: 720px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow: hidden;
         }
 
-        .modal-content .close {
+        .modal-box.wide .modal-head {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-box.wide .modal-body-scroll {
+            padding: 16px 22px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(53, 224, 201, .4) transparent;
+        }
+
+        .modal-box.wide .modal-body-scroll::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .modal-box.wide .modal-body-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--teal), var(--gold));
+            border-radius: 6px;
+        }
+
+        .modal-close {
             position: absolute;
-            top: 10px;
+            top: 16px;
             right: 16px;
-            font-size: 22px;
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            background: var(--glass-strong);
+            border: 1px solid var(--line);
+            color: var(--text-muted);
+            font-size: 17px;
             cursor: pointer;
-            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 111, 111, .12);
+            color: var(--coral);
+        }
+
+        .modal-box h2 {
+            margin: 0 0 18px;
+            font-family: var(--font-display);
+            font-size: 18px;
         }
 
         .form-group {
@@ -293,1005 +1093,719 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: var(--muted);
-            font-size: 14px;
+            color: var(--text-muted);
+            font-size: 13px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #2a3442;
-            background: #0f1620;
-            color: #fff;
-        }
-
-        /* ===== Original Lucky Modal ===== */
-        .lucky-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .lucky-modal-content {
-            background: linear-gradient(145deg, #020617, #0f172a);
-            width: 92%;
-            max-width: 720px;
-            border-radius: 18px;
-            padding: 24px;
-            color: #e5e7eb;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-            position: relative;
-        }
-
-        .lucky-close {
-            position: absolute;
-            right: 20px;
-            top: 16px;
-            font-size: 28px;
-            cursor: pointer;
-            color: #94a3b8;
+            padding: 11px;
+            border-radius: 9px;
+            border: 1px solid var(--line);
+            background: rgba(0, 0, 0, .35);
+            color: var(--text);
         }
 
         .reward-banner {
-            background: #020617;
+            background: rgba(0, 0, 0, .3);
+            border: 1px solid var(--line);
             border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 18px;
+            padding: 18px;
+            margin-bottom: 16px;
             text-align: center;
         }
 
         .reward-banner.winner {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: #022c22;
+            background: linear-gradient(135deg, var(--teal), #1fae9f);
+            color: #04231f;
+            border: none;
         }
 
-        .summary-grid {
+        .modal-summary-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 22px;
+            gap: 10px;
+            margin-bottom: 18px;
         }
 
-        .summary-grid div {
-            background: #020617;
-            padding: 14px;
-            border-radius: 12px;
+        .modal-summary-grid div {
+            background: rgba(0, 0, 0, .3);
+            border: 1px solid var(--line);
+            padding: 12px;
+            border-radius: 10px;
             text-align: center;
         }
 
         .accordion-item {
-            background: #020617;
-            border-radius: 12px;
-            margin-bottom: 12px;
+            background: rgba(0, 0, 0, .3);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
         }
 
         .accordion-header {
-            padding: 14px;
+            width: 100%;
+            background: none;
+            border: none;
+            color: var(--text);
+            padding: 13px 14px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            color: var(--text-muted);
+        }
+
+        .accordion-header[aria-expanded="true"]::after {
+            content: '–';
         }
 
         .accordion-body {
             display: none;
-            padding: 14px;
-            border-top: 1px solid #1e293b;
+            padding: 12px 14px;
+            border-top: 1px solid var(--line);
         }
 
         .voucher-pill {
             display: inline-block;
-            padding: 8px 12px;
-            margin: 6px;
+            padding: 7px 12px;
+            margin: 4px;
             border-radius: 20px;
-            background: #1e293b;
-            font-size: 13px;
+            background: var(--glass-strong);
+            font-size: 12px;
         }
 
         .voucher-pill.used {
-            background: #334155;
-            color: #94a3b8;
+            color: var(--text-dim);
         }
 
         .voucher-pill.unused {
-            background: #22c55e;
-            color: #022c22;
+            background: rgba(53, 224, 201, .12);
+            color: var(--teal);
         }
 
-        /* ===== Original Custom Modal (Backdrop/Tables) ===== */
-        .custom-modal {
-            display: none;
+        /* =========================================
+           CONFETTI
+        ========================================= */
+        .confetti-piece {
             position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(6px);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.2s ease-in-out;
+            top: -10px;
+            width: 8px;
+            height: 14px;
+            z-index: 1000;
+            pointer-events: none;
+            animation: confettiFall linear forwards;
         }
 
-        .custom-modal-content {
-            width: 700px;
-            max-height: 85vh;
-            background: #0f1b26;
-            border-radius: 12px;
-            box-shadow: 0 0 25px rgba(0, 255, 170, 0.15);
-            border: 1px solid rgba(0, 255, 170, 0.15);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .modal-header {
-            padding: 18px 20px;
-            background: linear-gradient(90deg, #0f1b26, #122635);
-            border-bottom: 1px solid rgba(0, 255, 170, 0.15);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 18px;
-        }
-
-        #closeModal {
-            background: #ff3b3b;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            color: #fff;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s ease;
-        }
-
-        #closeModal:hover {
-            background: #ff0000;
-            transform: scale(1.05);
-        }
-
-        .modal-body {
-            padding: 15px;
-            overflow-y: auto;
-        }
-
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .modal-body::-webkit-scrollbar-track {
-            background: #0f1b26;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb {
-            background: #00ffb3;
-            border-radius: 6px;
-        }
-
-        .modal-body table {
-            width: 100%;
-            border-collapse: collapse;
-            color: #cfd8dc;
-            font-size: 14px;
-        }
-
-        .modal-body th {
-            background: #122635;
-            color: #00ffb3;
-            text-align: left;
-            padding: 12px;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-
-        .modal-body td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .modal-body tr:hover {
-            background: rgba(0, 255, 170, 0.05);
-        }
-
-        .modal-body td:nth-child(3) {
-            color: #00ffb3;
-            font-weight: 600;
+        @keyframes confettiFall {
+            to {
+                transform: translateY(105vh) rotate(540deg);
+                opacity: .3;
+            }
         }
 
         @keyframes fadeIn {
             from {
-                opacity: 0;
+                opacity: 0
             }
 
             to {
-                opacity: 1;
+                opacity: 1
             }
         }
 
-        /* General Responsive */
-        @media(max-width:768px) {
-            .main {
-                padding: 80px 16px;
+        @media (prefers-reduced-motion: reduce) {
+
+            html {
+                scroll-behavior: auto;
             }
 
-            .performance-grid {
-                flex-direction: column;
+            #netCanvas {
+                display: none;
             }
 
-            .custom-modal-content {
-                width: 95%;
-            }
-        }
-
-
-        /* =========================================
-                                   2. NEW DASHBOARD STATS CSS
-                                   (Appended safely so it only affects the new UI)
-                                ========================================= */
-        .dashboard-stats-container {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: #12181f;
-            /* Matched to var(--card) */
-            border-radius: 12px;
-            /* Matched to var(--radius) */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            padding: 24px;
-            border: 1px solid #1f2832;
-            /* Matched to var(--border) */
-        }
-
-        .today-card {
-            border-top: 4px solid #a7ff1e;
-        }
-
-        /* Neon Green Accent */
-        .overall-card {
-            border-top: 4px solid #3b82f6;
-        }
-
-        /* Blue Accent */
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #1f2832;
-            padding-bottom: 12px;
-        }
-
-        .card-header h2 {
-            margin: 0;
-            font-size: 1.25rem;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card-header h2 i {
-            color: #a0acb3;
-        }
-
-        .badge {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-pulse {
-            background-color: rgba(167, 255, 30, 0.1);
-            color: #a7ff1e;
-            border: 1px solid rgba(167, 255, 30, 0.2);
-            animation: pulse 2s infinite;
-        }
-
-        .badge-solid {
-            background-color: #1a232c;
-            color: #a0acb3;
-            border: 1px solid #1f2832;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px;
-            background: #10171f;
-            border: 1px solid #1b222b;
-            border-radius: 10px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: inset 0 0 10px rgba(167, 255, 30, 0.02);
-        }
-
-        .stat-item:hover {
-            transform: translateY(-3px);
-            background: #162029;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(167, 255, 30, 0.05);
-        }
-
-        .highlight-stat {
-            background: #131a23;
-            border: 1px solid #1f2832;
-        }
-
-        .stat-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            background: rgba(167, 255, 30, 0.1);
-            color: #a7ff1e;
-            border-radius: 50%;
-            font-size: 1.2rem;
-        }
-
-        .overall-grid .stat-icon {
-            background: rgba(59, 130, 246, 0.1);
-            color: #3b82f6;
-        }
-
-        .stat-content p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: #a0acb3;
-            font-weight: 500;
-        }
-
-        .stat-content h3 {
-            margin: 4px 0 0 0;
-            font-size: 1.4rem;
-            color: #ffffff;
-            font-weight: 700;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 1;
+            .reveal {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
             }
 
-            50% {
-                opacity: 0.6;
+            .flow-path,
+            .node-pulse,
+            .ticker-dot.live,
+            .page-head .live-dot {
+                animation: none !important;
             }
 
-            100% {
-                opacity: 1;
+            .ring-fill {
+                animation: none !important;
+                stroke-dashoffset: var(--off) !important;
             }
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-
-
-
-
-        .card-flex {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: space-between;
-            align-items: stretch;
-        }
-
-        .referral-left {
-            flex: 1 1 55%;
-        }
-
-        /* Updated for Dark Mode */
-        .matrix-right {
-            flex: 1 1 40%;
-            background-color: rgba(255, 255, 255, 0.03);
-            /* Subtle dark panel */
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            /* Matches your bottom panels */
-            border-left: 4px solid #3b82f6;
-            /* Keeps the blue accent */
-        }
-
-        .matrix-header {
-            margin-top: 0;
-            margin-bottom: 20px;
-            color: #f8fafc;
-            /* White text */
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .rank-badge {
-            background-color: #3b82f6;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            vertical-align: middle;
-        }
-
-        .tier-progress-wrapper {
-            margin-bottom: 15px;
-        }
-
-        .tier-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 5px;
-            color: #94a3b8;
-            /* Soft slate-grey text */
-            font-weight: 600;
-        }
-
-        .progress-track {
-            background: #334155;
-            /* Dark grey track */
-            border-radius: 4px;
-            height: 8px;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.4s ease;
         }
     </style>
+
+    <canvas id="netCanvas" aria-hidden="true"></canvas>
+    <div class="bg-grid" aria-hidden="true"></div>
+
     @if (Auth::user()->hasRole('customer'))
-        {{-- {{dd($progress)}} --}}
+        @php
+            $t1 = min((($progress->tier_1_count ?? 0) / 3) * 100, 100);
+            $t2 = min((($progress->tier_2_count ?? 0) / 9) * 100, 100);
+            $t3 = min((($progress->tier_3_count ?? 0) / 27) * 100, 100);
+            $r1 = 85; $r2 = 68; $r3 = 51;
+            $c1 = 2 * M_PI * $r1; $c2 = 2 * M_PI * $r2; $c3 = 2 * M_PI * $r3;
+            $off1 = $c1 * (1 - $t1 / 100);
+            $off2 = $c2 * (1 - $t2 / 100);
+            $off3 = $c3 * (1 - $t3 / 100);
+            $maxLeg = max($leftDownline ?? 0, $rightDownline ?? 0, 1);
+        @endphp
 
-        <!-- Main Content -->
-        <div class="header">
-            <h1>Dashboard</h1>
-            <div class="user-info">
-                <span>👤 {{ Auth::user()->uname ?? Auth::user()->name }}</span>
-            </div>
-        </div>
-        <div>
-        </div>
-
-
-        {{-- <div class="card">
-            <h2>Referral Center</h2>
-
+        <div class="page-head reveal">
             <div>
-                <label>
-                    <input type="radio" name="leg" value="1" checked> Left
-                </label>
-
-                <label>
-                    <input type="radio" name="leg" value="2"> Right
-                </label>
+                <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> User Console</p>
+                <h1>Your Dashboard</h1>
+                <p class="sub">Referral growth &amp; earnings at a glance</p>
             </div>
-
-            <div class="referral-controls">
-                <input type="text" id="refLink"
-                    value="{{ url('/register') }}?refid={{ Auth::user()->id }}&leg=1&name={{ urlencode(Auth::user()->username ?? Auth::user()->name) }}"
-                    readonly>
-
-                <button class="btn btn-copy" onclick="copyLink()">Copy Link</button>
-
-                <button class="btn btn-whatsapp" onclick="shareWhatsApp()">Share</button>
-            </div>
-
-            <div style="margin-top:15px;">
-                <strong>Total Downline: </strong>
-                <span id="downline-count">{{ $leftDownline ?? 0 }}</span>
-            </div>
-
-        </div> --}}
-{{-- {{dd($totalDownline, $leftDownline, $rightDownline)}} --}}
-{{-- {{dd($totalLevelIncome)}} --}}
-        <div class="card card-flex">
-
-            <div class="referral-left">
-                <h2>Referral Center</h2>
-
-                <div style="margin-bottom: 15px;">
-                    <label style="margin-right: 15px; cursor: pointer;">
-                        <input type="radio" name="leg" value="1" checked> Left
-                    </label>
-
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="leg" value="2"> Right
-                    </label>
-                </div>
-
-                <div class="referral-controls" style="margin-bottom: 20px;">
-                    <input type="text" id="refLink"
-                        value="{{ url('/register') }}?refid={{ Auth::user()->id }}&leg=1&name={{ urlencode(Auth::user()->username ?? Auth::user()->name) }}"
-                        readonly
-                        style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;">
-
-                    <div>
-                        <button class="btn btn-copy" onclick="copyLink()">Copy Link</button>
-                        <button class="btn btn-whatsapp" onclick="shareWhatsApp()">Share</button>
-                    </div>
-                </div>
-
-                <div style="margin-top:15px; padding-top: 15px; border-top: 1px solid #eee;">
-                    <strong>Total Downline: </strong>
-                    <span style="color: #3b82f6; font-weight: bold; font-size: 1.1rem;">
-                        {{ $totalDownline ?? 0 }}
-                    </span>
-                </div>
-            </div>
-
-            <div class="matrix-right">
-                <h3 class="matrix-header">
-                    Current Rank: <span class="rank-badge">Level {{ $user->rank_level }}</span>
-                </h3>
-
-                <div class="tier-progress-wrapper">
-                    <div class="tier-info">
-                        <span>Tier 1 Progress</span>
-                        <span>{{ $progress->tier_1_count ?? 0 }} / 3</span>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill"
-                            style="width: {{ (($progress->tier_1_count ?? 0) / 3) * 100 }}%; background-color: #00b050;">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tier-progress-wrapper">
-                    <div class="tier-info">
-                        <span>Tier 2 Progress</span>
-                        <span>{{ $progress->tier_2_count ?? 0 }} / 9</span>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill"
-                            style="width: {{ (($progress->tier_2_count ?? 0) / 9) * 100 }}%; background-color: #f59e0b;">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tier-progress-wrapper">
-                    <div class="tier-info">
-                        <span>Tier 3 Progress</span>
-                        <span>{{ $progress->tier_3_count ?? 0 }} / 27</span>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill"
-                            style="width: {{ (($progress->tier_3_count ?? 0) / 27) * 100 }}%; background-color: #3b82f6;">
-                        </div>
-                    </div>
-                </div>
-
+            <div class="user-chip">
+                <span class="avatar" aria-hidden="true">{{ strtoupper(substr(Auth::user()->uname ?? Auth::user()->name, 0, 1)) }}</span>
+                <span>
+                    <span class="name">{{ Auth::user()->uname ?? Auth::user()->name }}</span>
+                    <span class="role">Customer</span>
+                </span>
             </div>
         </div>
-        <!-- Performance -->
-        <div class="card performance-card">
-            <h2 class="section-title">Performance</h2>
-            <div class="performance-grid">
-                <div class="col">
-                    <div class="stat-box">
-                        <h3>{{ $payoutReceived ?? 0 }}</h3>
-                        <p>Payout Received</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3>{{ $payoutPending ?? 0 }}</h3>
-                        <p>Payout Pending</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3>{{ $totalDownline ?? 0 }}</h3>
-                        <p>Total Downline</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3>₹{{ number_format($directIncome ?? 0, 2) }}</h3>
-                        <p>Direct Income</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3>₹{{ number_format($totalLevelIncome ?? 0, 2) }}</h3>
-                        <p>Level Income</p>
+
+        <!-- HERO KPI ROW -->
+        <div class="bento">
+            <div class="glass b-6 reveal">
+                <p class="hero-label"><i class="fa-solid fa-sack-dollar" aria-hidden="true"></i> Total Earning</p>
+                <div class="hero-figure grad-gold">₹{{ number_format(($directIncome ?? 0) + ($pairIncome ?? 0), 0) }}</div>
+                <p style="margin:0; font-size:12px; color:var(--text-muted);">Direct + Pair income combined</p>
+            </div>
+            <div class="glass b-6 reveal">
+                <p class="hero-label"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> Total Downline</p>
+                <div class="hero-figure grad-teal mono">{{ $totalDownline ?? 0 }}</div>
+                <p style="margin:0; font-size:12px; color:var(--text-muted);">{{ $leftDownline ?? 0 }} left · {{ $rightDownline ?? 0 }} right</p>
+            </div>
+        </div>
+
+        <!-- REFERRAL + LIVE NETWORK MAP -->
+        <div class="bento">
+            <div class="glass b-6 reveal">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Grow your network</p>
+                        <h2>Referral Center</h2>
                     </div>
                 </div>
 
-                <div class="col">
-                    <div class="stat-box">
-                        <h3>{{ number_format($payoutReceived ?? 0) }}</h3>
-                        <p>Total Withdraw</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3>₹{{ number_format($walletBalance ?? 0, 2) }}</h3>
-                        <p>Topup Wallet</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3>₹{{ number_format($pairIncome ?? 0, 2) }}</h3>
-                        <p>Pair Income</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3>
-                            ₹{{ number_format(($directIncome ?? 0) + ($pairIncome ?? 0), 2) }}
-                        </h3>
-                        <p>Total Earning</p>
-                    </div>
+                <div class="leg-choice" role="radiogroup" aria-label="Referral leg">
+                    <label><input type="radio" name="leg" value="1" checked><span>Left</span></label>
+                    <label><input type="radio" name="leg" value="2"><span>Right</span></label>
+                </div>
+
+                <label for="refLink" class="visually-hidden">Your referral link</label>
+                <input type="text" id="refLink" class="field-input" readonly
+                    value="{{ url('/register') }}?refid={{ Auth::user()->id }}&leg=1&name={{ urlencode(Auth::user()->username ?? Auth::user()->name) }}"
+                    style="margin-bottom: 14px;">
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-primary" onclick="copyLink()">Copy Link</button>
+                    <button type="button" class="btn btn-whatsapp" onclick="shareWhatsApp()">Share on WhatsApp</button>
                 </div>
             </div>
 
-
-            @if ($cycle)
-                <div class="card performance-card mt-4">
-                    <h2 class="section-title">Lucky Vouchers & Rewards</h2>
-
-                    <div class="performance-grid">
-                        <div class="col">
-                            <div class="stat-box" onclick="openLuckyModal()">
-                                <h3>{{ $cycle->current_month }} / 16</h3>
-                                <p>Months Completed</p>
-                            </div>
-
-                            <div class="stat-box" onclick="openLuckyModal()">
-                                <h3>{{ $totalVouchers }}</h3>
-                                <p>Total Vouchers Earned</p>
-                            </div>
-
-                            <div class="stat-box" onclick="openLuckyModal()">
-                                <h3>{{ $unusedVouchers }}</h3>
-                                <p>Active Vouchers</p>
-                            </div>
-                        </div>
-
-                        <div class="col">
-                            <div class="stat-box" onclick="openLuckyModal()">
-                                <h3>{{ $rewardStatus }}</h3>
-                                <p>Reward Status</p>
-                            </div>
-
-                            <div class="stat-box" onclick="openLuckyModal()">
-                                <h3>{{ $rewardText }}</h3>
-                                <p>Reward Details</p>
-                            </div>
-                        </div>
+            <div class="glass b-6 reveal">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Live network map</p>
+                        <h2>Your Matrix</h2>
                     </div>
                 </div>
-            @endif
+                <div class="netmap-wrap">
+                    <svg viewBox="0 0 320 190" role="img" aria-label="Network map showing {{ $leftDownline ?? 0 }} left leg members and {{ $rightDownline ?? 0 }} right leg members">
+                        <path class="flow-path" d="M160,34 C120,72 92,92 62,140" stroke="#35e0c9" />
+                        <path class="flow-path" d="M160,34 C200,72 228,92 258,140" stroke="#f0bd5a" />
+                        <circle cx="160" cy="34" r="26" fill="rgba(255,255,255,.06)" stroke="url(#gradYou)" stroke-width="2" />
+                        <circle class="node-pulse" style="--r:8px" cx="62" cy="140" r="8" fill="#35e0c9" opacity=".9" />
+                        <circle cx="62" cy="140" r="30" fill="rgba(53,224,201,.08)" stroke="#35e0c9" stroke-width="1.5" />
+                        <circle class="node-pulse" style="--r:8px" cx="258" cy="140" r="8" fill="#f0bd5a" opacity=".9" />
+                        <circle cx="258" cy="140" r="30" fill="rgba(240,189,90,.08)" stroke="#f0bd5a" stroke-width="1.5" />
 
-            <div id="luckyModal" class="lucky-modal">
-                <div class="lucky-modal-content">
+                        <text x="160" y="30" text-anchor="middle" class="netmap-count" font-size="13">You</text>
+                        <text x="160" y="46" text-anchor="middle" class="netmap-label" font-size="9">Level {{ $user->rank_level }}</text>
 
-                    <span class="lucky-close" onclick="closeLuckyModal()">×</span>
+                        <text x="62" y="136" text-anchor="middle" class="netmap-count" font-size="17">{{ $leftDownline ?? 0 }}</text>
+                        <text x="62" y="168" text-anchor="middle" class="netmap-label">Left Leg</text>
 
-                    <h2>🎟 Lucky Vouchers & Rewards</h2>
+                        <text x="258" y="136" text-anchor="middle" class="netmap-count" font-size="17">{{ $rightDownline ?? 0 }}</text>
+                        <text x="258" y="168" text-anchor="middle" class="netmap-label">Right Leg</text>
 
-                    @if ($cycle)
-                        {{-- Reward Highlight --}}
-                        <div class="reward-banner {{ $cycle->status === 'won' ? 'winner' : '' }}">
-                            <h3>{{ $rewardStatus }}</h3>
-                            <p>{{ $rewardText }}</p>
+                        <defs>
+                            <linearGradient id="gradYou" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#ffd98a" />
+                                <stop offset="100%" stop-color="#35e0c9" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- RANK RINGS + PERFORMANCE TILES -->
+        <div class="bento">
+            <div class="glass b-5 reveal">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Progression</p>
+                        <h2>Rank Rings</h2>
+                    </div>
+                    <span class="tag tag-gold">LVL {{ $user->rank_level }}</span>
+                </div>
+                <div class="rings-wrap">
+                    <svg viewBox="0 0 190 190">
+                        <circle class="ring-track" cx="95" cy="95" r="{{ $r1 }}" stroke-width="9" />
+                        <circle class="ring-track" cx="95" cy="95" r="{{ $r2 }}" stroke-width="9" />
+                        <circle class="ring-track" cx="95" cy="95" r="{{ $r3 }}" stroke-width="9" />
+                        <circle class="ring-fill" cx="95" cy="95" r="{{ $r1 }}" stroke-width="9" stroke="#35e0c9"
+                            style="--circ:{{ $c1 }}; --off:{{ $off1 }}; stroke-dasharray:{{ $c1 }};" />
+                        <circle class="ring-fill" cx="95" cy="95" r="{{ $r2 }}" stroke-width="9" stroke="#f0bd5a"
+                            style="--circ:{{ $c2 }}; --off:{{ $off2 }}; stroke-dasharray:{{ $c2 }}; animation-delay:.4s;" />
+                        <circle class="ring-fill" cx="95" cy="95" r="{{ $r3 }}" stroke-width="9" stroke="#ff6f6f"
+                            style="--circ:{{ $c3 }}; --off:{{ $off3 }}; stroke-dasharray:{{ $c3 }}; animation-delay:.55s;" />
+                    </svg>
+                    <div class="rings-center">
+                        <span class="lvl">{{ $user->rank_level }}</span>
+                        <span class="lvl-label">Rank Level</span>
+                    </div>
+                </div>
+                <div class="ring-legend">
+                    <span><i style="background:#35e0c9;"></i> Tier 1 · {{ $progress->tier_1_count ?? 0 }}/3</span>
+                    <span><i style="background:#f0bd5a;"></i> Tier 2 · {{ $progress->tier_2_count ?? 0 }}/9</span>
+                    <span><i style="background:#ff6f6f;"></i> Tier 3 · {{ $progress->tier_3_count ?? 0 }}/27</span>
+                </div>
+            </div>
+
+            <div class="glass b-7 reveal">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Earnings</p>
+                        <h2>Performance</h2>
+                    </div>
+                </div>
+                <div class="tile-grid">
+                    <div class="tile">
+                        <div class="tile-icon"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></div>
+                        <p class="tile-label">Payout Received</p>
+                        <p class="tile-value mono">{{ $payoutReceived ?? 0 }}</p>
+                    </div>
+                    <div class="tile coral-icon">
+                        <div class="tile-icon"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i></div>
+                        <p class="tile-label">Payout Pending</p>
+                        <p class="tile-value mono">{{ $payoutPending ?? 0 }}</p>
+                    </div>
+                    <div class="tile gold-icon">
+                        <div class="tile-icon"><i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i></div>
+                        <p class="tile-label">Direct Income</p>
+                        <p class="tile-value mono">₹{{ number_format($directIncome ?? 0, 2) }}</p>
+                    </div>
+                    <div class="tile gold-icon">
+                        <div class="tile-icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></div>
+                        <p class="tile-label">Level Income</p>
+                        <p class="tile-value mono">₹{{ number_format($totalLevelIncome ?? 0, 2) }}</p>
+                    </div>
+                    <div class="tile gold-icon">
+                        <div class="tile-icon"><i class="fa-solid fa-people-arrows" aria-hidden="true"></i></div>
+                        <p class="tile-label">Pair Income</p>
+                        <p class="tile-value mono">₹{{ number_format($pairIncome ?? 0, 2) }}</p>
+                    </div>
+                    <div class="tile">
+                        <div class="tile-icon"><i class="fa-solid fa-wallet" aria-hidden="true"></i></div>
+                        <p class="tile-label">Topup Wallet</p>
+                        <p class="tile-value mono">₹{{ number_format($walletBalance ?? 0, 2) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LUCKY VOUCHERS -->
+        @if ($cycle)
+            <div class="glass b-12 reveal" style="margin-bottom:20px;">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Rewards</p>
+                        <h2>🎟 Lucky Vouchers</h2>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="luckyModalA11y.open(this)">View details</button>
+                </div>
+                <div class="tile-grid">
+                    <div class="tile">
+                        <p class="tile-label">Months Completed</p>
+                        <p class="tile-value mono">{{ $cycle->current_month }} / 16</p>
+                    </div>
+                    <div class="tile">
+                        <p class="tile-label">Total Vouchers</p>
+                        <p class="tile-value mono">{{ $totalVouchers }}</p>
+                    </div>
+                    <div class="tile">
+                        <p class="tile-label">Active Vouchers</p>
+                        <p class="tile-value mono">{{ $unusedVouchers }}</p>
+                    </div>
+                    <div class="tile {{ $cycle->status === 'won' ? 'gold-icon' : '' }}">
+                        <p class="tile-label">Reward Status</p>
+                        <p class="tile-value">{{ $rewardStatus }}</p>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="glass b-12 reveal" style="margin-bottom:20px;">
+                <p class="eyebrow">🎟 Lucky Vouchers</p>
+                <p style="color:var(--text-muted); margin:0;">Purchase a ₹50,000 or ₹1,00,000 package to participate in Lucky Draw Rewards.</p>
+            </div>
+        @endif
+
+        <div id="luckyModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="luckyModalTitle" aria-hidden="true">
+            <div class="modal-box">
+                <button type="button" class="modal-close" aria-label="Close voucher details" onclick="luckyModalA11y.close()">&times;</button>
+                <h2 id="luckyModalTitle">🎟 Lucky Vouchers &amp; Rewards</h2>
+
+                @if ($cycle)
+                    <div class="reward-banner {{ $cycle->status === 'won' ? 'winner' : '' }}">
+                        <h3 style="margin:0 0 6px;">{{ $rewardStatus }}</h3>
+                        <p style="margin:0;">{{ $rewardText }}</p>
+                    </div>
+
+                    <div class="modal-summary-grid">
+                        <div>
+                            <strong class="mono">{{ $cycle->current_month }}/16</strong>
+                            <div style="font-size:11px; color:var(--text-muted);">Months</div>
                         </div>
-
-                        {{-- Summary --}}
-                        <div class="summary-grid">
-                            <div>
-                                <strong>{{ $cycle->current_month }}/16</strong>
-                                <span>Months Completed</span>
-                            </div>
-                            <div>
-                                <strong>{{ $totalVouchers }}</strong>
-                                <span>Total Vouchers</span>
-                            </div>
-                            <div>
-                                <strong>{{ $unusedVouchers }}</strong>
-                                <span>Active Vouchers</span>
-                            </div>
+                        <div>
+                            <strong class="mono">{{ $totalVouchers }}</strong>
+                            <div style="font-size:11px; color:var(--text-muted);">Total Vouchers</div>
                         </div>
-                    @else
-                        <div class="alert alert-info">
-                            <p>No active voucher cycle found. Complete EMI/Topup to activate vouchers.</p>
+                        <div>
+                            <strong class="mono">{{ $unusedVouchers }}</strong>
+                            <div style="font-size:11px; color:var(--text-muted);">Active</div>
                         </div>
-                    @endif
+                    </div>
+                @else
+                    <p style="color:var(--text-muted);">No active voucher cycle found. Complete EMI/Topup to activate vouchers.</p>
+                @endif
 
-                    {{-- Accordion --}}
-                    @if ($cycle && $voucherGroups)
-                        <div class="accordion">
-                            @foreach ($voucherGroups as $month => $vouchers)
-                                <div class="accordion-item">
-                                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                                        Month {{ $month }} Vouchers
-                                    </div>
-                                    <div class="accordion-body">
-                                        @foreach ($vouchers as $v)
-                                            <div class="voucher-pill {{ $v->status }}">
-                                                {{ $v->voucher_code }}
-                                            </div>
-                                        @endforeach
-                                    </div>
+                @if ($cycle && $voucherGroups)
+                    <div class="accordion">
+                        @foreach ($voucherGroups as $month => $vouchers)
+                            <div class="accordion-item">
+                                <button type="button" class="accordion-header" aria-expanded="false" onclick="toggleAccordion(this)">
+                                    Month {{ $month }} Vouchers
+                                </button>
+                                <div class="accordion-body">
+                                    @foreach ($vouchers as $v)
+                                        <span class="voucher-pill {{ $v->status }}">{{ $v->voucher_code }}</span>
+                                    @endforeach
                                 </div>
-                            @endforeach
-                        </div>
-                    @endif
-
-                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
-
-
-            <script>
-                function openLuckyModal() {
-                    document.getElementById('luckyModal').style.display = 'flex';
-                }
-
-                function closeLuckyModal() {
-                    document.getElementById('luckyModal').style.display = 'none';
-                }
-
-                function toggleAccordion(el) {
-                    const body = el.nextElementSibling;
-                    body.style.display = body.style.display === 'block' ? 'none' : 'block';
-                }
-            </script>
-
-
-            @if (!$cycle)
-                <div class="card performance-card mt-4">
-                    <h2 class="section-title">🎟 Lucky Vouchers & Rewards</h2>
-                    <p class="text-muted mt-2">
-                        Purchase ₹50,000 or ₹1,00,000 package to participate in Lucky Draw Rewards.
-                    </p>
-                </div>
-            @endif
-
-
-
-
-            <!-- Tables -->
-            <div class="card" style="display: none;">
-                <h2>Topup Status After Closing</h2>
-                <div class="table-wrap">
-                    <table>
-                        <tr>
-                            <th></th>
-                            <th>Left</th>
-                            <th>Right</th>
-                        </tr>
-                        <tr>
-                            <td>Topup</td>
-                            <td>0</td>
-                            <td>0</td>
-                        </tr>
-                        <tr>
-                            <td>Topup Amount</td>
-                            <td>0.00</td>
-                            <td>0.00</td>
-                        </tr>
-                        <tr>
-                            <td>Direct Topup</td>
-                            <td>0</td>
-                            <td>0</td>
-                        </tr>
-                        <tr>
-                            <td>Direct Topup Amount</td>
-                            <td>0.00</td>
-                            <td>0.00</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card" style="display: none;">
-                <h2>Total Topup Status</h2>
-                <div class="table-wrap">
-                    <table>
-                        <tr>
-                            <th></th>
-                            <th>Left</th>
-                            <th>Right</th>
-                        </tr>
-                        <tr>
-                            <td>Topup</td>
-                            <td>0</td>
-                            <td>0</td>
-                        </tr>
-                        <tr>
-                            <td>Topup Amount</td>
-                            <td>0.00</td>
-                            <td>0.00</td>
-                        </tr>
-                        <tr>
-                            <td>Direct Topup</td>
-                            <td>0</td>
-                            <td>0</td>
-                        </tr>
-                        <tr>
-                            <td>Direct Topup Amount</td>
-                            <td>0.00</td>
-                            <td>0.00</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
+        </div>
     @endif
 
-
     @if (Auth::user()->hasRole('admin'))
-        <div class="header">
-            <h1>Admin Console</h1>
-            <div class="user-info">👤 {{ Auth::user()->username ?? Auth::user()->name }}</div>
-        </div>
-        <div class="dashboard-stats-container">
+        @php
+            $maxPkgTotal = max($starterTotal, $sevenTotal, $thirteenTotal, $fiftyKTotal, $oneLakhTotal, 1);
+            $pkgLeaderboard = [
+                ['rank' => '01', 'key' => 'starter', 'name' => 'Starter (1000)', 'total' => $starterTotal],
+                ['rank' => '02', 'key' => '7000', 'name' => 'Seven + One (7000)', 'total' => $sevenTotal],
+                ['rank' => '03', 'key' => '13000', 'name' => 'Thirteen + Three (13000)', 'total' => $thirteenTotal],
+                ['rank' => '04', 'key' => '50000', 'name' => 'Golden (50000)', 'total' => $fiftyKTotal],
+                ['rank' => '05', 'key' => '100000', 'name' => 'Super Golden (100000)', 'total' => $oneLakhTotal],
+            ];
 
-            <div class="stat-card today-card">
-                <div class="card-header">
-                    <h2><i class="fa-solid fa-calendar-day"></i> Today's Overview</h2>
-                    {{-- <span class="badge badge-pulse">Live (00:00 - 23:59)</span> --}}
+            $sparkSeries = collect($fundData ?? [])->values();
+            $sparkMax = $sparkSeries->max() ?: 1;
+            $sparkMin = $sparkSeries->min() ?: 0;
+            $sparkRange = ($sparkMax - $sparkMin) ?: 1;
+            $sparkCount = $sparkSeries->count();
+            $sparkPoints = $sparkSeries->map(function ($v, $i) use ($sparkCount, $sparkMin, $sparkRange) {
+                $x = $sparkCount > 1 ? ($i / ($sparkCount - 1)) * 200 : 0;
+                $y = 40 - ((($v - $sparkMin) / $sparkRange) * 34) - 3;
+                return round($x, 1) . ',' . round($y, 1);
+            })->implode(' ');
+        @endphp
+
+        <div class="page-head reveal">
+            <div>
+                <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> Operations Console</p>
+                <h1>Admin Overview</h1>
+                <p class="sub">Live network &amp; revenue overview — {{ now()->format('d M, Y') }}</p>
+            </div>
+            <div class="user-chip">
+                <span class="avatar" aria-hidden="true">{{ strtoupper(substr(Auth::user()->username ?? Auth::user()->name, 0, 1)) }}</span>
+                <span>
+                    <span class="name">{{ Auth::user()->username ?? Auth::user()->name }}</span>
+                    <span class="role">Admin</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- HERO: WALLET FIGURE + ATTENTION QUEUE -->
+        <div class="bento">
+            <div class="glass b-7 reveal">
+                <p class="hero-label"><i class="fa-solid fa-wallet" aria-hidden="true"></i> Total Wallet Balance · All-Time</p>
+                <div class="hero-figure grad-gold">₹{{ number_format($totalWallet ?? 0, 0) }}</div>
+                <svg class="sparkline" viewBox="0 0 200 40" preserveAspectRatio="none" role="img" aria-label="Funds added trend this month">
+                    <defs>
+                        <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#f0bd5a" stop-opacity=".35" />
+                            <stop offset="100%" stop-color="#f0bd5a" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    @if ($sparkCount > 0)
+                        <polyline class="fill" points="0,40 {{ $sparkPoints }} 200,40" fill="url(#sparkFill)" />
+                        <polyline points="{{ $sparkPoints }}" stroke="#f0bd5a" />
+                    @endif
+                </svg>
+                <p style="margin:6px 0 0; font-size:11.5px; color:var(--text-muted);">Funds added this month, day by day</p>
+            </div>
+
+            <div class="glass b-5 reveal queue-card">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Needs review</p>
+                        <h2>Attention Queue</h2>
+                    </div>
+                    <i class="fa-solid fa-bell" style="color:var(--text-muted);" aria-hidden="true"></i>
                 </div>
-                <div class="stats-grid">
-                    <div class="stat-item highlight-stat">
-                        <div class="stat-icon"><i class="fa-solid fa-user-plus"></i></div>
-                        <div class="stat-content">
-                            <p>New Users</p>
-                            <h3>{{ $todaysData['todayUsers'] ?? 0 }}</h3>
-                        </div>
+                <div class="queue-row">
+                    <span class="queue-label"><i class="fa-solid fa-clock" aria-hidden="true"></i> Requested today</span>
+                    <span class="queue-value" style="color: {{ ($todayPendingWithdraws ?? 0) > 0 ? 'var(--coral)' : 'var(--text)' }};">{{ $todayPendingWithdraws ?? 0 }}</span>
+                </div>
+                <div class="queue-row">
+                    <span class="queue-label"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Pending (all-time)</span>
+                    <span class="queue-value" style="color: {{ ($pendingWithdraws ?? 0) > 0 ? 'var(--coral)' : 'var(--text)' }};">{{ $pendingWithdraws ?? 0 }}</span>
+                </div>
+
+                @if (($pendingWithdraws ?? 0) > 0)
+                    <div class="status-banner alert">
+                        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                        {{ $pendingWithdraws }} withdrawal{{ $pendingWithdraws > 1 ? 's' : '' }} waiting on you
                     </div>
-                    <div class="stat-item highlight-stat">
-                        <div class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                        <div class="stat-content">
-                            <p>Top-ups Today</p>
-                            <h3>{{ $todaysData['todayTopups'] ?? 0 }}</h3>
-                        </div>
+                @else
+                    <div class="status-banner ok">
+                        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                        All withdrawals cleared
                     </div>
-                    <div class="stat-item highlight-stat">
-                        <div class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                        <div class="stat-content">
-                            <p>Renewals Today</p>
-                            <h3>{{ $todaysData['todayRenewals'] ?? 0 }}</h3>
-                        </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- LIVE TICKER -->
+        <div class="glass b-12 reveal" style="margin-bottom:20px;">
+            <div class="panel-head">
+                <div>
+                    <p class="eyebrow">Right now</p>
+                    <h2>Today's Pulse</h2>
+                </div>
+                <span class="tag tag-teal">Updated {{ now()->format('h:i A') }}</span>
+            </div>
+            <div class="ticker">
+                <div class="ticker-chip">
+                    <span class="ticker-dot live" aria-hidden="true"></span>
+                    <span class="t-label">New Users</span>
+                    <span class="t-value mono count-up" data-count-up="{{ $todaysData['todayUsers'] ?? 0 }}">0</span>
+                </div>
+                <div class="ticker-chip">
+                    <span class="ticker-dot live" aria-hidden="true"></span>
+                    <span class="t-label">Top-ups</span>
+                    <span class="t-value mono count-up" data-count-up="{{ $todaysData['todayTopups'] ?? 0 }}">0</span>
+                </div>
+                <div class="ticker-chip">
+                    <span class="ticker-dot live" aria-hidden="true"></span>
+                    <span class="t-label">Renewals</span>
+                    <span class="t-value mono count-up" data-count-up="{{ $todaysData['todayRenewals'] ?? 0 }}">0</span>
+                </div>
+                <div class="ticker-chip">
+                    <span class="ticker-dot coral {{ ($todayPendingWithdraws ?? 0) > 0 ? 'live' : '' }}" aria-hidden="true"></span>
+                    <span class="t-label">Withdrawals Req.</span>
+                    <span class="t-value mono count-up" data-count-up="{{ $todayPendingWithdraws ?? 0 }}">0</span>
+                </div>
+                <div class="ticker-chip">
+                    <span class="ticker-dot" aria-hidden="true"></span>
+                    <span class="t-label">Withdrawals Paid</span>
+                    <span class="t-value mono count-up" data-count-up="{{ $todaysData['todayCompletedWithdraws'] ?? 0 }}">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SYSTEM OVERVIEW TILES -->
+        <div class="glass b-12 reveal" style="margin-bottom:20px;">
+            <div class="panel-head">
+                <div>
+                    <p class="eyebrow">All-time</p>
+                    <h2>System Overview</h2>
+                </div>
+                <span class="tag tag-gold">Cumulative</span>
+            </div>
+            <div class="tile-grid">
+                <div class="tile">
+                    <div class="tile-icon"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
+                    <p class="tile-label">Total Users</p>
+                    <p class="tile-value mono count-up" data-count-up="{{ $totalUsers ?? 0 }}">0</p>
+                </div>
+                <div class="tile">
+                    <div class="tile-icon"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></div>
+                    <p class="tile-label">Withdrawals Paid</p>
+                    <p class="tile-value mono count-up" data-count-up="{{ $completedWithdraws ?? 0 }}">0</p>
+                </div>
+                <div class="tile gold-icon">
+                    <div class="tile-icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></div>
+                    <p class="tile-label">Total Top-ups</p>
+                    <p class="tile-value mono count-up" data-count-up="{{ $totalTopups ?? 0 }}">0</p>
+                </div>
+                <div class="tile coral-icon">
+                    <div class="tile-icon"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i></div>
+                    <p class="tile-label">Pending Withdrawals</p>
+                    <p class="tile-value mono count-up" data-count-up="{{ $pendingWithdraws ?? 0 }}">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- GROWTH CHART + PACKAGE LEADERBOARD -->
+        <div class="bento">
+            <div class="glass b-8 reveal">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Trend</p>
+                        <h2>📈 Monthly Growth</h2>
                     </div>
-                    <div class="stat-item highlight-stat">
-                        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
-                        <div class="stat-content">
-                            <p>Withdrawals Req.</p>
-                            <h3>{{ $todayPendingWithdraws ?? 0 }}</h3>
-                        </div>
+                </div>
+                <canvas id="growthChart" class="chart-surface" style="width:100%;"></canvas>
+            </div>
+
+            <div class="glass b-4 reveal">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Ranked by revenue</p>
+                        <h2>Package Leaderboard</h2>
                     </div>
-                    <div class="stat-item highlight-stat">
-                        <div class="stat-icon"><i class="fa-solid fa-check-double"></i></div>
-                        <div class="stat-content">
-                            <p>Withdrawals Paid</p>
-                            <h3>{{ $todaysData['todayCompletedWithdraws'] ?? 0 }}</h3>
-                        </div>
-                    </div>
+                </div>
+                <div class="leaderboard">
+                    @foreach ($pkgLeaderboard as $pkg)
+                        <button type="button" class="lb-row package-card" data-package="{{ $pkg['key'] }}">
+                            <span class="mini-ring" style="--pct: {{ round(($pkg['total'] / $maxPkgTotal) * 100) }};">
+                                <span>{{ $pkg['rank'] }}</span>
+                            </span>
+                            <span class="lb-main">
+                                <span class="lb-rank">RANK {{ $pkg['rank'] }}</span>
+                                <div class="lb-name">{{ $pkg['name'] }}</div>
+                            </span>
+                            <span class="lb-amount count-up" data-prefix="₹" data-decimals="0" data-count-up="{{ $pkg['total'] }}">₹0</span>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCT SALES -->
+        <div class="glass b-12 reveal" style="margin-bottom:20px;">
+            <div class="panel-head">
+                <div>
+                    <p class="eyebrow">Today vs all-time</p>
+                    <h2>🛒 Product Sales</h2>
                 </div>
             </div>
 
-            <div class="stat-card overall-card">
-                <div class="card-header">
-                    <h2><i class="fa-solid fa-globe"></i> Overall System</h2>
-                    <span class="badge badge-solid">All-Time</span>
+            <div class="summary-strip">
+                <div class="summary-box">
+                    <p>Today's Orders</p>
+                    <h3 class="mono count-up" data-count-up="{{ $todayPackageTotals['qty'] ?? 0 }}">0</h3>
                 </div>
-                <div class="stats-grid overall-grid">
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                        <div class="stat-content">
-                            <p>Total Users</p>
-                            <h3>{{ $totalUsers ?? 0 }}</h3>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
-                        <div class="stat-content">
-                            <p>Total Wallet Balance</p>
-                            <h3>₹{{ number_format($totalWallet ?? 0, 2) }}</h3>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
-                        <div class="stat-content">
-                            <p>Pending Withdrawals</p>
-                            <h3>{{ $pendingWithdraws ?? 0 }}</h3>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
-                        <div class="stat-content">
-                            <p>Completed Withdrawals</p>
-                            <h3>{{ $completedWithdraws ?? 0 }}</h3>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
-                        <div class="stat-content">
-                            <p>Total Top-ups</p>
-                            <h3>{{ $totalTopups ?? 0 }}</h3>
-                        </div>
-                    </div>
+                <div class="summary-box">
+                    <p>Today's Revenue</p>
+                    <h3 class="mono count-up" data-prefix="₹" data-decimals="0" data-count-up="{{ $todayPackageTotals['amount'] ?? 0 }}">₹0</h3>
+                </div>
+                <div class="summary-box all-time">
+                    <p>All-Time Orders</p>
+                    <h3 class="mono count-up" data-count-up="{{ $allTimePackageTotals['qty'] ?? 0 }}">0</h3>
+                </div>
+                <div class="summary-box all-time">
+                    <p>All-Time Revenue</p>
+                    <h3 class="mono count-up" data-prefix="₹" data-decimals="0" data-count-up="{{ $allTimePackageTotals['amount'] ?? 0 }}">₹0</h3>
                 </div>
             </div>
 
-        </div>
-
-        <div class="card">
-            <h2>📈 Monthly Growth Overview</h2>
-            <canvas id="growthChart" style="width:100%;max-height:350px;"></canvas>
-        </div>
-        <div class="card">
-            <h2>Package based sales</h2>
-            <div class="grid">
-
-                <div class="stat package-card" data-package="starter">
-                    <h3>₹{{ number_format($starterTotal, 2) }}</h3>
-                    <p>Starter Package (1000)</p>
+            <div class="chart-grid" style="margin-bottom:20px;">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Today — Product</th><th>Qty</th><th>Amount</th></tr>
+                        </thead>
+                        <tbody>
+                            @forelse (($todayPackageStats ?? []) as $row)
+                                <tr>
+                                    <td>{{ $row->package_name }}</td>
+                                    <td class="mono">{{ $row->qty }}</td>
+                                    <td class="mono">₹{{ number_format($row->amount, 2) }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No sales yet today</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-
-                <div class="stat package-card" data-package="7000">
-                    <h3>₹{{ number_format($sevenTotal, 2) }}</h3>
-                    <p>Seven + One Package (7000)</p>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>All-Time — Product</th><th>Qty</th><th>Amount</th></tr>
+                        </thead>
+                        <tbody>
+                            @forelse (($allTimePackageStats ?? []) as $row)
+                                <tr>
+                                    <td>{{ $row->package_name }}</td>
+                                    <td class="mono">{{ $row->qty }}</td>
+                                    <td class="mono">₹{{ number_format($row->amount, 2) }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No sales recorded yet</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
+            </div>
 
-                <div class="stat package-card" data-package="13000">
-                    <h3>₹{{ number_format($thirteenTotal, 2) }}</h3>
-                    <p>Thirteen + Three Package (13000)</p>
-                </div>
-
-                <div class="stat package-card" data-package="50000">
-                    <h3>₹{{ number_format($fiftyKTotal, 2) }}</h3>
-                    <p>Fifty Thousand Golden Package (50000)</p>
-                </div>
-
-                <div class="stat package-card" data-package="100000">
-                    <h3>₹{{ number_format($oneLakhTotal, 2) }}</h3>
-                    <p>One Lakh Super Golden Package (100000)</p>
-                </div>
-
+            <div class="chart-grid">
+                <canvas id="pkgChartToday" class="chart-surface"></canvas>
+                <canvas id="pkgChartAllTime" class="chart-surface"></canvas>
             </div>
         </div>
     @endif
 
     <!-- Package Users Modal -->
-    <div id="packageModal" class="custom-modal">
-        <div class="custom-modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Package Users</h3>
-                <button id="closeModal">X</button>
+    <div id="packageModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-box wide">
+            <div class="modal-head">
+                <h3 id="modalTitle" style="margin:0; font-family: var(--font-display); font-size:16px;">Package Users</h3>
+                <button type="button" class="modal-close" style="position:static;" id="closeModal" aria-label="Close package users">&times;</button>
             </div>
-
-            <div class="modal-body" id="modalBody">
-                <!-- Dynamic Data Here -->
-            </div>
+            <div class="modal-body-scroll" id="modalBody"></div>
         </div>
     </div>
 
     <!-- Password Change Modal -->
-    <div id="passwordModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Change Password</h2>
-
+    <div id="passwordModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="pwModalTitle" aria-hidden="true">
+        <div class="modal-box">
+            <button type="button" class="modal-close" aria-label="Close password change" onclick="closeModal()">&times;</button>
+            <h2 id="pwModalTitle">Change Password</h2>
             <form id="passwordForm" method="POST" action="{{ route('changep.update') }}">
                 @csrf
                 <div class="form-group">
@@ -1300,254 +1814,470 @@
                 </div>
                 <div class="form-group">
                     <label for="new_password_confirmation">Confirm Password</label>
-                    <input type="password" name="new_password_confirmation" id="new_password_confirmation" required
-                        minlength="6">
+                    <input type="password" name="new_password_confirmation" id="new_password_confirmation" required minlength="6">
                 </div>
-                <button type="submit" class="btn btn-copy" style="width:100%;">Update Password</button>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Update Password</button>
             </form>
             @if (session('success'))
-                <p style="color:#a7ff1e; text-align:center;">{{ session('success') }}</p>
+                <p style="color:var(--teal); text-align:center;">{{ session('success') }}</p>
             @endif
             @if (session('error'))
-                <p style="color:#ff5555; text-align:center;">{{ session('error') }}</p>
+                <p style="color:var(--coral); text-align:center;">{{ session('error') }}</p>
             @endif
         </div>
-
-
     </div>
 
     <script>
-        const packageUsers = @json($packageUsers ?? []);
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        document.querySelectorAll('.package-card').forEach(card => {
-            card.addEventListener('click', function() {
+        // =========================================
+        // Ambient particle network background
+        // =========================================
+        (function() {
+            const canvas = document.getElementById('netCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let w, h, particles;
 
-                let packageType = this.getAttribute('data-package');
-                let users = [];
+            function size() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
 
-                // 🔥 Merge Starter Package (1000 + 1100)
-                if (packageType === 'starter') {
-                    users = [
-                        ...(packageUsers['1000'] || []),
-                        ...(packageUsers['1100'] || [])
-                    ];
-                } else {
-                    users = packageUsers[packageType] || [];
+            function init() {
+                size();
+                const count = Math.min(60, Math.floor((w * h) / 26000));
+                particles = Array.from({ length: count }, () => ({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    vx: (Math.random() - 0.5) * 0.25,
+                    vy: (Math.random() - 0.5) * 0.25,
+                    c: Math.random() > 0.5 ? '53,224,201' : '240,189,90'
+                }));
+            }
+
+            function frame() {
+                ctx.clearRect(0, 0, w, h);
+                for (const p of particles) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0 || p.x > w) p.vx *= -1;
+                    if (p.y < 0 || p.y > h) p.vy *= -1;
                 }
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const a = particles[i], b = particles[j];
+                        const dx = a.x - b.x, dy = a.y - b.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 140) {
+                            ctx.strokeStyle = `rgba(${a.c},${(1 - dist / 140) * 0.15})`;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(a.x, a.y);
+                            ctx.lineTo(b.x, b.y);
+                            ctx.stroke();
+                        }
+                    }
+                    ctx.fillStyle = `rgba(${p.c},0.5)`;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                if (!prefersReducedMotion) requestAnimationFrame(frame);
+            }
 
-                let modal = document.getElementById('packageModal');
-                let modalBody = document.getElementById('modalBody');
-                let modalTitle = document.getElementById('modalTitle');
+            init();
+            if (!prefersReducedMotion) {
+                requestAnimationFrame(frame);
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) requestAnimationFrame(frame);
+                });
+            } else {
+                frame();
+            }
+            window.addEventListener('resize', init);
+        })();
 
-                // ✅ Dynamic Title with count
-                modalTitle.innerText = `Users for Package (${users.length})`;
+        // =========================================
+        // Cursor spotlight on glass cards
+        // =========================================
+        document.querySelectorAll('.glass').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mx', (e.clientX - rect.left) + 'px');
+                card.style.setProperty('--my', (e.clientY - rect.top) + 'px');
+            });
+        });
 
-                let html = `
-                <table width="100%" border="1" cellpadding="8">
-                    <tr>
-                        <th>User Name</th>
-                        <th>Email</th>
-                        <th>Date</th>
-                    </tr>
-            `;
+        // =========================================
+        // Scroll reveal
+        // =========================================
+        (function() {
+            const items = document.querySelectorAll('.reveal');
+            if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+                items.forEach(el => el.classList.add('in'));
+                return;
+            }
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, i) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => entry.target.classList.add('in'), i * 60);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12 });
+            items.forEach(el => observer.observe(el));
+        })();
 
-                if (users.length > 0) {
-                    users.forEach(user => {
-                        html += `
-                        <tr>
-                            <td>${user.name ?? ''}</td>
-                            <td>${user.email ?? ''}</td>
-                            <td>${new Date(user.created_at).toLocaleDateString('en-GB', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric'
-                            })}</td>
-                        </tr>
-                    `;
+        // =========================================
+        // Accessible modal helper
+        // =========================================
+        function makeAccessibleModal(modal, opts) {
+            opts = opts || {};
+            // Guard: on role-specific pages some modals (e.g. #luckyModal for
+            // admins) never render. Without this check, addEventListener on
+            // null throws and halts every statement after it in this script
+            // block — including the count-up animations further down, which
+            // is why stats could get stuck at 0.
+            if (!modal) {
+                return { open: function() {}, close: function() {} };
+            }
+            let lastFocused = null;
+
+            function focusables() {
+                return Array.from(modal.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+                    .filter(el => el.offsetParent !== null);
+            }
+
+            function open(trigger) {
+                lastFocused = trigger || document.activeElement;
+                modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden', 'false');
+                const items = focusables();
+                if (items.length) items[0].focus();
+            }
+
+            function close() {
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+            }
+
+            modal.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') { close(); return; }
+                if (e.key === 'Tab') {
+                    const items = focusables();
+                    if (!items.length) return;
+                    const first = items[0], last = items[items.length - 1];
+                    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                }
+            });
+
+            if (opts.closeOnBackdrop) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) close();
+                });
+            }
+
+            return { open, close };
+        }
+
+        const luckyModalA11y = makeAccessibleModal(document.getElementById('luckyModal'), { closeOnBackdrop: true });
+        const passwordModalA11y = makeAccessibleModal(document.getElementById('passwordModal'), { closeOnBackdrop: true });
+        const packageModalA11y = makeAccessibleModal(document.getElementById('packageModal'), { closeOnBackdrop: false });
+
+        function openModal() { passwordModalA11y.open(); }
+        function closeModal() { passwordModalA11y.close(); }
+
+        function toggleAccordion(btn) {
+            const body = btn.nextElementSibling;
+            const isOpen = body.style.display === 'block';
+            body.style.display = isOpen ? 'none' : 'block';
+            btn.setAttribute('aria-expanded', String(!isOpen));
+        }
+
+        // =========================================
+        // Count-up animation
+        // =========================================
+        (function() {
+            const els = document.querySelectorAll('.count-up[data-count-up]');
+
+            function formatValue(el, value) {
+                const decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+                const prefix = el.getAttribute('data-prefix') || '';
+                const formatted = decimals > 0 ?
+                    value.toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) :
+                    Math.round(value).toLocaleString('en-IN');
+                return prefix + formatted;
+            }
+
+            function animateCount(el) {
+                const target = parseFloat(el.getAttribute('data-count-up')) || 0;
+                if (prefersReducedMotion) {
+                    el.textContent = formatValue(el, target);
+                    return;
+                }
+                const duration = 1100;
+                const start = performance.now();
+                function tick(now) {
+                    const progress = Math.min((now - start) / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    el.textContent = formatValue(el, target * eased);
+                    if (progress < 1) requestAnimationFrame(tick);
+                }
+                requestAnimationFrame(tick);
+            }
+
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            animateCount(entry.target);
+                            observer.unobserve(entry.target);
+                        }
                     });
-                } else {
-                    html += `
-                    <tr>
-                        <td colspan="4" style="text-align:center;">No users found</td>
-                    </tr>
-                `;
-                }
-
-                html += `</table>`;
-
-                modalBody.innerHTML = html;
-                modal.style.display = "flex";
-            });
-        });
-
-        // ✅ Close only via button
-        document.getElementById('closeModal').addEventListener('click', function() {
-            document.getElementById('packageModal').style.display = "none";
-        });
-
-        // ✅ Prevent closing on outside click
-        document.getElementById('packageModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                e.stopPropagation();
+                }, { threshold: 0.3 });
+                els.forEach(el => observer.observe(el));
+            } else {
+                els.forEach(animateCount);
             }
-        });
+        })();
+
+        // =========================================
+        // Confetti for lucky-draw winners
+        // =========================================
+        function fireConfetti() {
+            if (prefersReducedMotion) return;
+            const colors = ['#f0bd5a', '#35e0c9', '#ff6f6f', '#ffd98a'];
+            for (let i = 0; i < 60; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + 'vw';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDuration = (2.5 + Math.random() * 1.5) + 's';
+                piece.style.opacity = String(0.7 + Math.random() * 0.3);
+                document.body.appendChild(piece);
+                setTimeout(() => piece.remove(), 4200);
+            }
+        }
     </script>
 
-    <script>
-        document.getElementById("passwordForm").addEventListener("submit", function(e) {
-            const newPass = document.getElementById("new_password").value.trim();
-            const confirmPass = document.getElementById("new_password_confirmation").value.trim();
+    @if (Auth::user()->hasRole('customer') && $cycle && $cycle->status === 'won')
+        <script>document.addEventListener('DOMContentLoaded', fireConfetti);</script>
+    @endif
 
+    @if (Auth::user()->hasRole('admin'))
+        <script>
+            const packageUsers = @json($packageUsers ?? []);
+
+            document.querySelectorAll('.package-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    let packageType = this.getAttribute('data-package');
+                    let users = [];
+
+                    if (packageType === 'starter') {
+                        users = [...(packageUsers['1000'] || []), ...(packageUsers['1100'] || [])];
+                    } else {
+                        users = packageUsers[packageType] || [];
+                    }
+
+                    let modalBody = document.getElementById('modalBody');
+                    let modalTitle = document.getElementById('modalTitle');
+                    modalTitle.innerText = `Users for Package (${users.length})`;
+
+                    let html = `
+                        <table class="data-table" width="100%">
+                            <thead><tr><th>User Name</th><th>Email</th><th>Date</th></tr></thead>
+                            <tbody>`;
+
+                    if (users.length > 0) {
+                        users.forEach(user => {
+                            html += `
+                                <tr>
+                                    <td>${user.name ?? ''}</td>
+                                    <td>${user.email ?? ''}</td>
+                                    <td>${new Date(user.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                                </tr>`;
+                        });
+                    } else {
+                        html += `<tr><td colspan="3" style="text-align:center;">No users found</td></tr>`;
+                    }
+
+                    html += `</tbody></table>`;
+                    modalBody.innerHTML = html;
+                    packageModalA11y.open(card);
+                });
+            });
+
+            document.getElementById('closeModal').addEventListener('click', function() {
+                packageModalA11y.close();
+            });
+
+            const growthCanvas = document.getElementById('growthChart');
+            if (growthCanvas) {
+                new Chart(growthCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: {!! json_encode($labels ?? []) !!},
+                        datasets: [
+                            {
+                                label: '👥 New Users',
+                                data: {!! json_encode($userData ?? []) !!},
+                                borderColor: '#35e0c9',
+                                backgroundColor: 'rgba(53,224,201,0.12)',
+                                tension: 0.35,
+                                fill: true,
+                                borderWidth: 2
+                            },
+                            {
+                                label: '💰 Funds Added (₹)',
+                                data: {!! json_encode($fundData ?? []) !!},
+                                borderColor: '#f0bd5a',
+                                backgroundColor: 'rgba(240,189,90,0.12)',
+                                tension: 0.35,
+                                fill: true,
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#9298ab' } },
+                            y: { grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#9298ab' } }
+                        },
+                        plugins: {
+                            legend: { labels: { color: '#f6f7fb' } },
+                            title: { display: true, text: 'User & Fund Growth (Current Month)', color: '#9298ab' }
+                        }
+                    }
+                });
+            }
+
+            (function() {
+                const todayStats = @json($todayPackageStats ?? []);
+                const allTimeStats = @json($allTimePackageStats ?? []);
+                const gridColor = 'rgba(255,255,255,.06)';
+                const tickColor = '#9298ab';
+
+                const todayCanvas = document.getElementById('pkgChartToday');
+                if (todayCanvas) {
+                    new Chart(todayCanvas.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: todayStats.map(r => r.package_name),
+                            datasets: [{
+                                label: 'Amount (₹) — Today',
+                                data: todayStats.map(r => r.amount),
+                                backgroundColor: 'rgba(53,224,201,0.6)',
+                                borderColor: '#35e0c9',
+                                borderWidth: 1,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: { grid: { color: gridColor }, ticks: { color: tickColor } },
+                                y: { grid: { color: gridColor }, ticks: { color: tickColor } }
+                            },
+                            plugins: {
+                                legend: { labels: { color: '#f6f7fb' } },
+                                title: { display: true, text: "Today's Sales by Product", color: '#35e0c9' }
+                            }
+                        }
+                    });
+                }
+
+                const allTimeCanvas = document.getElementById('pkgChartAllTime');
+                if (allTimeCanvas) {
+                    const palette = ['#f0bd5a', '#35e0c9', '#ff6f6f', '#8b5cf6', '#7cf2e2', '#ffd98a'];
+                    new Chart(allTimeCanvas.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: allTimeStats.map(r => r.package_name),
+                            datasets: [{
+                                data: allTimeStats.map(r => r.amount),
+                                backgroundColor: allTimeStats.map((_, i) => palette[i % palette.length]),
+                                borderColor: '#060811',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom', labels: { color: '#f6f7fb' } },
+                                title: { display: true, text: 'All-Time Revenue by Product', color: '#f0bd5a' }
+                            }
+                        }
+                    });
+                }
+            })();
+        </script>
+    @endif
+
+    @if (Auth::user()->hasRole('customer'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const legStats = { 1: {{ $leftDownline ?? 0 }}, 2: {{ $rightDownline ?? 0 }} };
+                const baseUrl = "{{ url('/register') }}";
+                const refId = "{{ Auth::user()->id }}";
+                const name = "{{ urlencode(Auth::user()->username ?? Auth::user()->name) }}";
+
+                function updateReferralLink() {
+                    const leg = document.querySelector('input[name="leg"]:checked').value;
+                    document.getElementById('refLink').value = baseUrl + "?refid=" + refId + "&leg=" + leg + "&name=" + name;
+                }
+
+                document.querySelectorAll('input[name="leg"]').forEach(radio => {
+                    radio.addEventListener('change', updateReferralLink);
+                });
+
+                updateReferralLink();
+            });
+
+            function copyLink() {
+                const input = document.getElementById('refLink');
+                input.select();
+                document.execCommand('copy');
+                alert('Referral link copied!');
+            }
+
+            function shareWhatsApp() {
+                const link = document.getElementById('refLink').value;
+                window.open('https://wa.me/?text=' + encodeURIComponent(link), '_blank');
+            }
+        </script>
+    @endif
+
+    <script>
+        const logoutLink = document.getElementById('logout-link');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('logout-form').submit();
+            });
+        }
+
+        document.querySelectorAll('li span').forEach(item => {
+            if (item.textContent.trim() === 'Password') {
+                item.parentElement.addEventListener('click', function() {
+                    passwordModalA11y.open(item.parentElement);
+                });
+            }
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            const newPass = document.getElementById('new_password').value.trim();
+            const confirmPass = document.getElementById('new_password_confirmation').value.trim();
             if (newPass !== confirmPass) {
-                e.preventDefault(); // stop form submission
-                alert("Passwords do not match!");
+                e.preventDefault();
+                alert('Passwords do not match!');
             }
         });
-
-        // ===== Password Modal =====
-        const passwordModal = document.getElementById("passwordModal");
-
-        document.querySelectorAll("li span").forEach(item => {
-            if (item.textContent.trim() === "Password") {
-                item.parentElement.addEventListener("click", openModal);
-            }
-        });
-
-        function openModal() {
-            passwordModal.style.display = "flex";
-        }
-
-        function closeModal() {
-            passwordModal.style.display = "none";
-        }
-
-        // Close when clicking outside modal
-        window.onclick = function(e) {
-            if (e.target === passwordModal) {
-                closeModal();
-            }
-        };
-    </script>
-
-    <script>
-        // Handle Laravel logout securely
-        document.getElementById('logout-link').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('logout-form').submit();
-        });
-    </script>
-
-
-
-    <script>
-        const ctx = document.getElementById('growthChart').getContext('2d');
-
-        const growthChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                // Added ?? [] to prevent undefined errors
-                labels: {!! json_encode($labels ?? []) !!},
-                datasets: [{
-                        label: '👥 New Users',
-                        data: {!! json_encode($userData ?? []) !!},
-                        borderColor: '#a7ff1e',
-                        backgroundColor: 'rgba(167,255,30,0.15)',
-                        tension: 0.3,
-                        fill: true,
-                        borderWidth: 2
-                    },
-                    {
-                        label: '💰 Funds Added (₹)',
-                        data: {!! json_encode($fundData ?? []) !!},
-                        borderColor: '#2ee6a6',
-                        backgroundColor: 'rgba(46,230,166,0.15)',
-                        tension: 0.3,
-                        fill: true,
-                        borderWidth: 2
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        grid: {
-                            color: '#1f2832'
-                        },
-                        ticks: {
-                            color: '#a0acb3'
-                        }
-                    },
-                    y: {
-                        grid: {
-                            color: '#1f2832'
-                        },
-                        ticks: {
-                            color: '#a0acb3'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: '#e9eef3'
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'User & Fund Growth (Current Month)',
-                        color: '#a7ff1e'
-                    }
-                }
-            }
-        });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-
-            const legStats = {
-                1: {{ $leftDownline ?? 0 }},
-                2: {{ $rightDownline ?? 0 }}
-            };
-
-            const baseUrl = "{{ url('/register') }}";
-            const refId = "{{ Auth::user()->id }}";
-            const name = "{{ urlencode(Auth::user()->username ?? Auth::user()->name) }}";
-
-            function updateReferralLink() {
-
-                const leg = document.querySelector('input[name="leg"]:checked').value;
-
-                // Update referral link
-                document.getElementById('refLink').value =
-                    baseUrl + "?refid=" + refId + "&leg=" + leg + "&name=" + name;
-
-                // Update downline count
-                document.getElementById("downline-count").innerText = legStats[leg];
-            }
-
-            // Listen for radio change
-            document.querySelectorAll('input[name="leg"]').forEach(radio => {
-                radio.addEventListener("change", updateReferralLink);
-            });
-
-            // run once on page load
-            updateReferralLink();
-
-        });
-
-
-        function copyLink() {
-            const input = document.getElementById("refLink");
-            input.select();
-            document.execCommand("copy");
-            alert("Referral link copied!");
-        }
-
-        function shareWhatsApp() {
-            const link = document.getElementById("refLink").value;
-            window.open("https://wa.me/?text=" + encodeURIComponent(link), "_blank");
-        }
     </script>
 @endsection

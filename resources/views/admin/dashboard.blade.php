@@ -221,7 +221,7 @@
                     <li>📊 <span>Overview</span></li>
                 </a>
                 <a href="{{ route('admin.users') }}" style="text-decoration:none;color:inherit;display:block;">
-                    <li>👥 <span>Manage Users</span></li>
+                    <li>👥 <span>Manage Userss</span></li>
                 </a>
                 <a href="{{ route('admin.withdraws') }}" style="text-decoration:none;color:inherit;display:block;">
                     <li>🏦 <span>Manage Payouts</span></li>

@@ -108,84 +108,149 @@ class TreeController extends Controller
 
         return $personalInvestment + ($left ? $this->getBranchTotalRecursive($left->id) : 0) + ($right ? $this->getBranchTotalRecursive($right->id) : 0);
     }
+    // private function buildTree($userIdOrMemberId)
+    // {
+    //     // 1. Updated Search Logic: Find user by member_id OR internal id
+    //     $user = User::with('orders.package')->where('member_id', $userIdOrMemberId)->orWhere('id', $userIdOrMemberId)->first();
+
+    //     if (!$user) {
+    //         return [
+    //             'id' => null,
+    //             'member_id' => null,
+    //             'total_business' => 0,
+    //             'total_contributors' => 0,
+    //         ];
+    //     }
+
+    //     // 2. Calculate this specific user's investment
+    //     $personalInvestment = $user->orders->sum(function ($order) {
+    //         // Updated to use order amount as we discussed earlier for accuracy
+    //         return $order->amount ?? 0;
+    //     });
+
+    //     // 3. Get Children Data (Recursive calls stay the same)
+    //     $leftUser = User::where('placement_id', $user->id)->where('position', 'left')->first();
+    //     $rightUser = User::where('placement_id', $user->id)->where('position', 'right')->first();
+
+    //     $leftNode = $leftUser ? $this->buildTree($leftUser->id) : null;
+    //     $rightNode = $rightUser ? $this->buildTree($rightUser->id) : null;
+
+    //     // 4. Calculate Totals for THIS node based on children
+    //     $leftBranchTotal = $leftNode ? $leftNode['personal_investment'] + $leftNode['total_business'] : 0;
+    //     $rightBranchTotal = $rightNode ? $rightNode['personal_investment'] + $rightNode['total_business'] : 0;
+
+    //     $leftBranchContributors = $leftNode ? $leftNode['is_contributor'] + $leftNode['total_contributors'] : 0;
+    //     $rightBranchContributors = $rightNode ? $rightNode['is_contributor'] + $rightNode['total_contributors'] : 0;
+    //     return [
+    //         'id' => $user->id,
+    //         'member_id' => $user->member_id,
+    //         'username' => $user->username,
+    //         'personal_investment' => $personalInvestment,
+    //         'is_active' => $personalInvestment > 0,
+    //         'is_contributor' => $personalInvestment > 0 ? 1 : 0,
+
+    //         'total_business_left' => $leftBranchTotal,
+    //         'total_contributors_left' => $leftBranchContributors,
+    //         'total_business_right' => $rightBranchTotal,
+    //         'total_contributors_right' => $rightBranchContributors,
+
+    //         // NEW NODE COUNTS
+    //         'left_count' => $leftNode ? 1 + ($leftNode['total_count'] ?? 0) : 0,
+    //         'right_count' => $rightNode ? 1 + ($rightNode['total_count'] ?? 0) : 0,
+    //         'total_count' => ($leftNode ? 1 + ($leftNode['total_count'] ?? 0) : 0) + ($rightNode ? 1 + ($rightNode['total_count'] ?? 0) : 0),
+
+    //         'left' => $leftNode,
+    //         'right' => $rightNode,
+
+    //         'total_business' => $leftBranchTotal + $rightBranchTotal,
+    //         'total_contributors' => $leftBranchContributors + $rightBranchContributors,
+    //     ];
+    // }
     private function buildTree($userIdOrMemberId)
-    {
-        // 1. Updated Search Logic: Find user by member_id OR internal id
-        $user = User::with('orders.package')->where('member_id', $userIdOrMemberId)->orWhere('id', $userIdOrMemberId)->first();
+{
+    // 1. Find user by member_id OR internal id
+    $user = User::with('orders.package')->where('member_id', $userIdOrMemberId)->orWhere('id', $userIdOrMemberId)->first();
 
-        if (!$user) {
-            return [
-                'id' => null,
-                'member_id' => null,
-                'total_business' => 0,
-                'total_contributors' => 0,
-            ];
-        }
-
-        // 2. Calculate this specific user's investment
-        $personalInvestment = $user->orders->sum(function ($order) {
-            // Updated to use order amount as we discussed earlier for accuracy
-            return $order->amount ?? 0;
-        });
-
-        // 3. Get Children Data (Recursive calls stay the same)
-        $leftUser = User::where('placement_id', $user->id)->where('position', 'left')->first();
-        $rightUser = User::where('placement_id', $user->id)->where('position', 'right')->first();
-
-        $leftNode = $leftUser ? $this->buildTree($leftUser->id) : null;
-        $rightNode = $rightUser ? $this->buildTree($rightUser->id) : null;
-
-        // 4. Calculate Totals for THIS node based on children
-        $leftBranchTotal = $leftNode ? $leftNode['personal_investment'] + $leftNode['total_business'] : 0;
-        $rightBranchTotal = $rightNode ? $rightNode['personal_investment'] + $rightNode['total_business'] : 0;
-
-        $leftBranchContributors = $leftNode ? $leftNode['is_contributor'] + $leftNode['total_contributors'] : 0;
-        $rightBranchContributors = $rightNode ? $rightNode['is_contributor'] + $rightNode['total_contributors'] : 0;
-
-        // return [
-        //     'id' => $user->id,
-        //     'member_id' => $user->member_id, // Added member_id to the array
-        //     'username' => $user->username,
-        //     'personal_investment' => $personalInvestment,
-        //     'is_active' => $personalInvestment > 0,
-        //     'is_contributor' => $personalInvestment > 0 ? 1 : 0,
-
-        //     'total_business_left' => $leftBranchTotal,
-        //     'total_contributors_left' => $leftBranchContributors,
-        //     'total_business_right' => $rightBranchTotal,
-        //     'total_contributors_right' => $rightBranchContributors,
-
-        //     'left' => $leftNode,
-        //     'right' => $rightNode,
-
-        //     'total_business' => $leftBranchTotal + $rightBranchTotal,
-        //     'total_contributors' => $leftBranchContributors + $rightBranchContributors,
-        // ];
+    if (!$user) {
         return [
-            'id' => $user->id,
-            'member_id' => $user->member_id,
-            'username' => $user->username,
-            'personal_investment' => $personalInvestment,
-            'is_active' => $personalInvestment > 0,
-            'is_contributor' => $personalInvestment > 0 ? 1 : 0,
-
-            'total_business_left' => $leftBranchTotal,
-            'total_contributors_left' => $leftBranchContributors,
-            'total_business_right' => $rightBranchTotal,
-            'total_contributors_right' => $rightBranchContributors,
-
-            // NEW NODE COUNTS
-            'left_count' => $leftNode ? 1 + ($leftNode['total_count'] ?? 0) : 0,
-            'right_count' => $rightNode ? 1 + ($rightNode['total_count'] ?? 0) : 0,
-            'total_count' => ($leftNode ? 1 + ($leftNode['total_count'] ?? 0) : 0) + ($rightNode ? 1 + ($rightNode['total_count'] ?? 0) : 0),
-
-            'left' => $leftNode,
-            'right' => $rightNode,
-
-            'total_business' => $leftBranchTotal + $rightBranchTotal,
-            'total_contributors' => $leftBranchContributors + $rightBranchContributors,
+            'id' => null,
+            'member_id' => null,
+            'total_business' => 0,
+            'total_contributors' => 0,
         ];
     }
+
+    // 2. Split this user's own orders into first purchase vs renewals.
+    // First purchase = the order with the lowest id for this user (matches
+    // the "renewal" definition already used elsewhere in the controller,
+    // where an order is a renewal if an earlier-id order exists for the user).
+    $sortedOrders = $user->orders->sortBy('id')->values();
+    $firstOrder = $sortedOrders->first();
+
+    $firstPurchaseAmount = $firstOrder ? ($firstOrder->amount ?? 0) : 0;
+    $renewalAmount = $sortedOrders->slice(1)->sum(fn($order) => $order->amount ?? 0);
+
+    // Kept for backward compatibility with anything already reading this key
+    $personalInvestment = $firstPurchaseAmount + $renewalAmount;
+
+    // 3. Get Children Data (Recursive calls stay the same)
+    $leftUser = User::where('placement_id', $user->id)->where('position', 'left')->first();
+    $rightUser = User::where('placement_id', $user->id)->where('position', 'right')->first();
+
+    $leftNode = $leftUser ? $this->buildTree($leftUser->id) : null;
+    $rightNode = $rightUser ? $this->buildTree($rightUser->id) : null;
+
+    // 4. Calculate Totals for THIS node based on children
+    $leftBranchTotal = $leftNode ? $leftNode['personal_investment'] + $leftNode['total_business'] : 0;
+    $rightBranchTotal = $rightNode ? $rightNode['personal_investment'] + $rightNode['total_business'] : 0;
+
+    $leftBranchContributors = $leftNode ? $leftNode['is_contributor'] + $leftNode['total_contributors'] : 0;
+    $rightBranchContributors = $rightNode ? $rightNode['is_contributor'] + $rightNode['total_contributors'] : 0;
+
+    // 4b. Same aggregation pattern, split by first-purchase vs renewal
+    $leftBranchFirstPurchase = $leftNode ? $leftNode['personal_first_purchase'] + $leftNode['total_first_purchase'] : 0;
+    $leftBranchRenewal       = $leftNode ? $leftNode['personal_renewal'] + $leftNode['total_renewal'] : 0;
+
+    $rightBranchFirstPurchase = $rightNode ? $rightNode['personal_first_purchase'] + $rightNode['total_first_purchase'] : 0;
+    $rightBranchRenewal       = $rightNode ? $rightNode['personal_renewal'] + $rightNode['total_renewal'] : 0;
+
+    return [
+        'id' => $user->id,
+        'member_id' => $user->member_id,
+        'username' => $user->username,
+        'personal_investment' => $personalInvestment,
+        'personal_first_purchase' => $firstPurchaseAmount,
+        'personal_renewal' => $renewalAmount,
+        'is_active' => $personalInvestment > 0,
+        'is_contributor' => $personalInvestment > 0 ? 1 : 0,
+
+        'total_business_left' => $leftBranchTotal,
+        'total_contributors_left' => $leftBranchContributors,
+        'total_business_right' => $rightBranchTotal,
+        'total_contributors_right' => $rightBranchContributors,
+
+        // NEW: first-purchase / renewal split per side
+        'total_first_purchase_left' => $leftBranchFirstPurchase,
+        'total_renewal_left' => $leftBranchRenewal,
+        'total_first_purchase_right' => $rightBranchFirstPurchase,
+        'total_renewal_right' => $rightBranchRenewal,
+
+        // NODE COUNTS
+        'left_count' => $leftNode ? 1 + ($leftNode['total_count'] ?? 0) : 0,
+        'right_count' => $rightNode ? 1 + ($rightNode['total_count'] ?? 0) : 0,
+        'total_count' => ($leftNode ? 1 + ($leftNode['total_count'] ?? 0) : 0) + ($rightNode ? 1 + ($rightNode['total_count'] ?? 0) : 0),
+
+        'left' => $leftNode,
+        'right' => $rightNode,
+
+        'total_business' => $leftBranchTotal + $rightBranchTotal,
+        'total_contributors' => $leftBranchContributors + $rightBranchContributors,
+
+        // NEW: aggregated across both sides (mirrors total_business)
+        'total_first_purchase' => $leftBranchFirstPurchase + $rightBranchFirstPurchase,
+        'total_renewal' => $leftBranchRenewal + $rightBranchRenewal,
+    ];
+}
 
     // Helper to count people on each side
     private function getBranchCountRecursive($userId)
@@ -316,46 +381,103 @@ class TreeController extends Controller
     //     return view('team.list', compact('user', 'teamMembers'));
     // }
 
+    // public function list()
+    // {
+    //     $user = \Illuminate\Support\Facades\Auth::user();
+
+    //     // Build same tree used by tree page
+    //     $tree = $this->buildTree($user->id);
+
+    //     // Left side = everything under A's left root
+    //     // Right side = everything under A's right root
+    //     $leftIds = $this->collectTreeIds($tree['left'] ?? null);
+    //     $rightIds = $this->collectTreeIds($tree['right'] ?? null);
+
+    //     $downlineIds = array_merge($leftIds, $rightIds);
+
+    //     if (empty($downlineIds)) {
+    //         $teamMembers = collect([]);
+    //     } else {
+    //         $teamMembers = \App\Models\User::query()
+    //             ->select('users.*')
+    //             ->addSelect([
+    //                 'activation_date' => \DB::table('orders')->selectRaw('MIN(created_at)')->whereColumn('user_id', 'users.id')->where('status', 'completed')->limit(1),
+    //                 'total_emis_paid' => \DB::table('orders')->selectRaw('COUNT(*)')->whereColumn('user_id', 'users.id')->where('status', 'completed'),
+    //             ])
+    //             ->whereIn('id', $downlineIds)
+    //             ->get()
+    //             ->sortBy('created_at')
+    //             ->values();
+
+    //         // IMPORTANT: side is based on root branch, not user's own position
+    //         $teamMembers->each(function ($member) use ($leftIds, $rightIds) {
+    //             if (in_array($member->id, $leftIds)) {
+    //                 $member->side = 'left';
+    //             } elseif (in_array($member->id, $rightIds)) {
+    //                 $member->side = 'right';
+    //             }
+    //         });
+    //     }
+
+    //     return view('team.list', compact('user', 'teamMembers'));
+    // }
+
     public function list()
-    {
-        $user = \Illuminate\Support\Facades\Auth::user();
+{
+    $user = \Illuminate\Support\Facades\Auth::user();
 
-        // Build same tree used by tree page
-        $tree = $this->buildTree($user->id);
+    // Build same tree used by tree page
+    $tree = $this->buildTree($user->id);
 
-        // Left side = everything under A's left root
-        // Right side = everything under A's right root
-        $leftIds = $this->collectTreeIds($tree['left'] ?? null);
-        $rightIds = $this->collectTreeIds($tree['right'] ?? null);
+    // Left side = everything under A's left root
+    // Right side = everything under A's right root
+    $leftIds = $this->collectTreeIds($tree['left'] ?? null);
+    $rightIds = $this->collectTreeIds($tree['right'] ?? null);
 
-        $downlineIds = array_merge($leftIds, $rightIds);
+    $downlineIds = array_merge($leftIds, $rightIds);
 
-        if (empty($downlineIds)) {
-            $teamMembers = collect([]);
-        } else {
-            $teamMembers = \App\Models\User::query()
-                ->select('users.*')
-                ->addSelect([
-                    'activation_date' => \DB::table('orders')->selectRaw('MIN(created_at)')->whereColumn('user_id', 'users.id')->where('status', 'completed')->limit(1),
-                    'total_emis_paid' => \DB::table('orders')->selectRaw('COUNT(*)')->whereColumn('user_id', 'users.id')->where('status', 'completed'),
-                ])
-                ->whereIn('id', $downlineIds)
-                ->get()
-                ->sortBy('created_at')
+    if (empty($downlineIds)) {
+        $teamMembers = collect([]);
+    } else {
+        $teamMembers = \App\Models\User::query()
+            ->select('users.*')
+            ->addSelect([
+                'activation_date' => \DB::table('orders')->selectRaw('MIN(created_at)')->whereColumn('user_id', 'users.id')->where('status', 'completed')->limit(1),
+                'total_emis_paid' => \DB::table('orders')->selectRaw('COUNT(*)')->whereColumn('user_id', 'users.id')->where('status', 'completed'),
+            ])
+            // Eager-load each member's completed orders + the package on each,
+            // same relation buildTree() already uses (orders.package), so this
+            // won't N+1 query per row in the table.
+            ->with(['orders' => function ($q) {
+                $q->where('status', 'completed')
+                  ->orderBy('created_at')
+                  ->with('package:id,name'); // trim to the columns you actually need
+            }])
+            ->whereIn('id', $downlineIds)
+            ->get()
+            ->sortBy('created_at')
+            ->values();
+
+        // IMPORTANT: side is based on root branch, not user's own position
+        $teamMembers->each(function ($member) use ($leftIds, $rightIds) {
+            if (in_array($member->id, $leftIds)) {
+                $member->side = 'left';
+            } elseif (in_array($member->id, $rightIds)) {
+                $member->side = 'right';
+            }
+
+            // Compact "Package ×N" summary, e.g. ["Starter ×2", "Golden"]
+            $member->packages_summary = $member->orders
+                ->pluck('package.name')
+                ->filter() // drop any order whose package relation is missing
+                ->countBy()
+                ->map(fn($count, $name) => $count > 1 ? "{$name} ×{$count}" : $name)
                 ->values();
-
-            // IMPORTANT: side is based on root branch, not user's own position
-            $teamMembers->each(function ($member) use ($leftIds, $rightIds) {
-                if (in_array($member->id, $leftIds)) {
-                    $member->side = 'left';
-                } elseif (in_array($member->id, $rightIds)) {
-                    $member->side = 'right';
-                }
-            });
-        }
-
-        return view('team.list', compact('user', 'teamMembers'));
+        });
     }
+
+    return view('team.list', compact('user', 'teamMembers'));
+}
 
     private function collectTreeIds($node)
     {

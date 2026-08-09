@@ -103,13 +103,6 @@
             background: rgba(255, 255, 255, 0.04);
         }
 
-
-        To make your filter interface look modern,
-        "premium," and professional,
-        we will use Soft UI (Neumorphism-inspired) styles. This uses clean gradients,
-        smooth transitions,
-        and subtle hover effects that make the buttons feel like they are "clickable" elements. Here is the updated CSS to replace your existing <style>block. You do not need to change the function names or HTML IDs. The Advanced Modern Styles HTML <style>
-
         /* Container for the filter sections */
         .filter-container {
             background: #ffffff;
@@ -161,6 +154,26 @@
             font-weight: 400;
             margin-left: 5px;
             font-size: 12px;
+        }
+
+        /* Packages purchased pills */
+        .pkg-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            margin: 2px 4px 2px 0;
+            border-radius: 20px;
+            background: rgba(167, 255, 30, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(167, 255, 30, 0.2);
+            font-size: 11.5px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .pkg-none {
+            color: var(--muted);
+            font-size: 12px;
+            font-style: italic;
         }
     </style>
 
@@ -234,6 +247,7 @@
                     <th>EMI Progress</th>
                     <th>Branch</th>
                     <th>Investments</th>
+                    <th>Packages</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -308,6 +322,15 @@
                         </td>
                         <td>{{ $member->side }}</td>
                         <td>{{ $member->investment_count ?? 0 }}</td>
+                        <td>
+                            @if (!empty($member->packages_summary) && count($member->packages_summary))
+                                @foreach ($member->packages_summary as $pkg)
+                                    <span class="pkg-pill">{{ $pkg }}</span>
+                                @endforeach
+                            @else
+                                <span class="pkg-none">No purchases</span>
+                            @endif
+                        </td>
                         <td>
                             @if (($member->investment_count ?? 0) === 0)
                                 <span style="color:#ff3b3b;">Pending</span>
