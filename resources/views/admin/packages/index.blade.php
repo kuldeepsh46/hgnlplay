@@ -41,6 +41,7 @@
                             <th style="padding: 15px;">PV</th>
                             <th style="padding: 15px;">Direct Bonus</th>
                             <th style="padding: 15px;">Pair Bonus</th>
+                            <th style="padding: 15px;">Pairs With</th>
                             <th style="padding: 15px; text-align: right;">Actions</th>
                         </tr>
                     </thead>
@@ -52,8 +53,9 @@
                                 <td style="padding: 15px; font-weight: bold;">{{ $package->name }}</td>
                                 <td style="padding: 15px; color: #a7ff1e;">₹ {{ number_format($package->amount, 2) }}</td>
                                 <td style="padding: 15px;">{{ $package->pv }}</td>
-                                <td style="padding: 15px;">{{ $package->direct_bonus }}</td>
-                                <td style="padding: 15px;">{{ $package->pair_bonus }}</td>
+                                <td style="padding: 15px;">{{ \App\Models\Package::formatBonus($package->direct_bonus, $package->direct_bonus_type) }}</td>
+                                <td style="padding: 15px;">{{ \App\Models\Package::formatBonus($package->pair_bonus, $package->pair_bonus_type) }}</td>
+                                <td style="padding: 15px; color: #a0acb3; font-size: 13px;">{{ $package->pairedPackages->pluck('name')->implode(', ') ?: '—' }}</td>
                                 <td style="padding: 15px; text-align: right;">
                                     <div style="display: flex; gap: 15px; justify-content: flex-end;">
                                         <a href="{{ route('packages.edit', $package->id) }}"

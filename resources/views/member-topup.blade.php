@@ -313,7 +313,10 @@
                    @foreach ($packages as $p)
     {{-- <option value="{{ $p->id }}" data-amount="{{ $p->amount }}">{{ $p->name }} —
         ₹{{ $p->amount }}</option> --}}
-    <option value="{{ $p->id }}" data-amount="{{ $p->actual_amount }}">
+    <option value="{{ $p->id }}" data-amount="{{ $p->actual_amount }}"
+        data-direct="{{ \App\Models\Package::formatBonus($p->direct_bonus, $p->direct_bonus_type) }}"
+        data-pair="{{ \App\Models\Package::formatBonus($p->pair_bonus, $p->pair_bonus_type) }}"
+        data-pairs="{{ $p->pairedPackages->pluck('name')->implode(', ') }}">
 
         {{ $p->name }} —
         ₹{{ $p->actual_amount }}
@@ -484,10 +487,13 @@
                     breakdown +=
                         ` <span style="color:var(--muted); font-weight:400; font-size:12px;">(Includes ₹100 Reg. Fee)</span>`;
                 }
+                breakdown +=
+                    `<div style="color:var(--muted); font-weight:400; font-size:12px; margin-top:4px;">Direct Bonus: ${selectedOption.dataset.direct} &middot; Pair Bonus: ${selectedOption.dataset.pair}` +
+                    (selectedOption.dataset.pairs ? ` &middot; Pairs With: ${selectedOption.dataset.pairs}` : '') + `</div>`;
                 priceBreakdown.innerHTML = breakdown;
             }
 
-            packageSelect.addEventListener('change', updatePriceDisplay(investmentCount));
+            packageSelect.addEventListener('change', () => updatePriceDisplay(investmentCount));
             memberIdInput.addEventListener('input', function() {
                 this.value = this.value.toUpperCase();
             });
