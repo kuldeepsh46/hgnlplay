@@ -6,13 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use App\Enums\BonusType;
 class TopupController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
-        $packages = \App\Models\Package::with('pairedPackages')->orderBy('id')->get();
+        $packages = \App\Models\Package::orderBy('id')->get();
         $wallet = DB::table('wallets')->where('user_id', $user->id)->first();
 
         // ✅ User’s wallet-done topups (new table below)
@@ -72,11 +73,9 @@ class TopupController extends Controller
 
             $currentCount = $receiver->investment_count ?? 0;
 
-            // No registration fee for REPURCHASE BOOSTER PACKAGE
-            $registrationFee = $currentCount == 0 ? 100 : 0;
-            if ($isRepurchaseBooster || $isStarterPackage) {
-                $registrationFee = 0;
-            }
+            // ₹100 registration fee on a member's first purchase, only for
+            // packages set to charge it (admin/packages)
+            $registrationFee = $currentCount == 0 && !empty($package->charges_registration_fee) ? 100 : 0;
             // dd($baseAmount, $registrationFee);
             $finalAmount = (float) $baseAmount + $registrationFee;
             if ($isStarterPackage && $currentCount > 0) {
@@ -155,7 +154,7 @@ class TopupController extends Controller
         | Record Order
         |--------------------------------------------------------------------------
         */
-                $orderId = DB::table('orders')->insertGetId([
+                DB::table('orders')->insert([
                     'user_id' => $receiver->id,
                     'from_user_id' => $currentUser->id,
                     'package_id' => $package->id,
@@ -192,10 +191,9 @@ class TopupController extends Controller
         | - Matching pool = this package + the packages it can pair with.
         | - Daily cap: 5,000 per user per day (excess is flushed, never paid
         |   on a later day — see checkAndDistributePairCompletionBonus()).
-        | - STARTER PACKAGE first purchase is a special case: it only matches
-        |   against STARTER PACKAGE first-purchase volume on the other leg.
-        |   Its ₹1000 EMI/repurchase joins the pool of the packages Starter
-        |   is paired with and pays their pair bonus.
+        | - STARTER PACKAGE pairs in two parts, each with its own pairings:
+        |   ₹1600 first purchase (pays Starter's pair bonus) and ₹1000
+        |   EMI/repurchase (pays the pair bonus of the package it pairs with).
         |--------------------------------------------------------------------------
         */
                 $packageBusinessAmount = (float) ($package->amount ?? ($package->actual_amount ?? $finalAmount));
@@ -209,7 +207,7 @@ class TopupController extends Controller
                 }
 
                 if (!$isRepurchaseBooster && $packageBusinessAmount < 50000) {
-                    $this->processBinaryPairIncomeForTopup($receiver, $packageBusinessAmount, $package, $orderId);
+                    $this->processBinaryPairIncomeForTopup($receiver, $packageBusinessAmount, $package);
                 }
 
                 /*
@@ -268,7 +266,7 @@ class TopupController extends Controller
         }
     }
 
-    private function processBinaryPairIncomeForTopup($receiver, float $packageAmount, $package, $orderId = null): void
+    private function processBinaryPairIncomeForTopup($receiver, float $packageAmount, $package): void
     {
         if (!$receiver || empty($receiver->placement_id)) {
             return;
@@ -291,13 +289,13 @@ class TopupController extends Controller
                 break;
             }
 
-            $this->checkAndDistributePairCompletionBonus($parent, $packageAmount, 'Normal Package', $package, $orderId);
+            $this->checkAndDistributePairCompletionBonus($parent, $packageAmount, 'Normal Package', $package);
 
             $parentId = $parent->placement_id ?? null;
         }
     }
 
-    private function checkAndDistributePairCompletionBonus($sponsor, $amount, $packageType, $package, $orderId = null)
+    private function checkAndDistributePairCompletionBonus($sponsor, $amount, $packageType, $package)
     {
         /*
     |--------------------------------------------------------------------------
@@ -373,6 +371,11 @@ class TopupController extends Controller
     |--------------------------------------------------------------------------
     | Matching Pool + Pair Bonus Rule (from admin/packages)
     |--------------------------------------------------------------------------
+    | Pool = the bought package + the packages it can pair with. Each leg's
+    | available volume = pool volume not yet used for pair income (tracked
+    | per leg, per package), so the same volume is never paid twice even
+    | when different packages have different pairings.
+    |--------------------------------------------------------------------------
     */
         $pool = $this->resolvePairPool($package, (float) $amount);
 
@@ -380,14 +383,22 @@ class TopupController extends Controller
             return;
         }
 
-        $leftVolume = $this->getPoolBusinessVolume($leftUserIds, $pool);
-        $rightVolume = $this->getPoolBusinessVolume($rightUserIds, $pool);
+        $legs = [
+            'left' => $this->getLegClassVolumes($leftUserIds),
+            'right' => $this->getLegClassVolumes($rightUserIds),
+        ];
+        $this->seedLegacyConsumption($sponsor, ['left' => $leftUserIds, 'right' => $rightUserIds]);
+        $consumed = $this->getConsumedVolumes($sponsor->id);
 
-        $currentMatchedVolume = min($leftVolume, $rightVolume);
+        $available = [];
+        foreach ($legs as $leg => $volumes) {
+            $available[$leg] = 0;
+            foreach ($pool['classes'] as $class) {
+                $available[$leg] += ($volumes[$class] ?? 0) - ($consumed[$leg][$class] ?? 0);
+            }
+        }
 
-        $alreadyProcessedVolume = $this->getProcessedPoolVolume($sponsor->id, $pool, $leftUserIds, $rightUserIds, $orderId);
-
-        $newVolume = max(0, $currentMatchedVolume - $alreadyProcessedVolume);
+        $newVolume = max(0, min($available['left'], $available['right']));
 
         if ($pool['type'] === 'fixed') {
             /*
@@ -398,7 +409,7 @@ class TopupController extends Controller
         | matched volume on both legs (e.g. Starter: ₹300 per ₹1600).
         |--------------------------------------------------------------------------
         */
-            if ($pool['unit'] <= 0 || $currentMatchedVolume < $pool['unit']) {
+            if ($pool['unit'] <= 0) {
                 return;
             }
 
@@ -418,7 +429,7 @@ class TopupController extends Controller
         | Pay X% of newly matched business volume.
         |--------------------------------------------------------------------------
         */
-            if ($currentMatchedVolume < 1000 || $newVolume < 1000) {
+            if ($newVolume < 1000) {
                 return;
             }
 
@@ -431,13 +442,9 @@ class TopupController extends Controller
         // Flush the whole matched volume now — even if the daily cap
         // reduces (or zeroes) the actual payout, this volume is
         // considered "used" and will not be re-evaluated tomorrow.
-        DB::table('user_pair_volumes')
-            ->where('user_id', $sponsor->id)
-            ->where('pool_key', $pool['key'])
-            ->update([
-                'processed_volume' => $alreadyProcessedVolume + $volumeToFlush,
-                'updated_at' => now(),
-            ]);
+        foreach ($legs as $leg => $volumes) {
+            $this->consumeVolume($sponsor->id, $leg, $volumeToFlush, $pool, $volumes, $consumed[$leg] ?? []);
+        }
 
         if ($pairBonus <= 0) {
             return;
@@ -472,135 +479,221 @@ class TopupController extends Controller
     |--------------------------------------------------------------------------
     | Resolve Matching Pool For A Purchased Package
     |--------------------------------------------------------------------------
-    | Pool = the package + the packages it can pair with (admin/packages).
-    | Returns the pool's package ids, the pair bonus rule to apply, and a
-    | key used to track already-processed volume per user.
+    | Volume is grouped by "class": the package id, except Starter Package
+    | which has two — "<id>:first" (₹1600 first purchase) and "<id>:repeat"
+    | (₹1000 EMI/repurchase). Pool = bought class + the classes it can pair
+    | with (admin/packages). Returns the pool and the pair bonus rule.
     |--------------------------------------------------------------------------
     */
     private function resolvePairPool($package, float $amount): ?array
     {
-        $isStarter = strtoupper(trim((string) $package->name)) === 'STARTER PACKAGE';
+        $isStarter = \App\Models\Package::isStarter($package);
+        $part = $isStarter ? ($amount == (float) $package->actual_amount ? 'first' : 'repeat') : null;
+        $ownClass = \App\Models\Package::classKey($package->id, $part);
 
-        // Starter first purchase: matches only Starter first-purchase volume.
-        if ($isStarter && $amount == (float) $package->actual_amount) {
-            return [
-                'key' => 'starter:' . $package->id,
-                'ids' => [(int) $package->id],
-                'starter_first' => true,
-                'bonus' => (float) $package->pair_bonus,
-                'type' => $package->pair_bonus_type,
-                'unit' => (float) $package->actual_amount,
-            ];
+        $pairedKeys = \App\Models\Package::pairedClassKeys($package->id, $part);
+        $classes = array_values(array_unique(array_merge([$ownClass], $pairedKeys)));
+
+        // Starter ₹1000 EMI/repurchase pays the pair rule of the first
+        // package it is paired with; no pairing = no pair income.
+        $rulePackage = $package;
+        if ($part === 'repeat') {
+            $rulePackage = null;
+            foreach ($pairedKeys as $key) {
+                [$id] = \App\Models\Package::parseClassKey($key);
+                if ($id != $package->id) {
+                    $rulePackage = DB::table('packages')->find($id);
+                    break;
+                }
+            }
         }
-
-        $paired = DB::table('package_pairings as pp')
-            ->join('packages as p', 'p.id', '=', 'pp.paired_package_id')
-            ->where('pp.package_id', $package->id)
-            ->orderBy('p.id')
-            ->select('p.*')
-            ->get();
-
-        $ids = $paired->pluck('id')->push($package->id)->map(fn($id) => (int) $id)->unique()->sort()->values()->all();
-
-        // Starter ₹1000 EMI/repurchase pays the pair rule of the packages
-        // Starter is paired with; no pairing = no pair income.
-        $rulePackage = $isStarter ? $paired->first() : $package;
 
         if (!$rulePackage) {
             return null;
         }
 
         return [
-            'key' => implode(',', $ids),
-            'ids' => $ids,
-            'starter_first' => false,
+            'own' => $ownClass,
+            'classes' => $classes,
+            'starter_first' => $part === 'first',
             'bonus' => (float) $rulePackage->pair_bonus,
             'type' => $rulePackage->pair_bonus_type,
-            'unit' => (float) ($rulePackage->amount ?? $rulePackage->actual_amount),
+            'unit' => (float) ($part === 'first' ? $package->actual_amount : ($rulePackage->amount ?? $rulePackage->actual_amount)),
         ];
     }
 
-    private function getPoolBusinessVolume(array $userIds, array $pool, $excludeOrderId = null): float
+    // Orders of a leg that count for pair income, with their class and
+    // business volume. Repurchase Booster and packages of ₹50,000+ never
+    // count for pair income.
+    private function legOrdersQuery(array $userIds)
     {
-        if (empty($userIds)) {
-            return 0;
-        }
-
-        $query = DB::table('orders as o')
+        return DB::table('orders as o')
             ->join('packages as p', 'p.id', '=', 'o.package_id')
             ->whereIn('o.user_id', $userIds)
-            ->whereIn('o.package_id', $pool['ids'])
             ->where('o.status', 'completed')
-            ->when($excludeOrderId, fn($q) => $q->where('o.id', '!=', $excludeOrderId));
-
-        if ($pool['starter_first']) {
-            // Only Starter Package first-purchase orders count here. EMI/
-            // repurchase orders flow into the paired packages' pool instead.
-            return (float) $query
-                ->whereColumn('o.amount', 'p.actual_amount')
-                ->selectRaw('COALESCE(SUM(o.amount), 0) as total')
-                ->value('total');
-        }
-
-        return (float) $query
             ->whereRaw('UPPER(TRIM(p.name)) != ?', ['REPURCHASE BOOSTER PACKAGE'])
             ->whereRaw('COALESCE(p.amount, p.actual_amount, o.amount, 0) < ?', [50000])
-            // Starter Package first-purchase volume is matched separately
-            // (Starter-only). Only its ₹1000 EMI/repurchase volume feeds
-            // into a normal matching pool.
-            ->where(function ($q) {
-                $q->whereRaw('UPPER(TRIM(p.name)) != ?', ['STARTER PACKAGE'])
-                    ->orWhereColumn('o.amount', '!=', 'p.actual_amount');
-            })
             ->selectRaw("
-                COALESCE(SUM(
-                    CASE
-                        WHEN UPPER(TRIM(p.name)) = 'STARTER PACKAGE' THEN o.amount
-                        ELSE COALESCE(p.amount, p.actual_amount, o.amount, 0)
-                    END
-                ), 0) as total
-            ")
-            ->value('total');
+                CASE
+                    WHEN UPPER(TRIM(p.name)) = 'STARTER PACKAGE'
+                        THEN CONCAT(p.id, IF(o.amount = p.actual_amount, ':first', ':repeat'))
+                    ELSE CAST(p.id AS CHAR)
+                END as class_key,
+                CASE
+                    WHEN UPPER(TRIM(p.name)) = 'STARTER PACKAGE' THEN o.amount
+                    ELSE COALESCE(p.amount, p.actual_amount, o.amount, 0)
+                END as volume
+            ");
+    }
+
+    // Business volume of a leg, per class.
+    private function getLegClassVolumes(array $userIds): array
+    {
+        if (empty($userIds)) {
+            return [];
+        }
+
+        $volumes = [];
+        foreach ($this->legOrdersQuery($userIds)->get() as $row) {
+            $volumes[$row->class_key] = ($volumes[$row->class_key] ?? 0) + (float) $row->volume;
+        }
+
+        return $volumes;
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Already-Processed Volume For A User's Pool
+    | Carry Over Earlier Processed Pair Volume (once per user)
     |--------------------------------------------------------------------------
-    | If admin changes pairings, a user's pool changes and gets a new key.
-    | To avoid re-paying historical business, a new pool for a user who
-    | already has pair history starts from the volume matched before this
-    | order. Users with no pair history start from 0.
+    | Earlier, processed volume was stored per pool: user_pair_volumes
+    | (pool_key "1,2,3,8" / "starter:1"), or before that one number for the
+    | normal pool and one for Starter first purchases (users table). The
+    | first time a user's pair income is evaluated, spread those amounts
+    | over each leg's orders, oldest first, so paid volume is never paid
+    | again.
     |--------------------------------------------------------------------------
     */
-    private function getProcessedPoolVolume($userId, array $pool, array $leftUserIds, array $rightUserIds, $orderId): float
+    private function seedLegacyConsumption($sponsor, array $legUserIds): void
     {
-        $row = DB::table('user_pair_volumes')->where('user_id', $userId)->where('pool_key', $pool['key'])->lockForUpdate()->first();
-
-        if ($row) {
-            return (float) $row->processed_volume;
+        if (DB::table('user_pair_consumptions')->where('user_id', $sponsor->id)->exists()) {
+            return;
         }
 
-        $hasPairHistory = DB::table('user_pair_volumes')
-            ->where('user_id', $userId)
-            ->where('pool_key', $pool['starter_first'] ? 'like' : 'not like', 'starter:%')
-            ->exists();
+        $starterId = DB::table('packages')->whereRaw('UPPER(TRIM(name)) = ?', ['STARTER PACKAGE'])->value('id');
 
-        $startVolume = 0;
+        // Each bucket: [classes it covered, processed amount]
+        $buckets = [];
 
-        if ($hasPairHistory && $orderId) {
-            $startVolume = min($this->getPoolBusinessVolume($leftUserIds, $pool, $orderId), $this->getPoolBusinessVolume($rightUserIds, $pool, $orderId));
+        if (Schema::hasTable('user_pair_volumes')) {
+            foreach (DB::table('user_pair_volumes')->where('user_id', $sponsor->id)->orderBy('id')->get() as $row) {
+                if (str_starts_with($row->pool_key, 'starter:')) {
+                    $classes = [substr($row->pool_key, 8) . ':first'];
+                } else {
+                    // Starter in these pools only ever meant its ₹1000 repurchase
+                    $classes = array_map(fn($id) => $id == $starterId ? $id . ':repeat' : $id, explode(',', $row->pool_key));
+                }
+                $buckets[] = [$classes, (float) $row->processed_volume];
+            }
+        } else {
+            $buckets[] = [null, (float) ($sponsor->normal_pair_processed_volume ?? 0)];
+            if ($starterId) {
+                $buckets[] = [[$starterId . ':first'], (float) ($sponsor->starter_pair_processed_volume ?? 0)];
+            }
         }
 
-        DB::table('user_pair_volumes')->insertOrIgnore([
-            'user_id' => $userId,
-            'pool_key' => $pool['key'],
-            'processed_volume' => $startVolume,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $buckets = array_filter($buckets, fn($b) => $b[1] > 0);
 
-        return (float) DB::table('user_pair_volumes')->where('user_id', $userId)->where('pool_key', $pool['key'])->lockForUpdate()->value('processed_volume');
+        if (!$buckets) {
+            return;
+        }
+
+        $rows = [];
+
+        foreach ($legUserIds as $leg => $userIds) {
+            $orders = empty($userIds) ? collect() : $this->legOrdersQuery($userIds)->orderBy('o.id')->get();
+            $free = $orders->map(fn($o) => (float) $o->volume)->all();
+            $take = [];
+
+            foreach ($buckets as [$classes, $amount]) {
+                // null = the old normal pool: every class except Starter first purchase
+                $inBucket = fn($class) => $classes === null ? !str_ends_with($class, ':first') : in_array($class, $classes);
+                $lastClass = null;
+
+                foreach ($orders as $i => $order) {
+                    if ($amount <= 0) {
+                        break;
+                    }
+                    if (!$inBucket($order->class_key) || $free[$i] <= 0) {
+                        continue;
+                    }
+                    $use = min($amount, $free[$i]);
+                    $free[$i] -= $use;
+                    $amount -= $use;
+                    $take[$order->class_key] = ($take[$order->class_key] ?? 0) + $use;
+                    $lastClass = $order->class_key;
+                }
+
+                // Volume no longer present (e.g. reversed orders) stays consumed
+                if ($amount > 0) {
+                    $class = $lastClass ?? ($classes[0] ?? ($starterId ? $starterId . ':repeat' : null));
+                    if ($class) {
+                        $take[$class] = ($take[$class] ?? 0) + $amount;
+                    }
+                }
+            }
+
+            foreach ($take as $class => $amount) {
+                $rows[] = ['user_id' => $sponsor->id, 'leg' => $leg, 'class_key' => (string) $class, 'consumed_volume' => $amount, 'created_at' => now(), 'updated_at' => now()];
+            }
+        }
+
+        if ($rows) {
+            DB::table('user_pair_consumptions')->insert($rows);
+        }
+    }
+
+    // Volume already used for pair income: [leg][class] => amount
+    private function getConsumedVolumes($userId): array
+    {
+        $consumed = ['left' => [], 'right' => []];
+
+        foreach (DB::table('user_pair_consumptions')->where('user_id', $userId)->lockForUpdate()->get() as $row) {
+            $consumed[$row->leg][$row->class_key] = (float) $row->consumed_volume;
+        }
+
+        return $consumed;
+    }
+
+    // Mark $amount of a leg's pool volume as used: the bought package's own
+    // volume first, then the paired packages in order.
+    private function consumeVolume($userId, string $leg, float $amount, array $pool, array $volumes, array $consumed): void
+    {
+        $order = array_values(array_unique(array_merge([$pool['own']], $pool['classes'])));
+        $take = [];
+
+        foreach ($order as $class) {
+            if ($amount <= 0) {
+                break;
+            }
+            $free = max(0, ($volumes[$class] ?? 0) - ($consumed[$class] ?? 0));
+            $use = min($free, $amount);
+            if ($use > 0) {
+                $take[$class] = $use;
+                $amount -= $use;
+            }
+        }
+
+        if ($amount > 0) {
+            $take[$pool['own']] = ($take[$pool['own']] ?? 0) + $amount;
+        }
+
+        foreach ($take as $class => $use) {
+            DB::table('user_pair_consumptions')->upsert(
+                [['user_id' => $userId, 'leg' => $leg, 'class_key' => $class, 'consumed_volume' => ($consumed[$class] ?? 0) + $use, 'created_at' => now(), 'updated_at' => now()]],
+                ['user_id', 'leg', 'class_key'],
+                ['consumed_volume', 'updated_at'],
+            );
+        }
     }
 
     private function getFullSubtreeUsers($rootId, $side)

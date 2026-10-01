@@ -219,37 +219,19 @@
                     </div>
                     <small class="hgnl-hint">% = of matched volume &middot; Fixed = per matched package amount</small>
                 </div>
-                <div class="hgnl-field full-row">
-                    <div class="hgnl-pair-head">
-                        <label>Can Pair With</label>
-                        @if ($allPackages->isNotEmpty())
-                            <div class="hgnl-pair-tools">
-                                <span><span class="hgnl-pair-count" id="pairCount">0</span> selected</span>
-                                <button type="button" data-pair-all="1">Select all</button>
-                                <button type="button" data-pair-all="0">Clear</button>
-                            </div>
-                        @endif
-                    </div>
-                    @if ($allPackages->isNotEmpty())
-                        <div class="hgnl-pair-grid">
-                            @foreach ($allPackages as $p)
-                                <label class="hgnl-pair-card">
-                                    <input type="checkbox" name="paired_packages[]" value="{{ $p->id }}"
-                                        @checked(in_array($p->id, old('paired_packages', $pairedIds)))>
-                                    <span class="hgnl-pair-tick">
-                                        <svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 5" /></svg>
-                                    </span>
-                                    <span class="hgnl-pair-text">
-                                        <span class="hgnl-pair-name">{{ $p->name }}</span>
-                                        <span class="hgnl-pair-amt">₹{{ number_format($p->actual_amount) }}</span>
-                                    </span>
-                                </label>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="hgnl-pair-empty">No other packages yet.</div>
-                    @endif
+                <div class="hgnl-field">
+                    <label>Registration Fee (₹100 on member's first purchase)</label>
+                    <select name="charges_registration_fee" class="hgnl-input">
+                        <option value="1" @selected((string) old('charges_registration_fee', $package->charges_registration_fee ? '1' : '0') === '1')>Yes — add ₹100 to package price</option>
+                        <option value="0" @selected((string) old('charges_registration_fee', $package->charges_registration_fee ? '1' : '0') === '0')>No — package price is final</option>
+                    </select>
                 </div>
+                @if ($isStarter)
+                    @include('admin.packages._pairing', ['title' => '₹' . number_format($package->actual_amount) . ' First Purchase Can Pair With', 'inputName' => 'paired_packages_first', 'options' => $pairingOptions, 'selected' => old('paired_packages_first', $pairedKeys['first'])])
+                    @include('admin.packages._pairing', ['title' => '₹' . number_format($package->discounted_amount ?: 1000) . ' Repurchase Can Pair With', 'inputName' => 'paired_packages_repeat', 'options' => $pairingOptions, 'selected' => old('paired_packages_repeat', $pairedKeys['repeat'])])
+                @else
+                    @include('admin.packages._pairing', ['title' => 'Can Pair With', 'inputName' => 'paired_packages', 'options' => $pairingOptions, 'selected' => old('paired_packages', $pairedKeys['all'])])
+                @endif
                 <div class="hgnl-field full-row">
                     <button type="submit" class="hgnl-btn">Update Package Details</button>
                     <div style="text-align: center; margin-top: 20px;">
@@ -262,17 +244,17 @@
 </div>
 
     <script>
-        (function() {
-            const boxes = document.querySelectorAll('input[name="paired_packages[]"]');
-            const count = document.getElementById('pairCount');
+        document.querySelectorAll('[data-pair-group]').forEach(function(group) {
+            const boxes = group.querySelectorAll('input[type="checkbox"]');
+            const count = group.querySelector('[data-pair-count]');
             if (!boxes.length || !count) return;
             const update = () => count.textContent = [...boxes].filter(b => b.checked).length;
             boxes.forEach(b => b.addEventListener('change', update));
-            document.querySelectorAll('[data-pair-all]').forEach(btn => btn.addEventListener('click', () => {
+            group.querySelectorAll('[data-pair-all]').forEach(btn => btn.addEventListener('click', () => {
                 boxes.forEach(b => b.checked = btn.dataset.pairAll === '1');
                 update();
             }));
             update();
-        })();
+        });
     </script>
 @endsection

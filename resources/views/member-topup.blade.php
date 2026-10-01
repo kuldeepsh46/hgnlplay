@@ -316,7 +316,8 @@
     <option value="{{ $p->id }}" data-amount="{{ $p->actual_amount }}"
         data-direct="{{ \App\Models\Package::formatBonus($p->direct_bonus, $p->direct_bonus_type) }}"
         data-pair="{{ \App\Models\Package::formatBonus($p->pair_bonus, $p->pair_bonus_type) }}"
-        data-pairs="{{ $p->pairedPackages->pluck('name')->implode(', ') }}">
+        data-pairs="{{ \App\Models\Package::isStarter($p) ? $p->pairingSummary('first') : $p->pairingSummary() }}"
+        data-reg-fee="{{ $p->charges_registration_fee ? 100 : 0 }}">
 
         {{ $p->name }} —
         ₹{{ $p->actual_amount }}
@@ -471,13 +472,14 @@
 
             function updatePriceDisplay(investmentCount) {
                 // console.log("coo")
-                const registrationFee = investmentCount === 0 ? 100 : 0;
                 const selectedOption = packageSelect.options[packageSelect.selectedIndex];
 
                 if (!selectedOption || !selectedOption.value) {
                     priceBreakdown.innerHTML = '';
                     return;
                 }
+
+                const registrationFee = investmentCount === 0 ? (parseFloat(selectedOption.dataset.regFee) || 0) : 0;
 
                 const baseAmount = parseFloat(selectedOption.dataset.amount) || 0;
                 const totalAmount = baseAmount + registrationFee;
