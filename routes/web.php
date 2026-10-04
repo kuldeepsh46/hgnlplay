@@ -183,6 +183,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/sponsor-bonus', [\App\Http\Controllers\Admin\SponsorBonusController::class, 'index'])->name('admin.sponsor-bonus');
     Route::get('/admin/sponsor-bonus/export', [\App\Http\Controllers\Admin\SponsorBonusController::class, 'export'])->name('admin.sponsor-bonus.export');
 
+    // Sync settings
+    Route::get('/account/sync', [\App\Http\Controllers\Admin\SyncSettingsController::class, 'index'])->name('account.sync');
+    Route::post('/account/sync/{key}', [\App\Http\Controllers\Admin\SyncSettingsController::class, 'update'])->name('account.sync.update');
+
     // Rank & Rewards ladder and payouts (read-only)
     Route::get('/admin/rank-rewards', [\App\Http\Controllers\Admin\RankRewardController::class, 'index'])->name('admin.rank-rewards');
     Route::get('/admin/rank-rewards/export', [\App\Http\Controllers\Admin\RankRewardController::class, 'export'])->name('admin.rank-rewards.export');

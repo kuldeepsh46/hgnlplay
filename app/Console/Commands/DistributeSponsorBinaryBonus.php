@@ -29,6 +29,12 @@ class DistributeSponsorBinaryBonus extends Command
     {
         $date = $this->option('date') ?: now()->subDay()->toDateString();
 
+        if ($pausedBy = \App\Services\SystemSwitch::payoutsPausedBy()) {
+            $this->warn("Skipped: payouts are paused by the \"{$pausedBy}\" system switch. Nothing credited for {$date}. "
+                . "Once it is off, run: php artisan income:sponsor-binary-bonus --date={$date}");
+            return self::SUCCESS;
+        }
+
         $parsed = \DateTime::createFromFormat('!Y-m-d', $date);
 
         if (!$parsed || $parsed->format('Y-m-d') !== $date) {

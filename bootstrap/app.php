@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Superadmin kill switches (App\Services\SystemSwitch)
+        $middleware->web(append: \App\Http\Middleware\SystemSwitches::class);
+        $middleware->api(append: \App\Http\Middleware\SystemSwitches::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

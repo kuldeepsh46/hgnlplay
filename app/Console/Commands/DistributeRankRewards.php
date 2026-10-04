@@ -18,6 +18,11 @@ class DistributeRankRewards extends Command
     public function handle(): int
     {
         $dryRun = (bool) $this->option('dry-run');
+
+        if (!$dryRun && ($pausedBy = \App\Services\SystemSwitch::payoutsPausedBy())) {
+            $this->warn("Skipped: payouts are paused by the \"{$pausedBy}\" system switch. Ranks reached meanwhile are paid on the first run after it is turned off.");
+            return self::SUCCESS;
+        }
         $ladder = RankRewardService::ladder();
         $counts = RankRewardService::rankPairs();
 

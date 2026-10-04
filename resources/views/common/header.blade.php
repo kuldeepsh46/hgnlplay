@@ -95,6 +95,12 @@
             </a>
         @endif
 
+        @if (Auth::user()->hasRole('superadmin'))
+            <a href="{{ route('account.sync') }}" style="text-decoration:none;color:inherit;display:block;">
+                <li class="{{ Request::routeIs('account.sync*') ? 'active' : '' }}">⚙️ <span>Sync Settings</span></li>
+            </a>
+        @endif
+
         @if (Auth::user()->hasRole('admin'))
             <a href="{{ url('/dashboard') }}" style="text-decoration:none;color:inherit;display:block;">
                 <li class="{{ Request::is('dashboard') ? 'active' : '' }}">🧭 <span>Admin Console</span></li>
