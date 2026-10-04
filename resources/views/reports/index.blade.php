@@ -184,6 +184,7 @@
             <button class="btn" id="matchingBtn">Matching Income</button>
             <button class="btn" id="directBtn" style="background:#333;color:#fff;">Direct Income</button>
             <button class="btn" id="levelBtn" style="background:#333;color:#fff;">Level Income</button>
+            <button class="btn" id="sponsorBtn" style="background:#333;color:#fff;">Sponsor Binary Bonus</button>
         </div>
 
         <div id="matchingTab">
@@ -243,19 +244,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tfoot>
-    <tr class="fw-bold">
-        <td colspan="2" class="text-end">Total Pair Income</td>
-        <td>₹{{ number_format($directTotal, 2) }}</td>
-        <td>
-            @foreach($pairBreakdown as $bonusType => $amount)
-                <small class="d-block text-muted">
-                    {{ ucwords(str_replace('_', ' ', $bonusType)) }}: ₹{{ number_format($amount, 2) }}
-                </small>
-            @endforeach
-        </td>
-    </tr>
-</tfoot>
                         @forelse($directIncomes as $r)
                             <tr>
                                 <td>{{ ($directIncomes->currentPage() - 1) * $directIncomes->perPage() + $loop->iteration }}</td>
@@ -269,6 +257,13 @@
                             </tr>
                         @endforelse
                     </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="2" class="text-end">Total Direct Income</td>
+                            <td>₹{{ number_format($directTotal, 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
             {{ $directIncomes->appends(request()->query())->links() }}
@@ -302,20 +297,52 @@
                     </tbody>
                     <tfoot>
     <tr class="fw-bold">
-        <td colspan="2" class="text-end">Total Pair Income</td>
+        <td colspan="2" class="text-end">Total Level Income</td>
         <td>₹{{ number_format($levelTotal, 2) }}</td>
-        <td>
-            @foreach($pairBreakdown as $bonusType => $amount)
-                <small class="d-block text-muted">
-                    {{ ucwords(str_replace('_', ' ', $bonusType)) }}: ₹{{ number_format($amount, 2) }}
-                </small>
-            @endforeach
-        </td>
+        <td></td>
     </tr>
 </tfoot>
                 </table>
             </div>
             {{ $levelIncomes->appends(request()->query())->links() }}
+        </div>
+
+        <div id="sponsorTab" style="display:none;">
+            <h3 style="color:var(--accent)">Sponsor Binary Bonus</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($sponsorBonusIncomes as $r)
+                            <tr>
+                                <td>{{ ($sponsorBonusIncomes->currentPage() - 1) * $sponsorBonusIncomes->perPage() + $loop->iteration }}</td>
+                                <td>{{ date('d M Y, h:i A', strtotime($r->created_at)) }}</td>
+                                <td>₹{{ number_format($r->amount, 2) }}</td>
+                                <td>{{ $r->remarks }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4">No records found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="2" class="text-end">Total Sponsor Binary Bonus</td>
+                            <td>₹{{ number_format($sponsorBonusTotal, 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            {{ $sponsorBonusIncomes->appends(request()->query())->links() }}
         </div>
     </div>
 
@@ -340,84 +367,40 @@
     </div>
 
     <script>
-        const matchTab = document.getElementById('matchingTab');
-        const directTab = document.getElementById('directTab');
-        const levelTab = document.getElementById('levelTab');
-
-        const matchBtn = document.getElementById('matchingBtn');
-        const directBtn = document.getElementById('directBtn');
-        const levelBtn = document.getElementById('levelBtn');
-
         const exportBtn = document.getElementById('dynamicExportBtn');
 
-        // Routes for dynamic export
-        const matchingExportRoute = "{{ route('reports.export', 'matching') }}";
-        const directExportRoute = "{{ route('reports.export', 'direct') }}";
-        const levelExportRoute = "{{ route('reports.export', 'level') }}";
+        const tabs = {
+            matching: { tab: 'matchingTab', btn: 'matchingBtn', exportRoute: "{{ route('reports.export', 'matching') }}" },
+            direct: { tab: 'directTab', btn: 'directBtn', exportRoute: "{{ route('reports.export', 'direct') }}" },
+            level: { tab: 'levelTab', btn: 'levelBtn', exportRoute: "{{ route('reports.export', 'level') }}" },
+            sponsor: { tab: 'sponsorTab', btn: 'sponsorBtn', exportRoute: "{{ route('reports.export', 'sponsor') }}" },
+        };
 
-        function setMatchActive() {
-            matchTab.style.display = 'block';
-            directTab.style.display = 'none';
-            levelTab.style.display = 'none';
-
-            matchBtn.style.background = 'var(--accent)';
-            matchBtn.style.color = '#000';
-
-            directBtn.style.background = '#333';
-            directBtn.style.color = '#fff';
-
-            levelBtn.style.background = '#333';
-            levelBtn.style.color = '#fff';
-
-            exportBtn.setAttribute('formaction', matchingExportRoute);
+        function setActive(key) {
+            Object.entries(tabs).forEach(([name, t]) => {
+                const active = name === key;
+                document.getElementById(t.tab).style.display = active ? 'block' : 'none';
+                const btn = document.getElementById(t.btn);
+                btn.style.background = active ? 'var(--accent)' : '#333';
+                btn.style.color = active ? '#000' : '#fff';
+            });
+            exportBtn.setAttribute('formaction', tabs[key].exportRoute);
         }
 
-        function setDirectActive() {
-            matchTab.style.display = 'none';
-            directTab.style.display = 'block';
-            levelTab.style.display = 'none';
-
-            directBtn.style.background = 'var(--accent)';
-            directBtn.style.color = '#000';
-
-            matchBtn.style.background = '#333';
-            matchBtn.style.color = '#fff';
-
-            levelBtn.style.background = '#333';
-            levelBtn.style.color = '#fff';
-
-            exportBtn.setAttribute('formaction', directExportRoute);
-        }
-
-        function setLevelActive() {
-            matchTab.style.display = 'none';
-            directTab.style.display = 'none';
-            levelTab.style.display = 'block';
-
-            levelBtn.style.background = 'var(--accent)';
-            levelBtn.style.color = '#000';
-
-            matchBtn.style.background = '#333';
-            matchBtn.style.color = '#fff';
-
-            directBtn.style.background = '#333';
-            directBtn.style.color = '#fff';
-
-            exportBtn.setAttribute('formaction', levelExportRoute);
-        }
-
-        matchBtn.onclick = setMatchActive;
-        directBtn.onclick = setDirectActive;
-        levelBtn.onclick = setLevelActive;
+        Object.keys(tabs).forEach(key => {
+            document.getElementById(tabs[key].btn).onclick = () => setActive(key);
+        });
 
         // Persist tab on page load
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('direct_page')) {
-            setDirectActive();
+            setActive('direct');
         } else if (urlParams.has('level_page')) {
-            setLevelActive();
+            setActive('level');
+        } else if (urlParams.has('sponsor_page')) {
+            setActive('sponsor');
         } else {
-            setMatchActive();
+            setActive('matching');
         }
 
         /* Original Password Modal Logic */

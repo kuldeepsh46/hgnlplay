@@ -20,8 +20,9 @@ class ReportController extends Controller
         $matchQuery       = $this->baseQuery($user->id)->whereIn('bonus_type', BonusType::pairTypes());
         $directQuery      = $this->baseQuery($user->id)->where('bonus_type', BonusType::DirectIncome->value);
         $levelIncomeQuery = $this->baseQuery($user->id)->where('bonus_type', BonusType::LevelIncome->value);
+        $sponsorBonusQuery = $this->baseQuery($user->id)->where('bonus_type', BonusType::SponsorBinaryBonus->value);
 
-        foreach ([$matchQuery, $directQuery, $levelIncomeQuery] as $query) {
+        foreach ([$matchQuery, $directQuery, $levelIncomeQuery, $sponsorBonusQuery] as $query) {
             $this->applyDateFilter($query, $from, $to);
         }
 
@@ -30,7 +31,8 @@ class ReportController extends Controller
         $matchingTotal = (clone $matchQuery)->sum('amount');
         $directTotal   = (clone $directQuery)->sum('amount');
         $levelTotal    = (clone $levelIncomeQuery)->sum('amount');
-        $grandTotal    = $matchingTotal + $directTotal + $levelTotal;
+        $sponsorBonusTotal = (clone $sponsorBonusQuery)->sum('amount');
+        $grandTotal    = $matchingTotal + $directTotal + $levelTotal + $sponsorBonusTotal;
 
         // Shows which pair types make up the total, so a type that stops
         // contributing is visible instead of silently missing.
@@ -47,11 +49,12 @@ class ReportController extends Controller
         $matchingIncomes = $matchQuery->paginate(self::PER_PAGE, ['*'], 'match_page')->appends($filters);
         $directIncomes   = $directQuery->paginate(self::PER_PAGE, ['*'], 'direct_page')->appends($filters);
         $levelIncomes    = $levelIncomeQuery->paginate(self::PER_PAGE, ['*'], 'level_page')->appends($filters);
+        $sponsorBonusIncomes = $sponsorBonusQuery->paginate(self::PER_PAGE, ['*'], 'sponsor_page')->appends($filters);
 
         return view('reports.index', compact(
             'user',
-            'matchingIncomes', 'directIncomes', 'levelIncomes',
-            'matchingTotal', 'directTotal', 'levelTotal', 'grandTotal',
+            'matchingIncomes', 'directIncomes', 'levelIncomes', 'sponsorBonusIncomes',
+            'matchingTotal', 'directTotal', 'levelTotal', 'sponsorBonusTotal', 'grandTotal',
             'pairBreakdown',
             'from', 'to'
         ));
@@ -73,6 +76,9 @@ class ReportController extends Controller
         } elseif ($type === 'direct') {
             $query->where('bonus_type', BonusType::DirectIncome->value);
             $label = 'direct_income';
+        } elseif ($type === 'sponsor') {
+            $query->where('bonus_type', BonusType::SponsorBinaryBonus->value);
+            $label = 'sponsor_binary_bonus';
         } else {
             abort(404);
         }

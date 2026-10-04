@@ -1286,8 +1286,8 @@
         <div class="bento">
             <div class="glass b-6 reveal">
                 <p class="hero-label"><i class="fa-solid fa-sack-dollar" aria-hidden="true"></i> Total Earning</p>
-                <div class="hero-figure grad-gold">₹{{ number_format(($directIncome ?? 0) + ($pairIncome ?? 0), 0) }}</div>
-                <p style="margin:0; font-size:12px; color:var(--text-muted);">Direct + Pair income combined</p>
+                <div class="hero-figure grad-gold">₹{{ number_format(($directIncome ?? 0) + ($pairIncome ?? 0) + ($sponsorBinaryIncome ?? 0), 0) }}</div>
+                <p style="margin:0; font-size:12px; color:var(--text-muted);">Direct + Pair + Sponsor Binary Bonus combined</p>
             </div>
             <div class="glass b-6 reveal">
                 <p class="hero-label"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> Total Downline</p>
@@ -1425,6 +1425,11 @@
                         <div class="tile-icon"><i class="fa-solid fa-people-arrows" aria-hidden="true"></i></div>
                         <p class="tile-label">Pair Income</p>
                         <p class="tile-value mono">₹{{ number_format($pairIncome ?? 0, 2) }}</p>
+                    </div>
+                    <div class="tile gold-icon">
+                        <div class="tile-icon"><i class="fa-solid fa-user-plus" aria-hidden="true"></i></div>
+                        <p class="tile-label">Sponsor Binary Bonus</p>
+                        <p class="tile-value mono">₹{{ number_format($sponsorBinaryIncome ?? 0, 2) }}</p>
                     </div>
                     <div class="tile">
                         <div class="tile-icon"><i class="fa-solid fa-wallet" aria-hidden="true"></i></div>
