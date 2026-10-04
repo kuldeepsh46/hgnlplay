@@ -79,6 +79,14 @@ class AdminDashboardController extends Controller
             'recentMembers' => $this->recentMembers(),
             'recentIncome' => $this->recentIncome(),
             'network' => $this->network(),
+            'today' => $this->today(),
+            'allTime' => $this->allTime(),
+            'buyers' => $this->packageBuyers(),
+            'heatmap' => $this->topupHeatmap($from, $to),
+            'requestStatus' => $this->requestStatus($from, $to),
+            'paymentMix' => $this->paymentMix($from, $to),
+            'walletBands' => $this->walletBands(),
+            'sponsorBonus' => $this->sponsorBonusStatus(),
             'search' => trim((string) $request->input('q', '')),
             'searchResults' => $this->searchMembers(trim((string) $request->input('q', ''))),
             'inr' => fn($n, $decimals = 0) => self::inr($n, $decimals),
@@ -280,14 +288,32 @@ class AdminDashboardController extends Controller
 
         $pick = fn($data) => array_map(fn($k) => round((float) ($data[$k] ?? 0), 2), $keys);
 
+        // Running totals start from everything before the window
+        $running = function (array $values, float $start) {
+            $out = [];
+            foreach ($values as $v) {
+                $start += $v;
+                $out[] = round($start, 2);
+            }
+            return $out;
+        };
+        $membersBefore = (float) DB::table('users')->whereNotIn('id', self::EXCLUDED_USER_IDS)->where('created_at', '<', $start)->count();
+        $businessBefore = (float) DB::table('orders')->where('status', 'completed')->where('created_at', '<', $start)->sum('amount');
+
+        $businessSeries = $pick($business);
+        $incomeSeries = $pick($income);
+
         return [
             'monthly' => $monthly,
             'labels' => $labels,
-            'business' => $pick($business),
+            'business' => $businessSeries,
             'members' => $pick($members),
-            'income' => $pick($income),
+            'income' => $incomeSeries,
             'funds' => $pick($funds),
             'payouts' => $pick($payouts),
+            'members_total' => $running($pick($members), $membersBefore),
+            'business_total' => $running($businessSeries, $businessBefore),
+            'payout_ratio' => array_map(fn($b, $i) => $b > 0 ? round($i / $b * 100, 1) : null, $businessSeries, $incomeSeries),
         ];
     }
 
@@ -327,11 +353,18 @@ class AdminDashboardController extends Controller
             ->get()
             ->keyBy('package_id');
 
+        $today = DB::table('orders')->where('status', 'completed')->whereBetween('created_at', [now()->startOfDay(), now()->endOfDay()])
+            ->selectRaw('package_id, COUNT(*) as qty, SUM(amount) as revenue')
+            ->groupBy('package_id')
+            ->get()
+            ->keyBy('package_id');
+
         $periodRevenue = (float) $period->sum('revenue');
 
-        return Package::orderBy('id')->get()->map(function ($p) use ($period, $allTime, $periodRevenue) {
+        return Package::orderBy('id')->get()->map(function ($p) use ($period, $allTime, $today, $periodRevenue) {
             $now = $period[$p->id] ?? null;
             $all = $allTime[$p->id] ?? null;
+            $tod = $today[$p->id] ?? null;
             $isStarter = Package::isStarter($p);
 
             return [
@@ -344,6 +377,8 @@ class AdminDashboardController extends Controller
                 'share' => $periodRevenue > 0 ? ($now->revenue ?? 0) / $periodRevenue * 100 : 0,
                 'all_qty' => (int) ($all->qty ?? 0),
                 'all_revenue' => (float) ($all->revenue ?? 0),
+                'today_qty' => (int) ($tod->qty ?? 0),
+                'today_revenue' => (float) ($tod->revenue ?? 0),
                 'direct' => Package::formatBonus($p->direct_bonus, $p->direct_bonus_type),
                 'pair' => Package::formatBonus($p->pair_bonus, $p->pair_bonus_type),
                 'reg_fee' => (bool) $p->charges_registration_fee,
@@ -457,6 +492,172 @@ class AdminDashboardController extends Controller
                 ->orderByDesc('total')
                 ->limit(8)
                 ->pluck('total', 'state'),
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | From the old dashboard: today's pulse and all-time counters
+    |--------------------------------------------------------------------------
+    */
+    private function today(): array
+    {
+        $from = now()->startOfDay();
+        $to = now()->endOfDay();
+
+        $orders = DB::table('orders')->whereBetween('created_at', [$from, $to]);
+
+        return [
+            'new_users' => DB::table('users')->whereNotIn('id', self::EXCLUDED_USER_IDS)->whereBetween('created_at', [$from, $to])->count(),
+            'topups' => (clone $orders)->count(),
+            'revenue' => (float) (clone $orders)->where('status', 'completed')->sum('amount'),
+            'renewals' => DB::table('orders as o1')->whereBetween('o1.created_at', [$from, $to])
+                ->whereExists(fn($q) => $q->from('orders as o2')->whereColumn('o2.user_id', 'o1.user_id')->whereColumn('o2.id', '<', 'o1.id'))
+                ->count(),
+            'withdraw_requested' => DB::table('withdraw_requests')->whereBetween('created_at', [$from, $to])->count(),
+            'withdraw_paid' => DB::table('withdraw_requests')->where('status', 'completed')->whereBetween('updated_at', [$from, $to])->count(),
+            'funds_added' => (float) DB::table('fund_requests')->where('status', 'completed')->whereBetween('updated_at', [$from, $to])->sum('amount'),
+            'income_paid' => (float) DB::table('transactions')->whereIn('bonus_type', array_keys(self::INCOME_TYPES))->whereBetween('created_at', [$from, $to])->sum('amount'),
+        ];
+    }
+
+    private function allTime(): array
+    {
+        return [
+            'users' => DB::table('users')->whereNotIn('id', self::EXCLUDED_USER_IDS)->count(),
+            'topups' => DB::table('orders')->count(),
+            'business' => (float) DB::table('orders')->where('status', 'completed')->sum('amount'),
+            'withdraw_paid' => DB::table('withdraw_requests')->where('status', 'completed')->count(),
+            'withdraw_paid_amount' => (float) DB::table('withdraw_requests')->where('status', 'completed')->sum('net_amount'),
+            'withdraw_pending' => DB::table('withdraw_requests')->where('status', 'pending')->count(),
+            'income_paid' => (float) DB::table('transactions')->whereIn('bonus_type', array_keys(self::INCOME_TYPES))->sum('amount'),
+        ];
+    }
+
+    // Who bought each package (the old dashboard's package pop-up), latest first
+    private function packageBuyers(): array
+    {
+        $limit = 300;
+        $out = [];
+
+        foreach (DB::table('orders')->where('status', 'completed')->distinct()->pluck('package_id') as $packageId) {
+            $out[$packageId] = DB::table('orders as o')
+                ->leftJoin('users as u', 'u.id', '=', 'o.user_id')
+                ->leftJoin('users as b', 'b.id', '=', 'o.from_user_id')
+                ->where('o.status', 'completed')
+                ->where('o.package_id', $packageId)
+                ->orderByDesc('o.id')
+                ->limit($limit)
+                ->get(['o.id', 'o.amount', 'o.payment_by', 'o.created_at', 'u.id as user_id', 'u.member_id', 'u.name', 'u.mobile', 'b.member_id as paid_by'])
+                ->map(fn($r) => [
+                    'id' => $r->id,
+                    'member' => $r->member_id,
+                    'name' => $r->name,
+                    'mobile' => $r->mobile,
+                    'amount' => (float) $r->amount,
+                    'via' => $r->payment_by,
+                    'paid_by' => $r->paid_by,
+                    'when' => Carbon::parse($r->created_at)->format('d M Y, h:i A'),
+                    'edit' => $r->user_id ? route('admin.users.edit', $r->user_id) : null,
+                ])->all();
+        }
+
+        return ['limit' => $limit, 'rows' => $out];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Extra analysis
+    |--------------------------------------------------------------------------
+    */
+    // Top-ups by weekday (1 = Sunday) and hour of day
+    private function topupHeatmap(?Carbon $from, ?Carbon $to): array
+    {
+        $rows = $this->between(DB::table('orders')->where('status', 'completed'), 'created_at', $from, $to)
+            ->selectRaw('DAYOFWEEK(created_at) as dow, HOUR(created_at) as hr, COUNT(*) as n, SUM(amount) as total')
+            ->groupBy('dow', 'hr')
+            ->get();
+
+        $grid = [];
+        foreach ($rows as $r) {
+            $grid[(int) $r->dow][(int) $r->hr] = ['n' => (int) $r->n, 'total' => (float) $r->total];
+        }
+
+        return ['grid' => $grid, 'max' => (int) $rows->max('n')];
+    }
+
+    // Fund requests and withdrawals raised in the period, by status
+    private function requestStatus(?Carbon $from, ?Carbon $to): array
+    {
+        $by = fn($table, $amount) => $this->between(DB::table($table), 'created_at', $from, $to)
+            ->selectRaw("status, COUNT(*) as n, COALESCE(SUM($amount), 0) as total")
+            ->groupBy('status')
+            ->get()
+            ->mapWithKeys(fn($r) => [$r->status => ['n' => (int) $r->n, 'total' => (float) $r->total]])
+            ->all();
+
+        return ['funds' => $by('fund_requests', 'amount'), 'withdrawals' => $by('withdraw_requests', 'amount')];
+    }
+
+    private function paymentMix(?Carbon $from, ?Carbon $to): array
+    {
+        return $this->between(DB::table('orders')->where('status', 'completed'), 'created_at', $from, $to)
+            ->selectRaw("COALESCE(NULLIF(TRIM(payment_by), ''), 'Not set') as via, COUNT(*) as n, SUM(amount) as total")
+            ->groupBy('via')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn($r) => ['label' => ucfirst($r->via), 'n' => (int) $r->n, 'total' => (float) $r->total])
+            ->all();
+    }
+
+    // How the wallet liability is spread across members
+    private function walletBands(): array
+    {
+        $bands = [
+            ['< 0', null, 0],
+            ['0', 0, 0],
+            ['≤1k', 0, 1000],
+            ['1k–10k', 1000, 10000],
+            ['10k–1L', 10000, 100000],
+            ['1L–10L', 100000, 1000000],
+            ['10L+', 1000000, null],
+        ];
+
+        return array_map(function ($b) {
+            [$label, $min, $max] = $b;
+            $q = DB::table('wallets');
+            if ($min === null) {
+                $q->where('balance', '<', 0);
+            } elseif ($min === 0 && $max === 0) {
+                $q->where('balance', 0);
+            } else {
+                $q->where('balance', '>', $min);
+                if ($max !== null) {
+                    $q->where('balance', '<=', $max);
+                }
+            }
+
+            return ['label' => $label, 'n' => (clone $q)->count(), 'total' => (float) $q->sum('balance')];
+        }, $bands);
+    }
+
+    // Nightly sponsor binary bonus job: last day paid and totals
+    private function sponsorBonusStatus(): ?array
+    {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('sponsor_binary_bonus_payouts')) {
+            return null;
+        }
+
+        $t = DB::table('sponsor_binary_bonus_payouts');
+        $lastDay = (clone $t)->max('income_date');
+
+        return [
+            'last_day' => $lastDay,
+            'last_count' => $lastDay ? (clone $t)->where('income_date', $lastDay)->count() : 0,
+            'last_total' => $lastDay ? (float) (clone $t)->where('income_date', $lastDay)->sum('bonus_amount') : 0,
+            'all_count' => (clone $t)->count(),
+            'all_total' => (float) (clone $t)->sum('bonus_amount'),
+            'ran_yesterday' => $lastDay === now()->subDay()->toDateString(),
         ];
     }
 

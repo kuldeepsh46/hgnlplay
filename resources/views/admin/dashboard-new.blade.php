@@ -145,6 +145,30 @@
     .adn-legend div { display: flex; align-items: center; gap: 8px; font-size: 12px; }
     .adn-legend i { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
     .adn-legend span { flex: 1; color: var(--muted); }
+
+    /* Today / all-time strip */
+    .adn-pulse { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+    .adn-pulse div { background: var(--card2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    .adn-pulse b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; }
+    .adn-pulse span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .adn-pulse-title { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .8px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+    .adn-live { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(167,255,30,.6); animation: adnPulse 2s infinite; }
+    @keyframes adnPulse { 70% { box-shadow: 0 0 0 8px rgba(167,255,30,0); } 100% { box-shadow: 0 0 0 0 rgba(167,255,30,0); } }
+
+    /* Heatmap */
+    .adn-heat { display: grid; grid-template-columns: 38px repeat(24, minmax(14px, 1fr)); gap: 3px; font-size: 10px; color: var(--muted); min-width: 520px; }
+    .adn-heat .c { aspect-ratio: 1; border-radius: 3px; background: #151c24; }
+    .adn-heat .h { text-align: center; }
+    .adn-heat .d { display: flex; align-items: center; }
+
+    /* Modal */
+    .adn.adn-modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 16px; max-width: none; margin: 0; }
+    .adn.adn-modal.on { display: flex; }
+    .adn-modal .box { background: var(--card); border: 1px solid var(--line); border-radius: 14px; width: min(920px, 100%); max-height: 85vh; display: flex; flex-direction: column; }
+    .adn-modal .box-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .adn-modal .box-body { overflow: auto; padding: 8px 18px 18px; }
+    .adn-modal input { background: var(--card2); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 7px 10px; font-size: 12px; }
+    .adn-x { background: none; border: 0; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; }
 </style>
 
 <div class="adn">
@@ -155,7 +179,7 @@
             <h1>Admin Dashboard</h1>
             <div class="sub" style="margin-top:6px;">
                 Showing <b style="color:var(--text)">{{ $periodLabel }}</b>
-                @if ($from) ({{ $from->format('d M Y') }} – {{ $to->format('d M Y') }}) · compared with the previous {{ $from->diffInDays($to) + 1 }} day(s) @endif
+                @if ($from) ({{ $from->format('d M Y') }} – {{ $to->format('d M Y') }}) · compared with the previous {{ (int) round($from->diffInDays($to)) + 1 }} day(s) @endif
                 · updated {{ now()->format('d M, h:i A') }}
             </div>
         </div>
@@ -178,6 +202,36 @@
     @if (session('error'))
         <div class="adn-flash bad">⚠️ {{ session('error') }}</div>
     @endif
+
+    {{-- ============ TODAY + ALL TIME (from the old dashboard) ============ --}}
+    <div class="row adn-1-1">
+        <div class="card">
+            <p class="adn-pulse-title"><span class="adn-live"></span> Today's pulse · {{ now()->format('d M') }}</p>
+            <div class="adn-pulse">
+                <div><b>{{ $inr($today['new_users']) }}</b><span>New users</span></div>
+                <div><b>{{ $inr($today['topups']) }}</b><span>Top-ups</span></div>
+                <div><b>{{ $inr($today['renewals']) }}</b><span>Renewals</span></div>
+                <div><b>₹{{ $inr($today['revenue']) }}</b><span>Revenue</span></div>
+                <div><b style="color:{{ $today['withdraw_requested'] ? 'var(--warn)' : 'inherit' }}">{{ $inr($today['withdraw_requested']) }}</b><span>Withdrawals req.</span></div>
+                <div><b>{{ $inr($today['withdraw_paid']) }}</b><span>Withdrawals paid</span></div>
+                <div><b>₹{{ $inr($today['funds_added']) }}</b><span>Funds added</span></div>
+                <div><b>₹{{ $inr($today['income_paid']) }}</b><span>Income paid</span></div>
+            </div>
+        </div>
+        <div class="card">
+            <p class="adn-pulse-title">All time</p>
+            <div class="adn-pulse">
+                <div><b>{{ $inr($allTime['users']) }}</b><span>Total users</span></div>
+                <div><b>{{ $inr($allTime['topups']) }}</b><span>Total top-ups</span></div>
+                <div><b>₹{{ $inr($allTime['business']) }}</b><span>Total business</span></div>
+                <div><b>₹{{ $inr($allTime['income_paid']) }}</b><span>Income paid</span></div>
+                <div><b>{{ $inr($allTime['withdraw_paid']) }}</b><span>Withdrawals paid</span></div>
+                <div><b>₹{{ $inr($allTime['withdraw_paid_amount']) }}</b><span>Paid out (net)</span></div>
+                <div><b style="color:{{ $allTime['withdraw_pending'] ? 'var(--bad)' : 'inherit' }}">{{ $inr($allTime['withdraw_pending']) }}</b><span>Pending withdrawals</span></div>
+                <div><b>₹{{ $inr($network['wallet_total']) }}</b><span>Wallet balance</span></div>
+            </div>
+        </div>
+    </div>
 
     {{-- ============ NEEDS ATTENTION STRIP ============ --}}
     <div class="row adn-alerts">
@@ -249,10 +303,15 @@
         <div class="card">
             <div class="card-head">
                 <h3>📈 Business &amp; income trend <span class="sub">({{ $series['monthly'] ? 'monthly' : 'daily' }})</span></h3>
-                <div class="adn-tabs" data-chart-switch="trend">
-                    <button class="on" data-series="growth">Business vs income</button>
-                    <button data-series="members">New members</button>
-                    <button data-series="cash">Money in / out</button>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <div class="adn-tabs" data-chart-switch="trend">
+                        <button class="on" data-series="growth">Business vs income</button>
+                        <button data-series="members">New members</button>
+                        <button data-series="cash">Money in / out</button>
+                        <button data-series="cumulative">Cumulative growth</button>
+                        <button data-series="ratio">Payout ratio</button>
+                    </div>
+                    <button type="button" class="adn-btn sm ghost" id="adnTrendCsv" title="Download the chart data as CSV">⬇ CSV</button>
                 </div>
             </div>
             <div class="adn-chart"><canvas id="adnTrend"></canvas></div>
@@ -371,7 +430,7 @@
             <a class="link" href="{{ route('packages.index') }}">Manage packages →</a>
         </div>
         <div class="adn-table-wrap"><table>
-                <thead><tr><th>Package</th><th class="num-cell">Price</th><th class="num-cell">Sold</th><th class="num-cell">Revenue</th><th>Share</th><th class="num-cell">All-time</th><th>Direct / Pair</th><th>Reg. fee</th><th>Pairs with</th><th></th></tr></thead>
+                <thead><tr><th>Package</th><th class="num-cell">Price</th><th class="num-cell">Sold</th><th class="num-cell">Revenue</th><th>Share</th><th class="num-cell">Today</th><th class="num-cell">All-time</th><th>Direct / Pair</th><th>Reg. fee</th><th>Pairs with</th><th></th></tr></thead>
                 <tbody>
                 @foreach ($packages as $p)
                     <tr>
@@ -380,15 +439,97 @@
                         <td class="num-cell who"><b>{{ $p['qty'] }}</b><span>{{ $p['buyers'] }} buyers</span></td>
                         <td class="num-cell"><b>₹{{ $inr($p['revenue']) }}</b></td>
                         <td><div class="bar" title="{{ number_format($p['share'], 1) }}%"><i style="width: {{ min(100, $p['share']) }}%"></i></div></td>
+                        <td class="num-cell who"><b>₹{{ $inr($p['today_revenue']) }}</b><span>{{ $p['today_qty'] }} sold</span></td>
                         <td class="num-cell who"><b>₹{{ $inr($p['all_revenue']) }}</b><span>{{ $p['all_qty'] }} sold</span></td>
                         <td><span class="pill info">{{ $p['direct'] }}</span> <span class="pill ok">{{ $p['pair'] }}</span></td>
                         <td>{!! $p['reg_fee'] ? '<span class="pill warn">₹100</span>' : '<span class="pill mute">No</span>' !!}</td>
                         <td class="wrap">{{ $p['pairs'] }}</td>
-                        <td><a class="adn-btn sm ghost" href="{{ route('packages.edit', $p['id']) }}">Edit</a></td>
+                        <td><div class="actions" style="flex-direction:column;align-items:stretch;">
+                            <button type="button" class="adn-btn sm ghost" data-buyers="{{ $p['id'] }}" data-name="{{ $p['name'] }}" data-count="{{ $p['all_qty'] }}" @disabled(!$p['all_qty'])>Buyers</button>
+                            <a class="adn-btn sm ghost" href="{{ route('packages.edit', $p['id']) }}">Edit</a>
+                        </div></td>
                     </tr>
                 @endforeach
                 </tbody>
         </table></div>
+    </div>
+
+    {{-- ============ PACKAGE CHARTS ============ --}}
+    <div class="row adn-2-1">
+        <div class="card">
+            <div class="card-head"><h3>📊 Package revenue <span class="sub">— {{ $from ? $periodLabel . ' vs all time' : 'all time' }}</span></h3></div>
+            <div class="adn-chart"><canvas id="adnPkg"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-head"><h3>🛒 Sales mix</h3>
+                <div class="adn-tabs" data-chart-switch="mix">
+                    <button class="on" data-series="today">Today</button>
+                    <button data-series="period">{{ $from ? 'Period' : 'All time' }}</button>
+                    <button data-series="via">Paid via</button>
+                </div>
+            </div>
+            <div class="adn-chart sm"><canvas id="adnMix"></canvas></div>
+            <div class="empty" id="adnMixEmpty" style="display:none">No sales for this view.</div>
+        </div>
+    </div>
+
+    {{-- ============ WHEN SALES HAPPEN ============ --}}
+    <div class="card" style="margin-bottom:18px;">
+        <div class="card-head">
+            <h3>🗓 When top-ups happen <span class="sub">— by weekday and hour · {{ $periodLabel }}</span></h3>
+            <span class="sub">darker = more top-ups · hover for details</span>
+        </div>
+        @php $days = [2 => 'Mon', 3 => 'Tue', 4 => 'Wed', 5 => 'Thu', 6 => 'Fri', 7 => 'Sat', 1 => 'Sun']; $hmax = max(1, $heatmap['max']); @endphp
+        <div class="adn-table-wrap"><div class="adn-heat">
+            <div></div>
+            @for ($h = 0; $h < 24; $h++)<div class="h">{{ $h % 3 === 0 ? $h : '' }}</div>@endfor
+            @foreach ($days as $dow => $day)
+                <div class="d">{{ $day }}</div>
+                @for ($h = 0; $h < 24; $h++)
+                    @php $cell = $heatmap['grid'][$dow][$h] ?? null; $a = $cell ? 0.15 + 0.85 * $cell['n'] / $hmax : 0; @endphp
+                    <div class="c" @if ($cell) style="background: rgba(167,255,30,{{ round($a, 2) }})" title="{{ $day }} {{ sprintf('%02d:00–%02d:59', $h, $h) }} · {{ $cell['n'] }} top-ups · ₹{{ $inr($cell['total']) }}" @else title="{{ $day }} {{ sprintf('%02d:00', $h) }} · none" @endif></div>
+                @endfor
+            @endforeach
+        </div></div>
+    </div>
+
+    {{-- ============ REQUESTS · WALLETS · SPONSOR BONUS ============ --}}
+    <div class="row adn-3">
+        <div class="card">
+            <div class="card-head"><h3>📨 Requests by status</h3><span class="sub">raised · {{ $periodLabel }}</span></div>
+            @foreach (['funds' => 'Fund requests', 'withdrawals' => 'Withdrawals'] as $key => $title)
+                @php $st = $requestStatus[$key]; $tot = max(1, array_sum(array_column($st, 'n'))); @endphp
+                <div class="sub" style="margin:6px 0">{{ $title }} · {{ array_sum(array_column($st, 'n')) }}</div>
+                @forelse (['completed' => 'ok', 'pending' => 'warn', 'rejected' => 'bad'] as $status => $cls)
+                    @php $row = $st[$status] ?? ['n' => 0, 'total' => 0]; @endphp
+                    <div class="adn-list-row" style="padding:6px 0;">
+                        <span class="pill {{ $cls }}" style="min-width:80px;text-align:center">{{ ucfirst($status) }}</span>
+                        <div class="bar" style="flex:1"><i style="width: {{ $row['n'] / $tot * 100 }}%; background: var(--{{ $cls }})"></i></div>
+                        <b style="min-width:110px;text-align:right">{{ $row['n'] }} · ₹{{ $inr($row['total']) }}</b>
+                    </div>
+                @empty
+                @endforelse
+            @endforeach
+            <div style="margin-top:10px;"><a class="link" href="{{ route('admin.transactions', ['tab' => 'funds']) }}">See every request →</a></div>
+        </div>
+        <div class="card">
+            <div class="card-head"><h3>👛 Where wallet money sits</h3><span class="sub">now</span></div>
+            <div class="adn-chart sm"><canvas id="adnWallets"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-head"><h3>🤝 Sponsor binary bonus</h3><span class="sub">nightly 00:10 IST</span></div>
+            @if ($sponsorBonus)
+                <div class="adn-stats">
+                    <div class="adn-stat"><b>{{ $sponsorBonus['last_day'] ? \Carbon\Carbon::parse($sponsorBonus['last_day'])->format('d M') : '—' }}</b><span>Last day paid {!! $sponsorBonus['ran_yesterday'] ? '<span class="pill ok">on time</span>' : '<span class="pill warn">not yesterday</span>' !!}</span></div>
+                    <div class="adn-stat"><b>₹{{ $inr($sponsorBonus['last_total'], 2) }}</b><span>{{ $sponsorBonus['last_count'] }} payouts that day</span></div>
+                    <div class="adn-stat"><b>₹{{ $inr($sponsorBonus['all_total'], 2) }}</b><span>Paid all time</span></div>
+                    <div class="adn-stat"><b>{{ $inr($sponsorBonus['all_count']) }}</b><span>Payouts all time</span></div>
+                </div>
+                <div style="margin-top:12px;"><a class="link" href="{{ route('admin.sponsor-bonus') }}">Open sponsor bonus ledger →</a></div>
+            @else
+                <div class="empty">Sponsor bonus table not set up yet.</div>
+            @endif
+        </div>
     </div>
 
     {{-- ============ LEADERBOARDS ============ --}}
@@ -448,6 +589,8 @@
                     <a href="{{ route('packages.index') }}">📦 <span>Packages<small>bonuses &amp; pairing</small></span></a>
                     <a href="{{ route('admin.support') }}">🆘 <span>Support<small>{{ $attention['support']->count() }} to answer</small></span></a>
                     <a href="{{ route('admin.lucky.index') }}">🎁 <span>Lucky draw<small>{{ $attention['lucky_active'] }} active</small></span></a>
+                    <a href="{{ route('admin.transactions') }}">🧾 <span>All transactions<small>why &amp; how money moved</small></span></a>
+                    <a href="{{ route('admin.sponsor-bonus') }}">🤝 <span>Sponsor bonus<small>every 10% payout</small></span></a>
                 </div>
             @else
                 <div class="adn-table-wrap" style="margin-top:14px;">
@@ -561,8 +704,69 @@
     </div>
 </div>
 
+<div class="adn adn-modal" id="adnBuyers" role="dialog" aria-modal="true" aria-labelledby="adnBuyersTitle">
+    <div class="box">
+        <div class="box-head">
+            <h3 id="adnBuyersTitle" style="font-size:15px;margin:0">Buyers</h3>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <input type="search" id="adnBuyersFilter" placeholder="Filter by ID, name, mobile" aria-label="Filter buyers">
+                <button type="button" class="adn-btn sm ghost" id="adnBuyersCsv">⬇ CSV</button>
+                <button type="button" class="adn-x" data-close aria-label="Close">&times;</button>
+            </div>
+        </div>
+        <div class="box-body"><div class="adn-table-wrap"><table>
+            <thead><tr><th>#</th><th>Member</th><th>Mobile</th><th class="num-cell">Amount</th><th>Paid by</th><th>Via</th><th>When</th></tr></thead>
+            <tbody id="adnBuyersBody"></tbody>
+        </table></div><div class="sub" id="adnBuyersNote" style="margin-top:10px"></div></div>
+    </div>
+</div>
+
 <script>
 (function () {
+    // ---------- CSV helper ----------
+    function downloadCsv(name, rows) {
+        const esc = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+        const blob = new Blob(['\ufeff' + rows.map(r => r.map(esc).join(',')).join('\n')], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = name; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    // ---------- package buyers modal ----------
+    const BUYERS = @json($buyers);
+    const modal = document.getElementById('adnBuyers');
+    const body = document.getElementById('adnBuyersBody');
+    const filter = document.getElementById('adnBuyersFilter');
+    let current = { rows: [], name: '' };
+    const escHtml = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    function renderBuyers() {
+        const q = filter.value.trim().toLowerCase();
+        const rows = current.rows.filter(r => !q || [r.member, r.name, r.mobile].join(' ').toLowerCase().includes(q));
+        body.innerHTML = rows.length ? rows.map(r => `<tr>
+            <td class="mono">${r.id}</td>
+            <td class="who"><b>${r.edit ? `<a href="${r.edit}">${escHtml(r.member)}</a>` : escHtml(r.member)}</b><span>${escHtml(r.name)}</span></td>
+            <td>${escHtml(r.mobile || '—')}</td>
+            <td class="num-cell"><b>₹${Number(r.amount).toLocaleString('en-IN')}</b></td>
+            <td>${escHtml(r.paid_by || '—')}</td>
+            <td><span class="pill mute">${escHtml(r.via || '—')}</span></td>
+            <td class="sub">${escHtml(r.when)}</td></tr>`).join('') : '<tr><td colspan="7" class="empty">No buyers match.</td></tr>';
+    }
+    document.querySelectorAll('[data-buyers]').forEach(btn => btn.addEventListener('click', () => {
+        current = { rows: BUYERS.rows[btn.dataset.buyers] || [], name: btn.dataset.name };
+        const total = Number(btn.dataset.count);
+        document.getElementById('adnBuyersTitle').textContent = `${current.name} · ${total} sold`;
+        document.getElementById('adnBuyersNote').textContent = total > BUYERS.limit ? `Showing the latest ${BUYERS.limit} of ${total}. Use All Transactions → Top-ups for the full list.` : '';
+        filter.value = '';
+        renderBuyers();
+        modal.classList.add('on');
+        filter.focus();
+    }));
+    filter.addEventListener('input', renderBuyers);
+    modal.addEventListener('click', e => { if (e.target === modal || e.target.hasAttribute('data-close')) modal.classList.remove('on'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('on'); });
+    document.getElementById('adnBuyersCsv').addEventListener('click', () => downloadCsv(current.name.replace(/\W+/g, '_') + '_buyers.csv',
+        [['Order', 'Member ID', 'Name', 'Mobile', 'Amount', 'Paid by', 'Via', 'When']].concat(current.rows.map(r => [r.id, r.member, r.name, r.mobile, r.amount, r.paid_by, r.via, r.when]))));
+
     // ---------- tabs ----------
     function openTab(group, name) {
         group.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
@@ -614,13 +818,30 @@
             ],
             money: true,
         },
+        cumulative: {
+            datasets: [
+                { type: 'line', label: 'Total business', data: S.business_total, borderColor: C.ok, backgroundColor: 'rgba(167,255,30,.12)', fill: true, tension: .3, pointRadius: 0, yAxisID: 'y' },
+                { type: 'line', label: 'Total members', data: S.members_total, borderColor: C.info, tension: .3, pointRadius: 0, yAxisID: 'y2' },
+            ],
+            money: true,
+            y2: true,
+        },
+        ratio: {
+            datasets: [{ type: 'line', label: 'Income paid as % of business', data: S.payout_ratio, borderColor: C.warn, backgroundColor: 'rgba(255,181,71,.15)', fill: true, spanGaps: true, tension: .3, pointRadius: 2, yAxisID: 'y' }],
+            percent: true,
+        },
     };
+    const fmtY = v => trendSets.current?.percent ? v + '%' : trendSets.current?.money === false ? v : short(Math.abs(v));
     const trend = new Chart(document.getElementById('adnTrend'), {
         data: { labels: S.labels, datasets: trendSets.growth.datasets },
         options: {
             maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10 } }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + (trendSets.current?.money === false ? c.parsed.y : inr(Math.abs(c.parsed.y))) } } },
-            scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } }, y: { grid, ticks: { callback: v => (trendSets.current?.money === false ? v : short(Math.abs(v))) } } },
+            plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10 } }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + (c.dataset.yAxisID === 'y2' ? c.parsed.y.toLocaleString('en-IN') : trendSets.current?.percent ? c.parsed.y + '%' : trendSets.current?.money === false ? c.parsed.y : inr(Math.abs(c.parsed.y))) } } },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
+                y: { grid, ticks: { callback: v => fmtY(v) } },
+                y2: { display: false, position: 'right', grid: { display: false }, ticks: { callback: v => v.toLocaleString('en-IN') } },
+            },
         },
     });
     trendSets.current = trendSets.growth;
@@ -628,8 +849,78 @@
         btn.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
         trendSets.current = trendSets[btn.dataset.series];
         trend.data.datasets = trendSets.current.datasets;
+        trend.options.scales.y2.display = !!trendSets.current.y2;
         trend.update();
     }));
+    document.getElementById('adnTrendCsv').addEventListener('click', () => downloadCsv('dashboard_trend.csv',
+        [['Period', 'Business', 'Income paid', 'New members', 'Funds added', 'Withdrawals paid (net)', 'Total business', 'Total members', 'Payout ratio %']]
+            .concat(S.labels.map((l, i) => [l, S.business[i], S.income[i], S.members[i], S.funds[i], S.payouts[i], S.business_total[i], S.members_total[i], S.payout_ratio[i] ?? '']))));
+
+    const palette = [C.ok, C.info, C.warn, C.violet, C.teal, C.bad, '#f5e663', '#9aa5b1', '#ff9ad5'];
+
+    // ---------- package revenue ----------
+    const P = @json($packages);
+    const pkgRows = P.filter(p => p.all_revenue > 0 || p.revenue > 0);
+    new Chart(document.getElementById('adnPkg'), {
+        type: 'bar',
+        data: {
+            labels: pkgRows.map(p => p.name),
+            datasets: [
+                { label: @json($from ? $periodLabel : 'All time'), data: pkgRows.map(p => p.revenue), backgroundColor: 'rgba(167,255,30,.6)', borderRadius: 4 },
+                @if ($from) { label: 'All time', data: pkgRows.map(p => p.all_revenue), backgroundColor: 'rgba(92,200,255,.35)', borderRadius: 4 }, @endif
+            ],
+        },
+        options: {
+            indexAxis: 'y', maintainAspectRatio: false,
+            plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10 } }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + inr(c.parsed.x) } } },
+            scales: { x: { grid, ticks: { callback: v => short(v) } }, y: { grid: { display: false } } },
+        },
+    });
+
+    // ---------- sales mix ----------
+    const MIX = {
+        today: P.filter(p => p.today_revenue > 0).map(p => ({ label: p.name, total: p.today_revenue, n: p.today_qty })),
+        period: P.filter(p => p.revenue > 0).map(p => ({ label: p.name, total: p.revenue, n: p.qty })),
+        via: @json($paymentMix),
+    };
+    const mixEl = document.getElementById('adnMix');
+    const mix = new Chart(mixEl, {
+        type: 'doughnut',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: palette, borderColor: '#10171f', borderWidth: 3 }] },
+        options: { maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'right', labels: { boxWidth: 10, boxHeight: 10 } }, tooltip: { callbacks: { label: c => { const r = mix._rows[c.dataIndex]; return `${r.label}: ${inr(r.total)} · ${r.n} sold`; } } } } },
+    });
+    function showMix(key) {
+        const rows = MIX[key] || [];
+        mix._rows = rows;
+        mix.data.labels = rows.map(r => r.label);
+        mix.data.datasets[0].data = rows.map(r => r.total);
+        mix.update();
+        mixEl.parentElement.style.display = rows.length ? '' : 'none';
+        document.getElementById('adnMixEmpty').style.display = rows.length ? 'none' : '';
+    }
+    // Open on today's mix, or the period's when nothing sold today
+    const firstMix = MIX.today.length ? 'today' : 'period';
+    document.querySelectorAll('[data-chart-switch="mix"] button').forEach(b => b.classList.toggle('on', b.dataset.series === firstMix));
+    showMix(firstMix);
+    document.querySelectorAll('[data-chart-switch="mix"] button').forEach(btn => btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+        showMix(btn.dataset.series);
+    }));
+
+    // ---------- wallet bands ----------
+    const W = @json($walletBands);
+    new Chart(document.getElementById('adnWallets'), {
+        type: 'bar',
+        data: { labels: W.map(b => b.label), datasets: [
+            { label: 'Members', data: W.map(b => b.n), backgroundColor: 'rgba(92,200,255,.6)', borderRadius: 4, yAxisID: 'y' },
+            { label: 'Balance held', data: W.map(b => b.total), type: 'line', borderColor: C.ok, backgroundColor: C.ok, tension: .3, pointRadius: 3, yAxisID: 'y2' },
+        ] },
+        options: {
+            maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10 } }, tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y2' ? 'Balance held: ' + inr(c.parsed.y) : 'Members: ' + c.parsed.y } } },
+            scales: { x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45, autoSkip: false, font: { size: 10 } } }, y: { grid, ticks: { precision: 0 } }, y2: { position: 'right', grid: { display: false }, ticks: { callback: v => short(v) } } },
+        },
+    });
 
     const incomeRows = @json($incomeBreakdown);
     const incomeEl = document.getElementById('adnIncome');
