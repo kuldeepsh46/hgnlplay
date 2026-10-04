@@ -125,6 +125,10 @@
                 <li class="{{ Request::routeIs('admin.transactions*') ? 'active' : '' }}">🧾 <span>All Transactions</span></li>
             </a>
 
+            <a href="{{ route('admin.rank-rewards') }}" style="text-decoration:none;color:inherit;display:block;">
+                <li class="{{ Request::routeIs('admin.rank-rewards*') ? 'active' : '' }}">🏅 <span>Rank Rewards</span></li>
+            </a>
+
             <a href="{{ route('admin.support') }}" style="text-decoration:none;color:inherit;display:block;">
                 <li class="{{ Request::routeIs('admin.support') ? 'active' : '' }}">🆘 <span>Support Request</span>
                 </li>

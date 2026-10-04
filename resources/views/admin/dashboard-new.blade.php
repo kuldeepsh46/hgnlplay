@@ -591,6 +591,7 @@
                     <a href="{{ route('admin.lucky.index') }}">🎁 <span>Lucky draw<small>{{ $attention['lucky_active'] }} active</small></span></a>
                     <a href="{{ route('admin.transactions') }}">🧾 <span>All transactions<small>why &amp; how money moved</small></span></a>
                     <a href="{{ route('admin.sponsor-bonus') }}">🤝 <span>Sponsor bonus<small>every 10% payout</small></span></a>
+                    <a href="{{ route('admin.rank-rewards') }}">🏅 <span>Rank rewards<small>lifetime ranks &amp; payouts</small></span></a>
                 </div>
             @else
                 <div class="adn-table-wrap" style="margin-top:14px;">

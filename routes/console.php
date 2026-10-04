@@ -12,6 +12,9 @@ Artisan::command('inspire', function () {
 // Needs the server cron to run `php artisan schedule:run` every minute.
 Schedule::command('income:sponsor-binary-bonus')->dailyAt('00:10')->timezone('Asia/Kolkata')->withoutOverlapping();
 
+// Pays lifetime rank rewards (Reward Bonus) for every rank newly reached, at 00:20 IST.
+Schedule::command('income:rank-rewards')->dailyAt('00:20')->timezone('Asia/Kolkata')->withoutOverlapping();
+
 /*
 |--------------------------------------------------------------------------
 | Scheduler heartbeat

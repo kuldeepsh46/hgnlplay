@@ -38,6 +38,7 @@ class TransactionLedgerController extends Controller
         'pair_bonus_2000' => ['Pair Bonus 2000', 'Pair bonus from the older ₹2,000 package scheme.'],
         'pair_bonus' => ['Pair Bonus (old)', 'Old fixed pair bonus, paid once when both direct legs reached 3 investments.'],
         'sponsor_binary_bonus' => ['Sponsor Binary Bonus', '10% of a direct downline\'s pair income for one day (counted up to ₹5,000), paid to their sponsor by the nightly 00:10 IST job.'],
+        'rank_reward' => ['Rank Reward', 'One-time lifetime rank reward. A pair is one active member in the left leg matched with one in the right leg, and only pairs made after launch count; each rank needs that many new pairs on top of the previous ranks (10, 20, 40 ...) and pays ₹80 per pair. Paid by the nightly 00:20 IST job.'],
         'direct_income' => ['Direct Income', 'Commission to the sponsor (and indirect uplines) when a member buys or tops up a package. The % comes from the package settings.'],
         'commission' => ['Level Commission', 'Level commission (L1, L2 ...) paid up the sponsor line on a top-up.'],
         'level_income' => ['Level Income', 'Matrix level income paid when a member in the receiver\'s matrix tops up. Remarks show the product user, receiver and tier.'],
@@ -93,6 +94,11 @@ class TransactionLedgerController extends Controller
                 ->first(['p.*', 'd.member_id as source_member_id', 'd.name as source_name'])
             : null;
 
+        // Exact source record for rank rewards
+        $rankPayout = $txn->bonus_type === 'rank_reward'
+            ? DB::table('rank_reward_payouts')->where('transaction_id', $txn->id)->first()
+            : null;
+
         // Everything else that happened to this member around the same moment
         // (a top-up writes its debit, order and commissions within seconds)
         $from = date('Y-m-d H:i:s', strtotime($txn->created_at) - 120);
@@ -123,7 +129,7 @@ class TransactionLedgerController extends Controller
 
         return view('admin.transactions.show', compact(
             'txn', 'member', 'sponsor', 'placement', 'walletBalance', 'typeLabel', 'typeHow',
-            'sponsorPayout', 'nearbyOrders', 'nearbyTxns', 'recent'
+            'sponsorPayout', 'rankPayout', 'nearbyOrders', 'nearbyTxns', 'recent'
         ));
     }
 

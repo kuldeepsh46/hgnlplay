@@ -1286,8 +1286,8 @@
         <div class="bento">
             <div class="glass b-6 reveal">
                 <p class="hero-label"><i class="fa-solid fa-sack-dollar" aria-hidden="true"></i> Total Earning</p>
-                <div class="hero-figure grad-gold">₹{{ number_format(($directIncome ?? 0) + ($pairIncome ?? 0) + ($sponsorBinaryIncome ?? 0), 0) }}</div>
-                <p style="margin:0; font-size:12px; color:var(--text-muted);">Direct + Pair + Sponsor Binary Bonus combined</p>
+                <div class="hero-figure grad-gold">₹{{ number_format(($directIncome ?? 0) + ($pairIncome ?? 0) + ($sponsorBinaryIncome ?? 0) + ($rankRewardIncome ?? 0), 0) }}</div>
+                <p style="margin:0; font-size:12px; color:var(--text-muted);">Direct + Pair + Sponsor Binary Bonus + Rank Reward combined</p>
             </div>
             <div class="glass b-6 reveal">
                 <p class="hero-label"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> Total Downline</p>
@@ -1431,6 +1431,11 @@
                         <p class="tile-label">Sponsor Binary Bonus</p>
                         <p class="tile-value mono">₹{{ number_format($sponsorBinaryIncome ?? 0, 2) }}</p>
                     </div>
+                    <div class="tile gold-icon">
+                        <div class="tile-icon"><i class="fa-solid fa-crown" aria-hidden="true"></i></div>
+                        <p class="tile-label">Rank Reward</p>
+                        <p class="tile-value mono">₹{{ number_format($rankRewardIncome ?? 0, 2) }}</p>
+                    </div>
                     <div class="tile">
                         <div class="tile-icon"><i class="fa-solid fa-wallet" aria-hidden="true"></i></div>
                         <p class="tile-label">Topup Wallet</p>
@@ -1439,6 +1444,63 @@
                 </div>
             </div>
         </div>
+
+        <!-- LIFETIME RANK & REWARDS -->
+        @isset($rankProgress)
+            <div class="glass b-12 reveal" style="margin-bottom:20px;">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Lifetime Rank &amp; Rewards</p>
+                        <h2>👑 {{ $rankProgress['rank'] ?? 'No rank yet' }}</h2>
+                    </div>
+                    <span class="tag tag-gold">{{ $rankProgress['level'] ? 'Level ' . $rankProgress['level'] : 'Start' }}</span>
+                </div>
+                <div class="tile-grid">
+                    <div class="tile">
+                        <p class="tile-label">Pairs since launch</p>
+                        <p class="tile-value mono">{{ number_format($rankProgress['pairs']) }}</p>
+                    </div>
+                    <div class="tile">
+                        <p class="tile-label">Active left · right</p>
+                        <p class="tile-value mono">{{ number_format($rankProgress['left']) }} · {{ number_format($rankProgress['right']) }}</p>
+                    </div>
+                    <div class="tile gold-icon">
+                        <p class="tile-label">Rank rewards earned</p>
+                        <p class="tile-value mono">₹{{ number_format($rankRewardIncome ?? 0, 2) }}</p>
+                    </div>
+                </div>
+                @if ($rankProgress['next'])
+                    <p style="margin:16px 0 8px; font-size:13px; color:var(--text-muted);">
+                        Next: <b style="color:var(--text);">{{ $rankProgress['next']['name'] }}</b> — {{ number_format($rankProgress['to_next']) }} more pair{{ $rankProgress['to_next'] == 1 ? '' : 's' }} to earn ₹{{ number_format($rankProgress['next']['reward']) }}
+                    </p>
+                    <div style="height:8px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden;">
+                        <div style="height:100%; width:{{ round($rankProgress['next_pct'], 1) }}%; background:linear-gradient(90deg,#35e0c9,#f0bd5a); border-radius:4px;"></div>
+                    </div>
+                @else
+                    <p style="margin:16px 0 0; font-size:13px; color:var(--text-muted);">🎉 Highest rank reached.</p>
+                @endif
+                <details style="margin-top:14px;">
+                    <summary style="cursor:pointer; font-size:13px; color:var(--text-muted);">See all ranks</summary>
+                    <div class="table-wrap" style="margin-top:10px;">
+                        <table class="data-table">
+                            <thead><tr><th>Level</th><th>Rank</th><th>New pairs</th><th>Total pairs needed</th><th>Reward</th><th></th></tr></thead>
+                            <tbody>
+                                @foreach ($rankLadder as $row)
+                                    <tr>
+                                        <td class="mono">{{ $row['level'] }}</td>
+                                        <td>{{ $row['name'] }}</td>
+                                        <td class="mono">{{ number_format($row['step']) }}</td>
+                                        <td class="mono">{{ number_format($row['cumulative']) }}</td>
+                                        <td class="mono">₹{{ number_format($row['reward']) }}</td>
+                                        <td>{!! $row['level'] <= $rankProgress['level'] ? '✅' : '' !!}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+            </div>
+        @endisset
 
         <!-- LUCKY VOUCHERS -->
         @if ($cycle)

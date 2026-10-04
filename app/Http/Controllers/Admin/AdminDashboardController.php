@@ -31,6 +31,7 @@ class AdminDashboardController extends Controller
         'pair_bonus' => 'Pair Bonus (old)',
         'pair_bonus_2000' => 'Pair Bonus 2000',
         'sponsor_binary_bonus' => 'Sponsor Binary Bonus',
+        'rank_reward' => 'Rank Reward',
         'level_income' => 'Level Income',
         'commission' => 'Level Commission',
         'reward' => 'Reward',

@@ -183,6 +183,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/sponsor-bonus', [\App\Http\Controllers\Admin\SponsorBonusController::class, 'index'])->name('admin.sponsor-bonus');
     Route::get('/admin/sponsor-bonus/export', [\App\Http\Controllers\Admin\SponsorBonusController::class, 'export'])->name('admin.sponsor-bonus.export');
 
+    // Rank & Rewards ladder and payouts (read-only)
+    Route::get('/admin/rank-rewards', [\App\Http\Controllers\Admin\RankRewardController::class, 'index'])->name('admin.rank-rewards');
+    Route::get('/admin/rank-rewards/export', [\App\Http\Controllers\Admin\RankRewardController::class, 'export'])->name('admin.rank-rewards.export');
+
     // All transactions audit view (read-only)
     Route::get('/admin/transactions', [\App\Http\Controllers\Admin\TransactionLedgerController::class, 'index'])->name('admin.transactions');
     Route::get('/admin/transactions/export', [\App\Http\Controllers\Admin\TransactionLedgerController::class, 'export'])->name('admin.transactions.export');

@@ -185,6 +185,7 @@
             <button class="btn" id="directBtn" style="background:#333;color:#fff;">Direct Income</button>
             <button class="btn" id="levelBtn" style="background:#333;color:#fff;">Level Income</button>
             <button class="btn" id="sponsorBtn" style="background:#333;color:#fff;">Sponsor Binary Bonus</button>
+            <button class="btn" id="rankBtn" style="background:#333;color:#fff;">Rank Reward</button>
         </div>
 
         <div id="matchingTab">
@@ -205,7 +206,7 @@
                                 <td>{{ ($matchingIncomes->currentPage() - 1) * $matchingIncomes->perPage() + $loop->iteration }}</td>
                                 <td>{{ date('d M Y, h:i A', strtotime($r->created_at)) }}</td>
                                 <td>₹{{ number_format($r->amount, 2) }}</td>
-                                <td>{{ $r->remarks }}</td>
+                                <td align="left">{{ $r->remarks }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -344,6 +345,44 @@
             </div>
             {{ $sponsorBonusIncomes->appends(request()->query())->links() }}
         </div>
+
+        <div id="rankTab" style="display:none;">
+            <h3 style="color:var(--accent)">Rank Reward</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($rankRewardIncomes as $r)
+                            <tr>
+                                <td>{{ ($rankRewardIncomes->currentPage() - 1) * $rankRewardIncomes->perPage() + $loop->iteration }}</td>
+                                <td>{{ date('d M Y, h:i A', strtotime($r->created_at)) }}</td>
+                                <td>₹{{ number_format($r->amount, 2) }}</td>
+                                <td>{{ $r->remarks }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4">No records found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="2" class="text-end">Total Rank Reward</td>
+                            <td>₹{{ number_format($rankRewardTotal, 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            {{ $rankRewardIncomes->appends(request()->query())->links() }}
+        </div>
     </div>
 
     <div id="passwordModal" class="modal">
@@ -374,6 +413,7 @@
             direct: { tab: 'directTab', btn: 'directBtn', exportRoute: "{{ route('reports.export', 'direct') }}" },
             level: { tab: 'levelTab', btn: 'levelBtn', exportRoute: "{{ route('reports.export', 'level') }}" },
             sponsor: { tab: 'sponsorTab', btn: 'sponsorBtn', exportRoute: "{{ route('reports.export', 'sponsor') }}" },
+            rank: { tab: 'rankTab', btn: 'rankBtn', exportRoute: "{{ route('reports.export', 'rank') }}" },
         };
 
         function setActive(key) {
@@ -399,6 +439,8 @@
             setActive('level');
         } else if (urlParams.has('sponsor_page')) {
             setActive('sponsor');
+        } else if (urlParams.has('rank_page')) {
+            setActive('rank');
         } else {
             setActive('matching');
         }

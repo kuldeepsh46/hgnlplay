@@ -8,6 +8,7 @@ enum BonusType: string
     case PairBonus2000 = 'pair_bonus_2000';
     case PairBonusStarter = 'pair_bonus_starter';
     case SponsorBinaryBonus = 'sponsor_binary_bonus';
+    case RankReward = 'rank_reward';
     case LevelIncome = 'level_income';
     case DirectIncome = 'direct_income';
     case RewardAfterFullEmi = 'reward_after_full_emi';

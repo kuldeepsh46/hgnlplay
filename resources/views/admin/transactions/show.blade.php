@@ -60,6 +60,20 @@
         </div>
     @endif
 
+    @if ($rankPayout)
+        <div class="card">
+            <h2>How this rank reward was earned</h2>
+            <dl class="kv">
+                <dt>Rank</dt><dd>Level {{ $rankPayout->level }} · {{ $rankPayout->rank_name }}</dd>
+                <dt>New pairs for this rank</dt><dd>{{ number_format($rankPayout->pairs_step) }} × ₹{{ \App\Services\RankRewardService::REWARD_PER_PAIR }}</dd>
+                <dt>Pairs since launch needed</dt><dd>{{ number_format($rankPayout->pairs_required) }}</dd>
+                <dt>Pairs since launch when paid</dt><dd>{{ number_format($rankPayout->pairs_at_payout) }} (lifetime Left {{ number_format($rankPayout->left_count) }} · Right {{ number_format($rankPayout->right_count) }} active members)</dd>
+                <dt>Reward</dt><dd><strong>₹{{ number_format($rankPayout->amount, 2) }}</strong></dd>
+            </dl>
+            <p style="margin:14px 0 0;"><a class="link" href="{{ route('admin.rank-rewards') }}">Open the rank ladder →</a></p>
+        </div>
+    @endif
+
     @if ($nearbyOrders->isNotEmpty())
         <div class="card">
             <h2>Top-ups for this member within 2 minutes</h2>

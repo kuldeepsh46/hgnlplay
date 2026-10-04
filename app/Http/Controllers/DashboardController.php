@@ -266,9 +266,17 @@ $sponsorBinaryIncome = DB::table('transactions')
     ->where('bonus_type', BonusType::SponsorBinaryBonus->value)
     ->sum('amount');
 
+$rankRewardIncome = DB::table('transactions')
+    ->where('user_id', $user->id)
+    ->where('bonus_type', BonusType::RankReward->value)
+    ->sum('amount');
+
+$rankProgress = \App\Services\RankRewardService::progressFor($user->id);
+$rankLadder = \App\Services\RankRewardService::ladder();
+
             // 3️⃣ Wallet & Earnings
             $walletBalance = DB::table('wallets')->where('user_id', $user->id)->value('balance') ?? 0;
-            $totalEarning = $directIncome + $pairIncome + $sponsorBinaryIncome;
+            $totalEarning = $directIncome + $pairIncome + $sponsorBinaryIncome + $rankRewardIncome;
 
             // 4️⃣ Total Downline (Global)
             // $totalDownline = DB::table('users')->where('sponsor_id', $user->id)->orWhere('placement_id', $user->id)->count();
@@ -328,7 +336,7 @@ $sponsorBinaryIncome = DB::table('transactions')
                 $rewards = DB::table('lucky_rewards')->where('cycle_id', $cycle->id)->get();
             }
             // dd($totalDownline, $leftDownline, $rightDownline);
-            return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'sponsorBinaryIncome', 'walletBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning', 'progress', 'totalLevelIncome'));
+            return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'sponsorBinaryIncome', 'rankRewardIncome', 'rankProgress', 'rankLadder', 'walletBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning', 'progress', 'totalLevelIncome'));
         }
 
         // Admin dashboard view
