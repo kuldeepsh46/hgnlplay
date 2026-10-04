@@ -178,6 +178,17 @@ Route::get('/admin/dashboard-new', [\App\Http\Controllers\Admin\AdminDashboardCo
     ->middleware(['auth'])
     ->name('admin.dashboard.new');
 
+// Sponsor binary bonus ledger: who got each 10% bonus, from whom, for which day
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/sponsor-bonus', [\App\Http\Controllers\Admin\SponsorBonusController::class, 'index'])->name('admin.sponsor-bonus');
+    Route::get('/admin/sponsor-bonus/export', [\App\Http\Controllers\Admin\SponsorBonusController::class, 'export'])->name('admin.sponsor-bonus.export');
+
+    // All transactions audit view (read-only)
+    Route::get('/admin/transactions', [\App\Http\Controllers\Admin\TransactionLedgerController::class, 'index'])->name('admin.transactions');
+    Route::get('/admin/transactions/export', [\App\Http\Controllers\Admin\TransactionLedgerController::class, 'export'])->name('admin.transactions.export');
+    Route::get('/admin/transactions/{id}', [\App\Http\Controllers\Admin\TransactionLedgerController::class, 'show'])->whereNumber('id')->name('admin.transactions.show');
+});
+
 Route::resource('admin/packages', PackageController::class)->names([
     'index' => 'packages.index',
     'create' => 'packages.create',

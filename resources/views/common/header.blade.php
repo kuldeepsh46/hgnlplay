@@ -117,6 +117,14 @@
                 <li class="{{ Request::routeIs('admin.payouts') ? 'active' : '' }}">🏦 <span>Manage Payouts</span></li>
             </a>
 
+            <a href="{{ route('admin.sponsor-bonus') }}" style="text-decoration:none;color:inherit;display:block;">
+                <li class="{{ Request::routeIs('admin.sponsor-bonus*') ? 'active' : '' }}">🤝 <span>Sponsor Bonus</span></li>
+            </a>
+
+            <a href="{{ route('admin.transactions') }}" style="text-decoration:none;color:inherit;display:block;">
+                <li class="{{ Request::routeIs('admin.transactions*') ? 'active' : '' }}">🧾 <span>All Transactions</span></li>
+            </a>
+
             <a href="{{ route('admin.support') }}" style="text-decoration:none;color:inherit;display:block;">
                 <li class="{{ Request::routeIs('admin.support') ? 'active' : '' }}">🆘 <span>Support Request</span>
                 </li>
