@@ -73,7 +73,7 @@ th{background:#161f29;color:#a9b9c7;}
       </tbody>
     </table>
 
-    <div>{{ $emis->links('pagination::bootstrap-5') }}</div>
+    <div>{{ $emis->links('partials.pagination') }}</div>
   </div>
 </main>
 

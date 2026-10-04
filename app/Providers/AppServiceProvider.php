@@ -20,5 +20,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Paginator::useBootstrapFive();
+
+        // The site has no Tailwind/Bootstrap, so Laravel's default pagination
+        // renders huge arrows. Use our self-styled view for every table.
+        Paginator::defaultView('partials.pagination');
     }
 }

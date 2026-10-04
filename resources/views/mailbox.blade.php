@@ -288,7 +288,7 @@ td {
             @endforelse
         </tbody>
     </table>
-    <div>{{ $queries->links('pagination::bootstrap-5') }}</div>
+    <div>{{ $queries->links('partials.pagination') }}</div>
 </div>
 
 <!-- Password Change Modal -->
