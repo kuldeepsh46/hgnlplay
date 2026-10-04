@@ -9,7 +9,7 @@
       <th>Payment Method</th>
       <th>Bank</th>
       <th>Account</th>
-      <th>Txn Remark</th>
+      <th class="long-text">Txn Remark</th>
       <th>Attachment</th>
       <th>Status</th>
       <th>Date</th>
@@ -27,7 +27,7 @@
         <td>{{ $row->payment_mode }}</td>
         <td>{{ $row->bank_name }}</td>
         <td>{{ $row->account_number }}</td>
-        <td>{{ $row->transaction_remark }}</td>
+        <td class="long-text">{{ $row->transaction_remark }}</td>
 
         {{-- ✅ Attachment column --}}
         <td>

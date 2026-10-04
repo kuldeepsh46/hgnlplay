@@ -52,6 +52,15 @@ th, td {
  
     white-space: nowrap;
 }
+/* Long text columns (remarks, subject ...) read left-aligned and wrap */
+th.long-text, td.long-text {
+    text-align: left !important;
+    white-space: normal;
+    min-width: 260px;
+    max-width: 520px;
+    overflow-wrap: anywhere;
+    line-height: 1.45;
+}
 h2{
     margin-top:0px;
     font-size:22px;

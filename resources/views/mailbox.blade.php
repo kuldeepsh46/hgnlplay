@@ -260,7 +260,7 @@ td {
         <thead>
             <tr>
                 <th>#</th>
-                <th>Subject</th>
+                <th class="long-text">Subject</th>
                 <th>Status</th>
                 <th>Action</th>
                 <th>Date</th>
@@ -270,7 +270,7 @@ td {
             @forelse($queries as $index => $q)
             <tr>
                 <td>{{ $queries->firstItem() + $index }}</td>
-                <td>{{ $q->subject }}</td>
+                <td class="long-text">{{ $q->subject }}</td>
                 <td>{{ $q->status }}</td>
                 <td>
                     @if($q->status === 'Responded')

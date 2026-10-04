@@ -197,7 +197,7 @@
                             <th>#</th>
                             <th>Date</th>
                             <th>Amount</th>
-                            <th>Remarks</th>
+                            <th class="long-text">Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -206,7 +206,7 @@
                                 <td>{{ ($matchingIncomes->currentPage() - 1) * $matchingIncomes->perPage() + $loop->iteration }}</td>
                                 <td>{{ date('d M Y, h:i A', strtotime($r->created_at)) }}</td>
                                 <td>₹{{ number_format($r->amount, 2) }}</td>
-                                <td align="left">{{ $r->remarks }}</td>
+                                <td class="long-text">{{ $r->remarks }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -241,7 +241,7 @@
                             <th>#</th>
                             <th>Date</th>
                             <th>Amount</th>
-                            <th>Remarks</th>
+                            <th class="long-text">Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -250,7 +250,7 @@
                                 <td>{{ ($directIncomes->currentPage() - 1) * $directIncomes->perPage() + $loop->iteration }}</td>
                                 <td>{{ date('d M Y, h:i A', strtotime($r->created_at)) }}</td>
                                 <td>₹{{ number_format($r->amount, 2) }}</td>
-                                <td>{{ $r->remarks }}</td>
+                                <td class="long-text">{{ $r->remarks }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -279,7 +279,7 @@
                             <th>#</th>
                             <th>Date</th>
                             <th>Amount</th>
-                            <th>Remarks</th>
+                            <th class="long-text">Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -288,7 +288,7 @@
                                 <td>{{ ($levelIncomes->currentPage() - 1) * $levelIncomes->perPage() + $loop->iteration }}</td>
                                 <td>{{ date('d M Y, h:i A', strtotime($r->created_at)) }}</td>
                                 <td>₹{{ number_format($r->amount, 2) }}</td>
-                                <td>{{ $r->remarks }}</td>
+                                <td class="long-text">{{ $r->remarks }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -317,7 +317,7 @@
                             <th>#</th>
                             <th>Date</th>
                             <th>Amount</th>
-                            <th>Remarks</th>
+                            <th class="long-text">Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -326,7 +326,7 @@
                                 <td>{{ ($sponsorBonusIncomes->currentPage() - 1) * $sponsorBonusIncomes->perPage() + $loop->iteration }}</td>
                                 <td>{{ date('d M Y, h:i A', strtotime($r->created_at)) }}</td>
                                 <td>₹{{ number_format($r->amount, 2) }}</td>
-                                <td>{{ $r->remarks }}</td>
+                                <td class="long-text">{{ $r->remarks }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -355,7 +355,7 @@
                             <th>#</th>
                             <th>Date</th>
                             <th>Amount</th>
-                            <th>Remarks</th>
+                            <th class="long-text">Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -364,7 +364,7 @@
                                 <td>{{ ($rankRewardIncomes->currentPage() - 1) * $rankRewardIncomes->perPage() + $loop->iteration }}</td>
                                 <td>{{ date('d M Y, h:i A', strtotime($r->created_at)) }}</td>
                                 <td>₹{{ number_format($r->amount, 2) }}</td>
-                                <td>{{ $r->remarks }}</td>
+                                <td class="long-text">{{ $r->remarks }}</td>
                             </tr>
                         @empty
                             <tr>
