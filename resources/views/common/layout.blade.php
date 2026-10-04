@@ -223,6 +223,18 @@ main.main{
     main.main{
         padding-left:50px;
     }
+    /* Keep the sidebar in view while the page scrolls; long menus scroll inside it */
+    .sidebar{
+        position:sticky;
+        top:0;
+        height:100vh;
+        align-self:flex-start;
+    }
+    .sidebar > ul{
+        flex:1;
+        min-height:0;
+        overflow-y:auto;
+    }
 }
 
 /* INPUT FIX */

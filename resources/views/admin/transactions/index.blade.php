@@ -183,7 +183,7 @@
                 @endif
             </table>
         </div>
-        {{ $rows->links() }}
+        {{ $rows->links('partials.pagination') }}
     </div>
 </div>
 @endsection
