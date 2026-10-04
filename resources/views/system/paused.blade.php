@@ -10,7 +10,7 @@
         .icon { font-size: 44px; }
         h1 { margin: 12px 0 10px; font-size: 22px; color: #fff; }
         p { margin: 0 0 22px; line-height: 1.6; color: #a9b9c7; }
-        a { display: inline-block; padding: 10px 18px; border-radius: 8px; background: #3f7871; color: #fff; text-decoration: none; font-weight: 600; }
+        a, button { display: inline-block; border: 0; cursor: pointer; font-size: 15px; padding: 10px 18px; border-radius: 8px; background: #3f7871; color: #fff; text-decoration: none; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -18,9 +18,15 @@
         <div class="icon">{{ $offline ? '🛠️' : '⏸️' }}</div>
         <h1>{{ $offline ? "We'll be back soon" : 'Temporarily paused' }}</h1>
         <p>{{ $message }}</p>
-        @unless ($offline)
+        @if (!empty($showLogout))
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <input type="hidden" name="to" value="login">
+                <button type="submit">Log out</button>
+            </form>
+        @else
             <a href="{{ url()->previous() !== url()->current() ? url()->previous() : url('/') }}">Go back</a>
-        @endunless
+        @endif
     </div>
 </body>
 </html>

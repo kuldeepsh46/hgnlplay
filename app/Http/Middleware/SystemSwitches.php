@@ -30,6 +30,11 @@ class SystemSwitches
             return $next($request);
         }
 
+        // Logging out is always allowed, so nobody gets stuck signed in
+        if ($request->is('logout')) {
+            return $next($request);
+        }
+
         $on = array_flip($active);
         $isAuthRoute = $request->is('login', 'logout');
         $isApiLogin = $request->is('api/login');
@@ -98,6 +103,7 @@ class SystemSwitches
         return response()->view('system.paused', [
             'offline' => $key === 'site_offline',
             'message' => $message,
+            'showLogout' => in_array($key, ['site_offline', 'member_logins'], true),
         ], 503);
     }
 }
