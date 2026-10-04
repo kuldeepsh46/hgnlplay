@@ -85,18 +85,17 @@
         <h2>Recent changes</h2>
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th>When</th><th>Switch</th><th>Turned</th><th>By</th><th class="long-text">Message</th></tr></thead>
+                <thead><tr><th>When</th><th>Switch</th><th>Turned</th><th class="long-text">Message</th></tr></thead>
                 <tbody>
                     @forelse ($logs as $log)
                         <tr>
                             <td>{{ \Carbon\Carbon::parse($log->created_at)->format('d M Y, h:i A') }}</td>
                             <td>{{ \App\Services\SystemSwitch::SWITCHES[$log->key][0] ?? $log->key }}</td>
                             <td>{{ $log->is_on ? 'ON' : 'OFF' }}</td>
-                            <td>{{ $log->name ?? '—' }}{{ $log->member_id ? ' (' . $log->member_id . ')' : '' }}</td>
                             <td class="long-text">{{ $log->message ?? '—' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="muted">No switch has been changed yet.</td></tr>
+                        <tr><td colspan="4" class="muted">No switch has been changed yet.</td></tr>
                     @endforelse
                 </tbody>
             </table>

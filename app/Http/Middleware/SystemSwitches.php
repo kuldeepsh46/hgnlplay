@@ -35,17 +35,17 @@ class SystemSwitches
         $isApiLogin = $request->is('api/login');
         $isWrite = !in_array($request->method(), ['GET', 'HEAD', 'OPTIONS'], true);
 
-        // 1. Whole site offline
-        if (isset($on['site_offline']) && !$isAuthRoute) {
+        // 1. Whole site offline: sign out anyone signed in, so the browser is
+        //    free for a superadmin to log in again
+        if (isset($on['site_offline']) && ($user || !$isAuthRoute)) {
+            $this->signOut($request, $user);
             return $this->block($request, 'site_offline');
         }
 
         // 2. Logins blocked: sign out anyone already signed in
         if (isset($on['member_logins'])) {
             if ($user) {
-                Auth::guard('web')->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                $this->signOut($request, $user);
                 return $this->block($request, 'member_logins');
             }
             if ($isApiLogin || ($isApi && $request->bearerToken())) {
@@ -73,6 +73,16 @@ class SystemSwitches
         }
 
         return $next($request);
+    }
+
+    private function signOut(Request $request, $user): void
+    {
+        if (!$user) {
+            return;
+        }
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
     }
 
     private function block(Request $request, string $key): Response
