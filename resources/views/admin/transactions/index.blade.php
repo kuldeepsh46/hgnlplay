@@ -106,7 +106,7 @@
         <div class="table-wrap">
             <table>
                 @if ($tab === 'wallet')
-                    <thead><tr><th>Txn</th><th>Date &amp; time</th><th>Member</th><th>Type</th><th>Direction</th><th class="num">Amount</th><th>Why (remarks)</th><th></th></tr></thead>
+                    <thead><tr><th>Txn</th><th>Date &amp; time</th><th>Member</th><th>Type</th><th>Direction</th><th class="num">Amount</th><th>Remarks</th><th>Action</th></tr></thead>
                     <tbody>
                         @forelse ($rows as $r)
                             <tr>
@@ -117,7 +117,7 @@
                                 <td><span class="pill {{ $r->direction }}">{{ ucfirst($r->direction) }}</span></td>
                                 <td class="num">{{ $r->direction === 'debit' ? '−' : '+' }}₹{{ number_format($r->amount, 2) }}</td>
                                 <td class="remarks">{{ $r->remarks ?: '—' }}</td>
-                                <td class="nowrap"><a class="link" href="{{ route('admin.transactions.show', $r->id) }}">Details →</a></td>
+                                <td class="act"><a class="link" href="{{ route('admin.transactions.show', $r->id) }}">Details →</a></td>
                             </tr>
                         @empty
                             <tr><td colspan="8">No transactions match these filters.</td></tr>

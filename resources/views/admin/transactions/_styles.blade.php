@@ -29,7 +29,8 @@
 .atx td.num, .atx th.num { text-align: right; white-space: nowrap; }
 .atx td small { display: block; color: #8899a8; }
 .atx .nowrap { white-space: nowrap; }
-.atx .remarks { min-width: 260px; max-width: 520px; }
+.atx .remarks { min-width: 260px; max-width: 520px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+.atx td.act { white-space: nowrap; width: 1%; padding-left: 14px; }
 .atx .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .atx .pill.credit, .atx .pill.completed, .atx .pill.approved { background: #1d3b2f; color: #5fd39a; }
 .atx .pill.debit, .atx .pill.rejected { background: #3d1f22; color: #ff8a8a; }
