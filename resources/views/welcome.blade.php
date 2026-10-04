@@ -31,6 +31,27 @@
         box-sizing: border-box
     }
 
+    /* ===== Our Products (homepage) ===== */
+    .home-products { padding: 70px 0; background: #fff; text-align: center; }
+    .home-products .hp-eyebrow { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #2f6b1e; margin-bottom: 8px; }
+    .home-products .hp-title { margin: 0 0 34px; font-size: 32px; color: var(--text); }
+    .home-products .hp-title span { color: #2f6b1e; }
+    .home-products .hp-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; }
+    .home-products .hp-card { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+    .home-products .hp-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; background: #f3f5f2; border: 1px solid var(--border); box-shadow: 0 6px 18px rgba(0, 0, 0, .08); transition: transform .2s, box-shadow .2s; }
+    .home-products .hp-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .home-products .hp-card:hover .hp-img { transform: translateY(-4px); box-shadow: 0 12px 26px rgba(0, 0, 0, .14); }
+    .home-products .hp-wa { margin-top: -4px; font-size: 12px; font-weight: 600; color: #1f8f4e; }
+    .home-products .hp-card:hover .hp-wa { text-decoration: underline; }
+    .home-products .hp-name { background: #345C01; color: #fff; padding: 6px 12px; border-radius: 5px; font-size: 13px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
+    @media (max-width: 560px) {
+        .home-products { padding: 48px 0; }
+        .home-products .hp-title { font-size: 24px; }
+        .home-products .hp-grid { gap: 14px; }
+        .home-products .hp-card { width: calc(50% - 7px); }
+        .home-products .hp-name { font-size: 11px; padding: 5px 8px; }
+    }
+
     @media (max-width: 520px) {
         .img-main img {
             height: 310px !important;
@@ -1646,7 +1667,7 @@ padding-top: 20px;
                     <li><a href="/#about">About Us</a></li>
                     <li><a href="/#plan">Business Plan</a></li>
                                    <li><a href="/#teams">Team</a></li>
-                    <li><a href="/#products">Products / Services</a></li>
+                    <li><a href="/#our-products">Products / Services</a></li>
                 </ul>
             </nav>
 
@@ -1666,7 +1687,7 @@ padding-top: 20px;
                 <li><a href="/#home" class="m-link">Home</a></li>
                 <li><a href="/#about" class="m-link">About Us</a></li>
                 <li><a href="/#plan" class="m-link">Business Plan</a></li>
-                <li><a href="/#products" class="m-link">Products / Services</a></li>
+                <li><a href="/#our-products" class="m-link">Products / Services</a></li>
                 <div class="container nav-cta mobile-sec" style="padding-bottom:18px">
                     <a class="btn btn-ghost" href="/login">Log in</a>
                     <a class="btn btn-primary" href="/#contact">Contact Us</a>
@@ -1702,7 +1723,7 @@ padding-top: 20px;
 
                 <div class="hero-actions">
                     <a href="/#plan" class="btn btn-primary">Explore Now</a>
-                    <a href="/#products" class="btn btn-outline">View All Services</a>
+                    <a href="/#our-products" class="btn btn-outline">View All Services</a>
                 </div>
             </div>
 
@@ -1815,6 +1836,38 @@ padding-top: 20px;
 
         </div>
     </section>
+    <!-- OUR PRODUCTS -->
+    @php
+        $homeProducts = [
+            ['img' => 'himglow-herbal-shampoo.jpeg', 'name' => 'HimGlow Herbal Shampoo'],
+            ['img' => 'himglow-hair-oil.jpeg', 'name' => 'HimGlow Hair Oil'],
+            ['img' => 'himglow-tooth-serum.jpeg', 'name' => 'HimGlow Tooth Serum'],
+            ['img' => 'himglow-body-scrub.jpeg', 'name' => 'HimGlow Body Scrub'],
+            ['img' => 'sunscreen-spf-50.jpeg', 'name' => 'Sunscreen SPF 50'],
+            ['img' => 'white-beauty-soap.jpeg', 'name' => 'White Beauty Soap'],
+            ['img' => 'himglow-shampoo.jpeg', 'name' => 'HimGlow Shampoo'],
+            ['img' => 'pay-wellness-syrup.jpeg', 'name' => 'Pay Wellness Syrup'],
+            ['img' => 'home-appliances.jpeg', 'name' => 'Home Appliances'],
+        ];
+    @endphp
+    <section class="home-products" id="our-products">
+        <div class="container">
+            <span class="hp-eyebrow">OUR PRODUCTS</span>
+            <h2 class="hp-title">Products by <span>Himalaya Trading</span></h2>
+            <div class="hp-grid">
+                @foreach ($homeProducts as $p)
+                    <a class="hp-card" href="https://wa.me/919805032635?text={{ rawurlencode("Hi, I'm interested in " . $p['name']) }}" target="_blank" rel="noopener" title="Enquire on WhatsApp">
+                        <div class="hp-img">
+                            <img src="{{ asset('images/products/' . $p['img']) }}" alt="{{ $p['name'] }}" loading="lazy">
+                        </div>
+                        <span class="hp-name">{{ $p['name'] }}</span>
+                        <span class="hp-wa">💬 Enquire on WhatsApp</span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
     {{-- <!--  -->
 <section id="teams" class="team-section">
     <div class="container">
@@ -2258,7 +2311,7 @@ padding-top: 20px;
                 <ul>
                     <li><a href="/#about">About Us</a></li>
                     <li><a href="/#plan">Business Plan</a></li>
-                    <li><a href="/#products">Products</a></li>
+                    <li><a href="/#our-products">Products</a></li>
                 </ul>
             </div>
 
