@@ -173,6 +173,30 @@ Route::post('/reverse-all-user', [ManageUsersRolesController::class, 'reverseAll
 // The Panic Button
 Route::post('/panic-nuke', [ManageUsersRolesController::class, 'systemPanic'])->name('admin.panic');
 
+// New admin dashboard (preview — the current one at /dashboard is unchanged)
+Route::get('/admin/dashboard-new', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('admin.dashboard.new');
+
+// Sponsor binary bonus ledger: who got each 10% bonus, from whom, for which day
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/sponsor-bonus', [\App\Http\Controllers\Admin\SponsorBonusController::class, 'index'])->name('admin.sponsor-bonus');
+    Route::get('/admin/sponsor-bonus/export', [\App\Http\Controllers\Admin\SponsorBonusController::class, 'export'])->name('admin.sponsor-bonus.export');
+
+    // Sync settings
+    Route::get('/account/sync', [\App\Http\Controllers\Admin\SyncSettingsController::class, 'index'])->name('account.sync');
+    Route::post('/account/sync/{key}', [\App\Http\Controllers\Admin\SyncSettingsController::class, 'update'])->name('account.sync.update');
+
+    // Rank & Rewards ladder and payouts (read-only)
+    Route::get('/admin/rank-rewards', [\App\Http\Controllers\Admin\RankRewardController::class, 'index'])->name('admin.rank-rewards');
+    Route::get('/admin/rank-rewards/export', [\App\Http\Controllers\Admin\RankRewardController::class, 'export'])->name('admin.rank-rewards.export');
+
+    // All transactions audit view (read-only)
+    Route::get('/admin/transactions', [\App\Http\Controllers\Admin\TransactionLedgerController::class, 'index'])->name('admin.transactions');
+    Route::get('/admin/transactions/export', [\App\Http\Controllers\Admin\TransactionLedgerController::class, 'export'])->name('admin.transactions.export');
+    Route::get('/admin/transactions/{id}', [\App\Http\Controllers\Admin\TransactionLedgerController::class, 'show'])->whereNumber('id')->name('admin.transactions.show');
+});
+
 Route::resource('admin/packages', PackageController::class)->names([
     'index' => 'packages.index',
     'create' => 'packages.create',
@@ -187,3 +211,61 @@ Route::resource('admin/packages', PackageController::class)->names([
 //         'value' => \App\Enums\BonusType::LevelIncome->value,
 //     ];
 // });
+use Illuminate\Support\Facades\Artisan;
+
+// Route::get('/clear-cache-temp', function () {
+//     Artisan::call('config:clear');
+//     Artisan::call('cache:clear');
+//     Artisan::call('config:cache');
+
+//     return 'Cache cleared';
+// });
+use Illuminate\Support\Facades\Mail;
+
+// Route::get('/test-mail', function () {
+//     try {
+//         Mail::raw('This is a test email from HGNL Pay Laravel project.', function ($message) {
+//             $message->to('hhh444@yopmail.com')
+//                 ->subject('HGNL Pay SMTP Test');
+//         });
+
+//         return 'Test email sent successfully.';
+//     } catch (\Exception $e) {
+//         return 'Mail failed: ' . $e->getMessage();
+//     }
+// });
+use App\Mail\HgnlNotificationMail;
+
+use App\Services\MailNotificationService;
+
+Route::get('/test-mail-service', function (MailNotificationService $mailService) {
+    $mailService->send(
+        'hhh444@yopmail.com',
+        'HGNL Pay Service Test',
+        'test_mail_service',
+        [
+            'title' => 'Mail Service Working',
+            'greeting' => 'Hello,',
+            'message' => 'This email was sent using MailNotificationService.',
+            'rows' => [
+                'Status' => 'Working',
+                'Mailer' => 'Hostinger SMTP',
+                'Time' => now()->format('d M Y h:i A'),
+            ],
+            'note' => 'This confirms the reusable mail service is working.',
+        ],
+        null
+    );
+
+    return 'Mail service test executed.';
+});
+Route::get('/mail-config-check', function () {
+    return response()->json([
+        'app_name' => config('app.name'),
+        'mail_from_address' => config('mail.from.address'),
+        'mail_from_name' => config('mail.from.name'),
+        'support_address' => config('mail.support.address'),
+        'support_name' => config('mail.support.name'),
+        'env_mail_from_name' => env('MAIL_FROM_NAME'),
+    ]);
+});

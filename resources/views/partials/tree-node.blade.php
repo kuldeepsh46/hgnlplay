@@ -20,8 +20,8 @@
         }
 
         /* ======================
-                                   TREE BASE
-                                ====================== */
+                                           TREE BASE
+                                        ====================== */
         .tree {
             display: flex;
             justify-content: center;
@@ -153,8 +153,8 @@
         }
 
         /* =====================================================
-                                   ✅ ONLY NEW CSS (EMPTY LEAF USER – NOTHING ELSE TOUCHED)
-                                ===================================================== */
+                                           ✅ ONLY NEW CSS (EMPTY LEAF USER – NOTHING ELSE TOUCHED)
+                                        ===================================================== */
         .tree li.leaf .node span:empty {
             color: #999;
             /* different look */
@@ -321,7 +321,7 @@
             👤 {{ Auth::user()->username ?? Auth::user()->email }}
         </div>
     </div>
-  {{-- <div class="stats-container">
+    {{-- <div class="stats-container">
     <p><strong>Left Downline Nodes:</strong> {{ $tree['left_count'] ?? 0 }}</p>
     <p><strong>Right Downline Nodes:</strong> {{ $tree['right_count'] ?? 0 }}</p>
     <p><strong>Total Nodes:</strong> {{ $tree['total_count'] ?? 0 }}</p>
@@ -569,15 +569,21 @@
         
         <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;">
             
-            <div style="background: #2d3436; color: #ffffff; padding: 20px; border-radius: 12px; min-width: 240px; flex: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-left: 5px solid #00cec9;">
-                <div style="font-size: 12px; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px;">Left Side Summary</div>
-                <div style="font-size: 14px; margin-bottom: 4px;">Contributors: <span style="font-weight:bold; color: #00cec9;">' .
-            ($node['total_contributors_left'] ?? 0) .
-            '</span></div>
-                <div style="font-size: 14px;">Total Business: <span style="font-weight:bold; color: #00cec9;">' .
-            number_format($node['total_business_left'] ?? 0, 2) .
-            '</span></div>
-            </div>
+           <div style="background: #2d3436; color: #ffffff; padding: 20px; border-radius: 12px; min-width: 240px; flex: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-left: 5px solid #00cec9;">
+    <div style="font-size: 12px; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px;">Left Side Summary</div>
+    <div style="font-size: 14px; margin-bottom: 4px;">Contributors: <span style="font-weight:bold; color: #00cec9;">' .
+        ($node['total_contributors_left'] ?? 0) .
+    '</span></div>
+    <div style="font-size: 14px; margin-bottom: 8px;">Total Business: <span style="font-weight:bold; color: #00cec9;">' .
+        number_format($node['total_business_left'] ?? 0, 2) .
+    '</span></div>
+    <div style="font-size: 13px; opacity:0.85; margin-bottom: 2px;">First Purchase: <span style="font-weight:bold; color:#00cec9;">' .
+        number_format($node['total_first_purchase_left'] ?? 0, 2) .
+    '</span></div>
+    <div style="font-size: 13px; opacity:0.85;">Renewal: <span style="font-weight:bold; color:#00cec9;">' .
+        number_format($node['total_renewal_left'] ?? 0, 2) .
+    '</span></div>
+</div>
             
             
 
@@ -599,15 +605,20 @@
     </form>
 </div>
             <div style="background: #2d3436; color: #ffffff; padding: 20px; border-radius: 12px; min-width: 240px; flex: 1; text-align: right; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-right: 5px solid #ff7675;">
-                <div style="font-size: 12px; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px;">Right Side Summary</div>
-                <div style="font-size: 14px; margin-bottom: 4px;">Contributors: <span style="font-weight:bold; color: #ff7675;">' .
-            ($node['total_contributors_right'] ?? 0) .
-            '</span></div>
-                <div style="font-size: 14px;">Total Business: <span style="font-weight:bold; color: #ff7675;">' .
-            number_format($node['total_business_right'] ?? 0, 2) .
-            '</span></div>
-            </div>
-        </div>
+    <div style="font-size: 12px; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px;">Right Side Summary</div>
+    <div style="font-size: 14px; margin-bottom: 4px;">Contributors: <span style="font-weight:bold; color: #ff7675;">' .
+        ($node['total_contributors_right'] ?? 0) .
+    '</span></div>
+    <div style="font-size: 14px; margin-bottom: 8px;">Total Business: <span style="font-weight:bold; color: #ff7675;">' .
+        number_format($node['total_business_right'] ?? 0, 2) .
+    '</span></div>
+    <div style="font-size: 13px; opacity:0.85; margin-bottom: 2px;">First Purchase: <span style="font-weight:bold; color:#ff7675;">' .
+        number_format($node['total_first_purchase_right'] ?? 0, 2) .
+    '</span></div>
+    <div style="font-size: 13px; opacity:0.85;">Renewal: <span style="font-weight:bold; color:#ff7675;">' .
+        number_format($node['total_renewal_right'] ?? 0, 2) .
+    '</span></div>
+</div>
 
         <div style="min-width: 900px;">
             <table style="width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed;">

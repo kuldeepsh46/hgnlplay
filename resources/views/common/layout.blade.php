@@ -52,6 +52,15 @@ th, td {
  
     white-space: nowrap;
 }
+/* Long text columns (remarks, subject ...) read left-aligned and wrap */
+th.long-text, td.long-text {
+    text-align: left !important;
+    white-space: normal;
+    min-width: 260px;
+    max-width: 520px;
+    overflow-wrap: anywhere;
+    line-height: 1.45;
+}
 h2{
     margin-top:0px;
     font-size:22px;
@@ -222,6 +231,18 @@ main.main{
 @media (min-width:769px){
     main.main{
         padding-left:50px;
+    }
+    /* Keep the sidebar in view while the page scrolls; long menus scroll inside it */
+    .sidebar{
+        position:sticky;
+        top:0;
+        height:100vh;
+        align-self:flex-start;
+    }
+    .sidebar > ul{
+        flex:1;
+        min-height:0;
+        overflow-y:auto;
     }
 }
 

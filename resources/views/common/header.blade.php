@@ -95,6 +95,12 @@
             </a>
         @endif
 
+        @if (Auth::user()->hasRole('superadmin'))
+            <a href="{{ route('account.sync') }}" style="text-decoration:none;color:inherit;display:block;">
+                <li class="{{ Request::routeIs('account.sync*') ? 'active' : '' }}">⚙️ <span>Sync Settings</span></li>
+            </a>
+        @endif
+
         @if (Auth::user()->hasRole('admin'))
             <a href="{{ url('/dashboard') }}" style="text-decoration:none;color:inherit;display:block;">
                 <li class="{{ Request::is('dashboard') ? 'active' : '' }}">🧭 <span>Admin Console</span></li>
@@ -115,6 +121,18 @@
 
             <a href="{{ route('admin.payouts') }}" style="text-decoration:none;color:inherit;display:block;">
                 <li class="{{ Request::routeIs('admin.payouts') ? 'active' : '' }}">🏦 <span>Manage Payouts</span></li>
+            </a>
+
+            <a href="{{ route('admin.sponsor-bonus') }}" style="text-decoration:none;color:inherit;display:block;">
+                <li class="{{ Request::routeIs('admin.sponsor-bonus*') ? 'active' : '' }}">🤝 <span>Sponsor Bonus</span></li>
+            </a>
+
+            <a href="{{ route('admin.transactions') }}" style="text-decoration:none;color:inherit;display:block;">
+                <li class="{{ Request::routeIs('admin.transactions*') ? 'active' : '' }}">🧾 <span>All Transactions</span></li>
+            </a>
+
+            <a href="{{ route('admin.rank-rewards') }}" style="text-decoration:none;color:inherit;display:block;">
+                <li class="{{ Request::routeIs('admin.rank-rewards*') ? 'active' : '' }}">🏅 <span>Rank Rewards</span></li>
             </a>
 
             <a href="{{ route('admin.support') }}" style="text-decoration:none;color:inherit;display:block;">

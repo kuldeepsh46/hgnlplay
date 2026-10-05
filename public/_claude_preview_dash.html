@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard - HGNL Pay</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg:#0b0e12;
+    --card:#10171f;
+    --sidebar:#0f141b;
+    --accent:#3f7871;
+    --text:#e9eef3;
+    --muted:#a0acb3;
+    --radius:12px;
+      --bg: #0b0e12;
+    --card: #10171f;
+    --sidebar: #0f141b;
+    --accent:#3f7871;
+    --accent2: #3f7871;
+    --border: #1b222b;
+    --text: #e9eef3;
+    --muted: #a0acb3;
+    --radius: 12px;
+ --bg:#0b0e12;
+  --card:#10171f;
+  --sidebar:#0f141b;
+
+  --border:#1b222b;
+  --text:#e9eef3;
+  --muted:#a0acb3;
+  --radius:12px;
+
+}
+div#passwordModal h2 {
+    color: #ffff;
+}
+nav[aria-label="Pagination Navigation"] > div:first-child {
+
+    padding-top: 20px;
+}
+/* ===== RESET ===== */
+*{box-sizing:border-box}
+.modal-content p {
+    line-height: 1.6;
+    text-align: center;
+}
+th, td {
+ 
+    white-space: nowrap;
+}
+h2{
+    margin-top:0px;
+    font-size:22px;
+}
+body{
+    margin:0;
+    font-family:Inter,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+}
+.table-res {
+    overflow-x: auto;
+}
+.toggle-btn {
+    position: absolute;
+    top: 16px;
+    right: -18px;
+    background: #3f7871 !important;
+    color: #ffffffff;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 0 10px #a7ff1e66;
+}
+/* ===== SIDEBAR (from header file) ===== */
+.sidebar{
+    width:250px;
+    background:var(--sidebar);
+    border-right:1px solid #12181f;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    transition:.3s ease;
+    z-index:1001;
+}
+.btn-primary{
+    color: #ffffff !important;
+}
+.btn {
+    
+    color: #ffffff !important;
+ 
+}
+.user-info {
+    color: #e84e6d !important;
+}
+.sidebar ul{list-style:none;margin:0;padding:0}
+.sidebar ul li{
+    padding:14px 18px;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-left: 4px solid #a7ff1e00;
+}
+.sidebar ul li:hover,
+.sidebar ul li.active{
+    background:#141c26;
+    color:#fff;
+    border-left:4px solid var(--accent);
+}
+
+/* ===== MAIN CONTENT ===== */
+main.main{
+    flex:1;
+    padding:20px;
+    overflow-x:hidden;
+}
+
+/* ===== OVERLAY ===== */
+#sidebarOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.45);
+    display:none;
+    z-index:1000;
+}
+.mobile-header {
+    display: none;
+}
+/* ===== MOBILE FIXES ===== */
+@media (max-width:768px){
+    .profile-card{
+        padding-bottom:20px !important;
+    }
+.toggle-btn {
+  
+    right: 19px;
+  
+   
+}
+    body{
+        display:block !important;
+    }
+
+    .sidebar{
+        position:fixed;
+        top:20px;
+        bottom:0;
+        left:-260px;
+        width:250px;
+        transition:.3s ease;
+    }
+
+    .sidebar.open{
+        left:0;
+    }
+
+    /* Overlay visible only when sidebar open */
+    .sidebar.open + #sidebarOverlay{
+        display:block;
+    }
+
+    /* Prevent background scroll */
+    body.sidebar-open{
+        overflow:hidden;
+    }
+
+    /* MAIN CONTENT FIX (IMPORTANT) */
+    main.main{
+
+        padding-top:110px; /* mobile header space */
+    }
+.mobile-header .logo img {
+    height: 59px;
+}
+    /* Mobile header fix */
+    .mobile-header{
+        position:fixed;
+        top:0;
+        left:0;
+        right:0;
+        z-index:1100;
+        background:var(--sidebar);
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:10px 13px;
+        box-shadow:0 0 20px -10px;
+    }
+}
+
+.logo img {
+    width: 100%;
+    height: 52px;
+    object-fit: contain;
+}
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0px;
+}
+
+.logo h1 {
+    font-size: 20px;
+}
+
+.logo h1 span {
+    color: #e84e6d;
+}
+/* ===== DESKTOP ONLY ===== */
+@media (min-width:769px){
+    main.main{
+        padding-left:50px;
+    }
+}
+
+/* INPUT FIX */
+input[type="date"]::-webkit-calendar-picker-indicator{
+    filter:invert(1);
+    cursor:pointer;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.header h1{
+    margin:0px;    font-size: 22px;
+}
+
+.user-info {
+    background: #141c22;
+    padding: 8px 14px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+
+/* Team Accordion */
+.team-item {
+    list-style: none;
+}
+
+/* Header */
+.team-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    cursor: pointer;
+    color: var(--muted);
+    user-select: none;
+}
+
+.team-item.active > .team-menu {
+    color: #fff;
+}
+
+/* Arrow */
+.team-menu .arrow {
+    transition: transform 0.3s ease;
+    font-size: 14px;
+}
+
+/* Rotate when open */
+.team-item.open .arrow {
+    transform: rotate(180deg);
+}
+
+/* Submenu */
+.submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+    padding-left: 18px;
+}
+ul.submenu li {
+    border-left: unset;
+    padding: 14px 18px !important;
+}
+ul.submenu li:hover {
+    border-left: unset;
+    padding: 0px;
+}
+/* Open state */
+.team-item.open .submenu {
+    max-height: 500px; /* enough for items */
+}
+
+/* Submenu links */
+.submenu li a {
+    display: block;
+    padding: 10px 12px;
+    color: var(--muted);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+}
+
+.submenu li a:hover,
+.submenu li a.active {
+    color: #fff;
+    background: #141c26;
+    border-left: 3px solid var(--accent);
+}
+.btn-view {
+    background: #a7ff1e;
+    color: #000;
+    border: none;
+    padding: 10px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+
+<!-- Sidebar -->
+<div class="mobile-header">
+    <div class="logo"><img src="http://127.0.0.1:8000/assets/images/logo.jpeg" alt="Himalaya Trading">
+        <!-- <h1>Himalaya <span class="brand-green">Trading</span></h1> -->
+    </div>
+    <div class="toggle-btn" id="toggleBtn">☰</div>
+</div>
+<aside class="sidebar" id="sidebar">
+    <div class="logo"><img src="http://127.0.0.1:8000/assets/images/logo.jpeg" alt="Himalaya Trading">
+        <!-- <h1>Himalaya <span class="brand-green">Trading</span></h1> -->
+    </div>
+    <div class="toggle-btn" id="toggleBtnd">☰</div>
+    <ul>
+        
+                    <a href="http://localhost/dashboard" style="text-decoration:none;color:inherit;display:block;">
+                <li class="">🧭 <span>Admin Console</span></li>
+            </a>
+
+            <a href="http://localhost/admin/users" style="text-decoration:none;color:inherit;display:block;">
+                <li class="">👥 <span>Manage Users</span></li>
+            </a>
+
+            <a href="http://localhost/admin/packages" style="text-decoration:none;color:inherit;display:block;">
+    <li class="">📦 <span>Manage Packages</span></li>
+</a>
+
+            <a href="http://localhost/payments" style="text-decoration:none;color:inherit;display:block;">
+                <li class="">💳 <span>Manage Payments</span>
+                </li>
+            </a>
+
+            <a href="http://localhost/payouts" style="text-decoration:none;color:inherit;display:block;">
+                <li class="">🏦 <span>Manage Payouts</span></li>
+            </a>
+
+            <a href="http://localhost/support" style="text-decoration:none;color:inherit;display:block;">
+                <li class="">🆘 <span>Support Request</span>
+                </li>
+            </a>
+
+            <a href="http://localhost/lucky" style="text-decoration:none;color:inherit;display:block;">
+                <li class="">🎁 <span>Lucky Draw</span></li>
+            </a>
+
+            <li class="team-item "
+                style="display:block;padding:0px;">
+
+                <div class="team-menu">
+                    <span class="team-title">
+                        ⚙️ <span>Settings</span>
+                    </span>
+                    <span class="arrow">▾</span>
+                </div>
+
+                <ul class="submenu">
+                    <li>
+                        <a href="http://localhost/admin/settings/qr/1"
+                            class="">
+                            QR Code
+                        </a>
+                    </li>
+                    <li>
+                        <a href="http://localhost/admin/settings/qr/2"
+                            class="">
+                            USDT
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        
+
+
+
+
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+            style="text-decoration: none; color: inherit; display: block;">
+            <li>🚪 <span>Logout</span></li>
+        </a>
+
+        <form id="logout-form" action="http://localhost/logout" method="POST" style="display: none;">
+            <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off">        </form>
+
+    </ul>
+
+
+</aside>
+
+
+<div id="sidebarOverlay"></div>
+
+
+<main class="main">
+    
+<style>
+    .adn { --ok: #a7ff1e; --ok-soft: rgba(167, 255, 30, .1); --warn: #ffb547; --warn-soft: rgba(255, 181, 71, .12); --bad: #ff5c7a; --bad-soft: rgba(255, 92, 122, .12); --info: #5cc8ff; --info-soft: rgba(92, 200, 255, .12); --line: #1b222b; --card: #10171f; --card2: #0b0e12; --muted: #8b98a5; --text: #e9eef3;
+        color: var(--text); padding: 24px; max-width: 1600px; margin: 0 auto; }
+    .adn * { box-sizing: border-box; }
+    .adn a { color: inherit; }
+    .adn h1 { font-size: 26px; margin: 0; letter-spacing: -.3px; }
+    .adn h3 { font-size: 15px; margin: 0; font-weight: 700; letter-spacing: .2px; }
+    .adn .sub { color: var(--muted); font-size: 13px; }
+    .adn .row { display: grid; gap: 18px; margin-bottom: 18px; }
+    .adn .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; min-width: 0; }
+    .adn .card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .adn .link { color: var(--muted); font-size: 12px; text-decoration: none; border-bottom: 1px dashed #3a4652; }
+    .adn .link:hover { color: var(--text); }
+
+    /* Header + filters */
+    .adn-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+    .adn-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .adn-chip { padding: 8px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .adn-chip:hover { color: var(--text); border-color: #3a4652; }
+    .adn-chip.on { background: var(--ok); color: #000; border-color: var(--ok); }
+    .adn-custom { display: flex; gap: 6px; align-items: center; }
+    .adn-custom input { background: var(--card); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 7px 8px; font-size: 12px; color-scheme: dark; }
+    .adn-custom button, .adn-btn { background: var(--ok); color: #000; border: 0; border-radius: 8px; padding: 8px 12px; font-weight: 700; font-size: 12px; cursor: pointer; text-decoration: none; display: inline-block; white-space: nowrap; }
+    .adn-btn.ghost { background: transparent; color: var(--text); border: 1px solid #3a4652; }
+    .adn-btn.danger { background: transparent; color: var(--bad); border: 1px solid rgba(255, 92, 122, .4); }
+    .adn-btn.sm { padding: 5px 9px; font-size: 11px; }
+    .adn-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* Flash */
+    .adn-flash { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; }
+    .adn-flash.ok { background: var(--ok-soft); border: 1px solid var(--ok); color: var(--ok); }
+    .adn-flash.bad { background: var(--bad-soft); border: 1px solid var(--bad); color: var(--bad); }
+
+    /* Attention strip */
+    .adn-alerts { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .adn-alert { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); text-decoration: none; transition: .2s; }
+    .adn-alert:hover { transform: translateY(-2px); border-color: #3a4652; }
+    .adn-alert .ico { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-size: 18px; flex-shrink: 0; }
+    .adn-alert .num { font-size: 20px; font-weight: 800; line-height: 1.1; }
+    .adn-alert .lbl { font-size: 12px; color: var(--muted); }
+    .adn-alert.warn { border-color: rgba(255, 181, 71, .35); } .adn-alert.warn .ico { background: var(--warn-soft); }
+    .adn-alert.bad { border-color: rgba(255, 92, 122, .35); } .adn-alert.bad .ico { background: var(--bad-soft); }
+    .adn-alert.good .ico { background: var(--ok-soft); } .adn-alert.info .ico { background: var(--info-soft); }
+
+    /* KPI */
+    .adn-kpis { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+    .adn-kpi .k-lbl { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; }
+    .adn-kpi .k-val { font-size: 26px; font-weight: 800; margin: 8px 0 6px; letter-spacing: -.5px; white-space: nowrap; }
+    .adn-kpi .k-foot { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); }
+    .adn-kpi.hero { background: linear-gradient(135deg, rgba(167, 255, 30, .12), var(--card) 60%); border-color: rgba(167, 255, 30, .3); }
+    .adn-delta { font-weight: 700; white-space: nowrap; }
+    .adn-delta.up { color: var(--ok); } .adn-delta.down { color: var(--bad); } .adn-delta.flat { color: var(--muted); }
+
+    /* Layout grids */
+    .adn-2-1 { grid-template-columns: 2fr 1fr; }
+    .adn-1-1 { grid-template-columns: 1fr 1fr; }
+    .adn-3 { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 1200px) { .adn-2-1, .adn-3 { grid-template-columns: 1fr 1fr; } .adn-2-1 > :first-child { grid-column: 1 / -1; } }
+    @media (max-width: 800px) { .adn { padding: 14px; } .adn-2-1, .adn-1-1, .adn-3 { grid-template-columns: 1fr; } .adn-kpi .k-val { font-size: 22px; } }
+    @media (max-width: 560px) {
+        .adn-alerts, .adn-kpis { grid-template-columns: 1fr 1fr; gap: 10px; }
+        .adn-alert { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; }
+        .adn-alert .ico { width: 32px; height: 32px; font-size: 16px; }
+        .adn-kpi { padding: 14px; } .adn-kpi .k-val { font-size: 18px; } .adn-kpi .k-foot { flex-direction: column; gap: 4px; }
+        .adn h1 { font-size: 22px; }
+    }
+
+    /* Tables */
+    .adn-table-wrap { overflow-x: auto; margin: 0 -4px; }
+    .adn table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .adn th { text-align: left; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; font-weight: 700; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    .adn td { padding: 10px 6px; border-bottom: 1px solid #151c24; vertical-align: middle; white-space: nowrap; }
+    .adn tr:last-child td { border-bottom: 0; }
+    .adn tbody tr:hover { background: #131b24; }
+    .adn .num-cell { text-align: right; font-variant-numeric: tabular-nums; }
+    .adn .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--muted); }
+    .adn .wrap { white-space: normal; min-width: 150px; max-width: 260px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .adn-quick { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 16px; }
+    .adn-quick a { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card2); text-decoration: none; font-size: 13px; font-weight: 600; transition: .2s; }
+    .adn-quick a:hover { border-color: var(--ok); transform: translateY(-2px); }
+    .adn-quick small { display: block; color: var(--muted); font-weight: 400; font-size: 11px; }
+    .adn .who b { display: block; font-weight: 600; }
+    .adn .who span { color: var(--muted); font-size: 12px; }
+    .adn .pill { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .adn .pill.ok { background: var(--ok-soft); color: var(--ok); }
+    .adn .pill.warn { background: var(--warn-soft); color: var(--warn); }
+    .adn .pill.bad { background: var(--bad-soft); color: var(--bad); }
+    .adn .pill.info { background: var(--info-soft); color: var(--info); }
+    .adn .pill.mute { background: #1b222b; color: var(--muted); }
+    .adn .actions { display: flex; gap: 6px; justify-content: flex-end; }
+    .adn .actions form { margin: 0; }
+    .adn .empty { padding: 26px 10px; text-align: center; color: var(--muted); font-size: 13px; }
+    .adn .bar { height: 6px; border-radius: 3px; background: #1b222b; overflow: hidden; min-width: 60px; }
+    .adn .bar i { display: block; height: 100%; background: var(--ok); border-radius: 3px; }
+
+    /* Tabs */
+    .adn-tabs { display: flex; gap: 4px; background: var(--card2); padding: 4px; border-radius: 10px; border: 1px solid var(--line); }
+    .adn-tabs button { background: none; border: 0; color: var(--muted); padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: 7px; cursor: pointer; }
+    .adn-tabs button.on { background: #1b222b; color: var(--text); }
+    .adn [data-tab-panel] { display: none; } .adn [data-tab-panel].on { display: block; }
+
+    /* Misc */
+    .adn-chart { position: relative; height: 300px; }
+    .adn-chart.sm { height: 240px; }
+    .adn-search { display: flex; gap: 8px; }
+    .adn-search input { flex: 1; min-width: 0; background: var(--card2); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+    .adn-search input:focus { outline: none; border-color: var(--ok); }
+    .adn-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .adn-stat { background: var(--card2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+    .adn-stat b { display: block; font-size: 20px; }
+    .adn-stat span { font-size: 12px; color: var(--muted); }
+    .adn-list-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #151c24; font-size: 13px; }
+    .adn-list-row:last-child { border-bottom: 0; }
+    .adn-legend { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .adn-legend div { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .adn-legend i { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .adn-legend span { flex: 1; color: var(--muted); }
+</style>
+
+<div class="adn">
+
+    
+    <div class="adn-top">
+        <div>
+            <h1>Admin Dashboard</h1>
+            <div class="sub" style="margin-top:6px;">
+                Showing <b style="color:var(--text)">All time</b>
+                                · updated 01 Oct, 05:30 PM
+            </div>
+        </div>
+        <div class="adn-filters">
+                            <a class="adn-chip " href="http://localhost/admin/dashboard-new?period=today">Today</a>
+                            <a class="adn-chip " href="http://localhost/admin/dashboard-new?period=yesterday">Yesterday</a>
+                            <a class="adn-chip " href="http://localhost/admin/dashboard-new?period=7d">Last 7 days</a>
+                            <a class="adn-chip " href="http://localhost/admin/dashboard-new?period=30d">Last 30 days</a>
+                            <a class="adn-chip " href="http://localhost/admin/dashboard-new?period=month">This month</a>
+                            <a class="adn-chip " href="http://localhost/admin/dashboard-new?period=last_month">Last month</a>
+                            <a class="adn-chip on" href="http://localhost/admin/dashboard-new?period=all">All time</a>
+                        <form class="adn-custom" method="GET" action="http://localhost/admin/dashboard-new">
+                <input type="hidden" name="period" value="custom">
+                <input type="date" name="from" value="" required aria-label="From date">
+                <input type="date" name="to" value="" required aria-label="To date">
+                <button type="submit" class="ghost">Apply</button>
+            </form>
+        </div>
+    </div>
+
+        
+    
+    <div class="row adn-alerts">
+        <a href="#actions" class="adn-alert warn" data-open-tab="funds">
+            <div class="ico">💳</div>
+            <div><div class="num">10</div><div class="lbl">Fund requests pending · ₹70,15,200</div></div>
+        </a>
+        <a href="#actions" class="adn-alert bad" data-open-tab="payouts">
+            <div class="ico">🏦</div>
+            <div><div class="num">2</div><div class="lbl">Withdrawals pending · ₹1,000</div></div>
+        </a>
+        <a href="#actions" class="adn-alert good" data-open-tab="support">
+            <div class="ico">🆘</div>
+            <div><div class="num">0</div><div class="lbl">Support queries to answer</div></div>
+        </a>
+        <a href="#actions" class="adn-alert bad" data-open-tab="funds">
+            <div class="ico">⏰</div>
+            <div><div class="num">12</div><div class="lbl">Requests waiting &gt; 48h</div></div>
+        </a>
+        <a href="http://localhost/admin/users" class="adn-alert info">
+            <div class="ico">💤</div>
+            <div><div class="num">400</div><div class="lbl">Members with no package (7+ days)</div></div>
+        </a>
+        <a href="http://localhost/lucky" class="adn-alert info">
+            <div class="ico">🎁</div>
+            <div><div class="num">7</div><div class="lbl">Active lucky draw cycles</div></div>
+        </a>
+            </div>
+
+    
+        <div class="row adn-kpis">
+                                <div class="card adn-kpi hero">
+                <div class="k-lbl">Business (top-ups)</div>
+                <div class="k-val">₹7,60,497</div>
+                <div class="k-foot">
+                    <span>258 top-ups · avg ₹2,948</span>
+                                    </div>
+            </div>
+                                <div class="card adn-kpi ">
+                <div class="k-lbl">New members</div>
+                <div class="k-val">609</div>
+                <div class="k-foot">
+                    <span>210 activated (first package)</span>
+                                    </div>
+            </div>
+                                <div class="card adn-kpi ">
+                <div class="k-lbl">Repurchases / EMIs</div>
+                <div class="k-val">48</div>
+                <div class="k-foot">
+                    <span>top-ups by existing buyers</span>
+                                    </div>
+            </div>
+                                <div class="card adn-kpi ">
+                <div class="k-lbl">Funds added</div>
+                <div class="k-val">₹15,49,999</div>
+                <div class="k-foot">
+                    <span>approved fund requests</span>
+                                    </div>
+            </div>
+                                <div class="card adn-kpi ">
+                <div class="k-lbl">Income paid to members</div>
+                <div class="k-val">₹2,09,115</div>
+                <div class="k-foot">
+                    <span>27.5% of business</span>
+                                    </div>
+            </div>
+                                <div class="card adn-kpi ">
+                <div class="k-lbl">Withdrawals paid</div>
+                <div class="k-val">₹0</div>
+                <div class="k-foot">
+                    <span>net, after tax · gross ₹0</span>
+                                    </div>
+            </div>
+                                <div class="card adn-kpi ">
+                <div class="k-lbl">Net cash flow</div>
+                <div class="k-val">₹15,49,999</div>
+                <div class="k-foot">
+                    <span>funds added − withdrawals paid</span>
+                                    </div>
+            </div>
+                <div class="card adn-kpi">
+            <div class="k-lbl">Wallet liability (now)</div>
+            <div class="k-val">₹1,34,70,017</div>
+            <div class="k-foot"><span>held in 136 member wallets</span></div>
+        </div>
+    </div>
+
+    
+    <div class="row adn-2-1">
+        <div class="card">
+            <div class="card-head">
+                <h3>📈 Business &amp; income trend <span class="sub">(monthly)</span></h3>
+                <div class="adn-tabs" data-chart-switch="trend">
+                    <button class="on" data-series="growth">Business vs income</button>
+                    <button data-series="members">New members</button>
+                    <button data-series="cash">Money in / out</button>
+                </div>
+            </div>
+            <div class="adn-chart"><canvas id="adnTrend"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-head"><h3>💸 Income paid by type</h3><span class="sub">₹2,09,115</span></div>
+                            <div class="adn-chart sm"><canvas id="adnIncome"></canvas></div>
+                <div class="adn-legend" id="adnIncomeLegend"></div>
+                    </div>
+    </div>
+
+    
+    <div class="card" id="actions" style="margin-bottom:18px;">
+        <div class="card-head">
+            <h3>⚡ Action center <span class="sub">— 12 item(s) waiting</span></h3>
+            <div class="adn-tabs" data-tabs="actions">
+                <button class="on" data-tab="funds">Fund requests (10)</button>
+                <button data-tab="payouts">Withdrawals (2)</button>
+                <button data-tab="support">Support (0)</button>
+            </div>
+        </div>
+
+        <div data-tab-panel="funds" class="on">
+                            <div class="adn-table-wrap"><table>
+                    <thead><tr><th>Member</th><th class="num-cell">Amount</th><th>Mode</th><th>Reference</th><th>Deposit date</th><th>Waiting</th><th>Proof</th><th style="text-align:right">Action</th></tr></thead>
+                    <tbody>
+                                            <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/2/edit">HGNL1002</a></b><span>HGNLPAY</span></td>
+                            <td class="num-cell"><b>₹50,00,000</b></td>
+                            <td>Online Transaction</td>
+                            <td class="mono">utr25321456</td>
+                            <td>24 Mar 2026</td>
+                            <td><span class="pill bad">6 months ago</span></td>
+                            <td><a class="link" href="http://127.0.0.1:8000/public/uploads/fund_requests/1774332163_renewal.pdf" target="_blank" rel="noopener">View</a></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payments/approve/1" onsubmit="return confirm('Approve ₹50,00,000 for HGNL1002? It will be added to their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm">Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payments/reject/1" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                            <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/177/edit">HGNL1177</a></b><span>ROOHI DEVI</span></td>
+                            <td class="num-cell"><b>₹1,100</b></td>
+                            <td>Online Transaction</td>
+                            <td class="mono">608525331096</td>
+                            <td>26 Mar 2026</td>
+                            <td><span class="pill bad">6 months ago</span></td>
+                            <td><a class="link" href="http://127.0.0.1:8000/public/uploads/fund_requests/1774521915_WhatsApp Image 2026-03-26 at 4.12.56 PM.jpeg" target="_blank" rel="noopener">View</a></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payments/approve/2" onsubmit="return confirm('Approve ₹1,100 for HGNL1177? It will be added to their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm">Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payments/reject/2" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                            <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/89/edit">HGNL1089</a></b><span>BHEEM SINGH</span></td>
+                            <td class="num-cell"><b>₹11,000</b></td>
+                            <td>Online Transaction</td>
+                            <td class="mono">—</td>
+                            <td>02 Apr 2026</td>
+                            <td><span class="pill bad">5 months ago</span></td>
+                            <td><a class="link" href="http://127.0.0.1:8000/public/uploads/fund_requests/1775121257_IMG_20260402_142332.jpg" target="_blank" rel="noopener">View</a></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payments/approve/3" onsubmit="return confirm('Approve ₹11,000 for HGNL1089? It will be added to their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm">Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payments/reject/3" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                            <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/296/edit">HGNL1296</a></b><span>Karam chand</span></td>
+                            <td class="num-cell"><b>₹1,100</b></td>
+                            <td>Online Transaction</td>
+                            <td class="mono">270307461631</td>
+                            <td>06 Apr 2026</td>
+                            <td><span class="pill bad">5 months ago</span></td>
+                            <td><a class="link" href="http://127.0.0.1:8000/public/uploads/fund_requests/1775495847_Screenshot_2026-04-06-22-46-01-15_944a2809ea1b4cda6ef12d1db9048ed3.jpg" target="_blank" rel="noopener">View</a></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payments/approve/4" onsubmit="return confirm('Approve ₹1,100 for HGNL1296? It will be added to their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm">Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payments/reject/4" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                            <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/149/edit">HGNL1149</a></b><span>PRASHI</span></td>
+                            <td class="num-cell"><b>₹2,000</b></td>
+                            <td>Online Transaction</td>
+                            <td class="mono">609813197696</td>
+                            <td>08 Apr 2026</td>
+                            <td><span class="pill bad">5 months ago</span></td>
+                            <td><a class="link" href="http://127.0.0.1:8000/public/uploads/fund_requests/1775634207_IMG-20260408-WA0008.jpg" target="_blank" rel="noopener">View</a></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payments/approve/5" onsubmit="return confirm('Approve ₹2,000 for HGNL1149? It will be added to their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm">Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payments/reject/5" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                            <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/580/edit">HGNL1580</a></b><span>user a</span></td>
+                            <td class="num-cell"><b>₹50,000</b></td>
+                            <td>Online Transaction</td>
+                            <td class="mono">fsfsfsffsd</td>
+                            <td>22 Apr 2026</td>
+                            <td><span class="pill bad">5 months ago</span></td>
+                            <td><a class="link" href="http://127.0.0.1:8000/public/uploads/fund_requests/1776851102_download (3).jpeg" target="_blank" rel="noopener">View</a></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payments/approve/6" onsubmit="return confirm('Approve ₹50,000 for HGNL1580? It will be added to their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm">Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payments/reject/6" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                            <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/583/edit">HGNL1583</a></b><span>user d</span></td>
+                            <td class="num-cell"><b>₹50,000</b></td>
+                            <td>Online Transaction</td>
+                            <td class="mono">ssfsfs</td>
+                            <td>23 Apr 2026</td>
+                            <td><span class="pill bad">5 months ago</span></td>
+                            <td><a class="link" href="http://127.0.0.1:8000/public/uploads/fund_requests/1776932446_download (2).jpeg" target="_blank" rel="noopener">View</a></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payments/approve/7" onsubmit="return confirm('Approve ₹50,000 for HGNL1583? It will be added to their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm">Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payments/reject/7" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                            <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/588/edit">HGNL1588</a></b><span>user x</span></td>
+                            <td class="num-cell"><b>₹5,00,000</b></td>
+                            <td>Online Transaction</td>
+                            <td class="mono">fsfss</td>
+                            <td>04 May 2026</td>
+                            <td><span class="pill bad">4 months ago</span></td>
+                            <td><a class="link" href="http://127.0.0.1:8000/public/uploads/fund_requests/1777879458_cache.sql" target="_blank" rel="noopener">View</a></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payments/approve/8" onsubmit="return confirm('Approve ₹5,00,000 for HGNL1588? It will be added to their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm">Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payments/reject/8" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                            <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/589/edit">HGNL1589</a></b><span>usery</span></td>
+                            <td class="num-cell"><b>₹5,00,000</b></td>
+                            <td>Online Transaction</td>
+                            <td class="mono">ssssfs</td>
+                            <td>04 May 2026</td>
+                            <td><span class="pill bad">4 months ago</span></td>
+                            <td><a class="link" href="http://127.0.0.1:8000/public/uploads/fund_requests/1777880020_cache.sql" target="_blank" rel="noopener">View</a></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payments/approve/9" onsubmit="return confirm('Approve ₹5,00,000 for HGNL1589? It will be added to their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm">Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payments/reject/9" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                            <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/566/edit">HGNL1566</a></b><span>Devender kumar</span></td>
+                            <td class="num-cell"><b>₹9,00,000</b></td>
+                            <td>Online Transaction</td>
+                            <td class="mono">wfdsdsa</td>
+                            <td>06 Jun 2026</td>
+                            <td><span class="pill bad">3 months ago</span></td>
+                            <td><a class="link" href="http://127.0.0.1:8000/public/uploads/fund_requests/1780707173_users (2).sql" target="_blank" rel="noopener">View</a></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payments/approve/10" onsubmit="return confirm('Approve ₹9,00,000 for HGNL1566? It will be added to their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm">Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payments/reject/10" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                        </tbody>
+                </table></div>
+                        <div style="margin-top:12px;"><a class="link" href="http://localhost/payments">Open all payments →</a></div>
+        </div>
+
+        <div data-tab-panel="payouts">
+                            <div class="adn-table-wrap"><table>
+                    <thead><tr><th>Member</th><th class="num-cell">Amount</th><th class="num-cell">Net payable</th><th class="num-cell">Wallet</th><th>Bank</th><th>Waiting</th><th style="text-align:right">Action</th></tr></thead>
+                    <tbody>
+                                                                    <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/23/edit">HGNL1023</a></b><span>VIKESH SHARMA</span></td>
+                            <td class="num-cell"><b>₹900</b></td>
+                            <td class="num-cell">₹810</td>
+                            <td class="num-cell">₹0 <span class="pill bad">short</span></td>
+                            <td class="mono">—  </td>
+                            <td><span class="pill bad">6 months ago</span></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payouts/approve/1" onsubmit="return confirm('Approve withdrawal of ₹900 for HGNL1023? It will be deducted from their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm"  disabled title="Wallet balance is lower than the request" >Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payouts/reject/1" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                                                    <tr>
+                            <td class="who"><b><a href="http://localhost/admin/users/16/edit">HGNL1016</a></b><span>onit</span></td>
+                            <td class="num-cell"><b>₹100</b></td>
+                            <td class="num-cell">₹90</td>
+                            <td class="num-cell">₹3,725 </td>
+                            <td class="mono">UNION BANK OF INDIA · 714802010002306 · UBIN0571482</td>
+                            <td><span class="pill bad">6 months ago</span></td>
+                            <td><div class="actions">
+                                <form method="POST" action="http://localhost/payouts/approve/2" onsubmit="return confirm('Approve withdrawal of ₹100 for HGNL1016? It will be deducted from their wallet.')">
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <button class="adn-btn sm" >Approve</button>
+                                </form>
+                                <form method="POST" action="http://localhost/payouts/reject/2" data-reject>
+                                    <input type="hidden" name="_token" value="iHLQfSnrLxnKnXotrqVPCoDFbskqGCcJjn0VFHco" autocomplete="off"> <input type="hidden" name="reject_reason"> <button class="adn-btn sm danger">Reject</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                                        </tbody>
+                </table></div>
+                        <div style="margin-top:12px;"><a class="link" href="http://localhost/payouts">Open all payouts →</a></div>
+        </div>
+
+        <div data-tab-panel="support">
+                            <div class="empty">🎉 No unanswered support queries.</div>
+                    </div>
+    </div>
+
+    
+    <div class="card" style="margin-bottom:18px;">
+        <div class="card-head">
+            <h3>📦 Package performance <span class="sub">— all time</span></h3>
+            <a class="link" href="http://localhost/admin/packages">Manage packages →</a>
+        </div>
+        <div class="adn-table-wrap"><table>
+                <thead><tr><th>Package</th><th class="num-cell">Price</th><th class="num-cell">Sold</th><th class="num-cell">Revenue</th><th>Share</th><th class="num-cell">All-time</th><th>Direct / Pair</th><th>Reg. fee</th><th>Pairs with</th><th></th></tr></thead>
+                <tbody>
+                                    <tr>
+                        <td><b>Starter Package</b></td>
+                        <td class="num-cell">₹1,600</td>
+                        <td class="num-cell who"><b>234</b><span>206 buyers</span></td>
+                        <td class="num-cell"><b>₹2,55,900</b></td>
+                        <td><div class="bar" title="33.6%"><i style="width: 33.649047925238%"></i></div></td>
+                        <td class="num-cell who"><b>₹2,55,900</b><span>234 sold</span></td>
+                        <td><span class="pill info">₹500</span> <span class="pill ok">₹300</span></td>
+                        <td><span class="pill mute">No</span></td>
+                        <td class="wrap">₹1,600: — · ₹1,000: Seven + One Package, Thirteen + Three Package, HIMALAYA BALANCE</td>
+                        <td><a class="adn-btn sm ghost" href="http://localhost/admin/packages/1/edit">Edit</a></td>
+                    </tr>
+                                    <tr>
+                        <td><b>Seven + One Package</b></td>
+                        <td class="num-cell">₹7,000</td>
+                        <td class="num-cell who"><b>4</b><span>3 buyers</span></td>
+                        <td class="num-cell"><b>₹28,100</b></td>
+                        <td><div class="bar" title="3.7%"><i style="width: 3.6949521168394%"></i></div></td>
+                        <td class="num-cell who"><b>₹28,100</b><span>4 sold</span></td>
+                        <td><span class="pill info">10%</span> <span class="pill ok">10%</span></td>
+                        <td><span class="pill warn">₹100</span></td>
+                        <td class="wrap">Starter Package (₹1,000 repurchase), Thirteen + Three Package, HIMALAYA BALANCE</td>
+                        <td><a class="adn-btn sm ghost" href="http://localhost/admin/packages/2/edit">Edit</a></td>
+                    </tr>
+                                    <tr>
+                        <td><b>Thirteen + Three Package</b></td>
+                        <td class="num-cell">₹13,000</td>
+                        <td class="num-cell who"><b>0</b><span>0 buyers</span></td>
+                        <td class="num-cell"><b>₹0</b></td>
+                        <td><div class="bar" title="0.0%"><i style="width: 0%"></i></div></td>
+                        <td class="num-cell who"><b>₹0</b><span>0 sold</span></td>
+                        <td><span class="pill info">10%</span> <span class="pill ok">10%</span></td>
+                        <td><span class="pill warn">₹100</span></td>
+                        <td class="wrap">Starter Package (₹1,000 repurchase), Seven + One Package, HIMALAYA BALANCE</td>
+                        <td><a class="adn-btn sm ghost" href="http://localhost/admin/packages/3/edit">Edit</a></td>
+                    </tr>
+                                    <tr>
+                        <td><b>Fifty Thousand Golden Package</b></td>
+                        <td class="num-cell">₹50,000</td>
+                        <td class="num-cell who"><b>3</b><span>3 buyers</span></td>
+                        <td class="num-cell"><b>₹1,50,000</b></td>
+                        <td><div class="bar" title="19.7%"><i style="width: 19.723943684196%"></i></div></td>
+                        <td class="num-cell who"><b>₹1,50,000</b><span>3 sold</span></td>
+                        <td><span class="pill info">0%</span> <span class="pill ok">0%</span></td>
+                        <td><span class="pill warn">₹100</span></td>
+                        <td class="wrap">—</td>
+                        <td><a class="adn-btn sm ghost" href="http://localhost/admin/packages/4/edit">Edit</a></td>
+                    </tr>
+                                    <tr>
+                        <td><b>One Lakh Super Golden Package</b></td>
+                        <td class="num-cell">₹1,00,000</td>
+                        <td class="num-cell who"><b>3</b><span>2 buyers</span></td>
+                        <td class="num-cell"><b>₹3,00,200</b></td>
+                        <td><div class="bar" title="39.5%"><i style="width: 39.474185959971%"></i></div></td>
+                        <td class="num-cell who"><b>₹3,00,200</b><span>3 sold</span></td>
+                        <td><span class="pill info">0%</span> <span class="pill ok">0%</span></td>
+                        <td><span class="pill warn">₹100</span></td>
+                        <td class="wrap">—</td>
+                        <td><a class="adn-btn sm ghost" href="http://localhost/admin/packages/5/edit">Edit</a></td>
+                    </tr>
+                                    <tr>
+                        <td><b>REPURCHASE BOOSTER PACKAGE</b></td>
+                        <td class="num-cell">₹2,000</td>
+                        <td class="num-cell who"><b>9</b><span>4 buyers</span></td>
+                        <td class="num-cell"><b>₹18,097</b></td>
+                        <td><div class="bar" title="2.4%"><i style="width: 2.3796280590193%"></i></div></td>
+                        <td class="num-cell who"><b>₹18,097</b><span>9 sold</span></td>
+                        <td><span class="pill info">0%</span> <span class="pill ok">0%</span></td>
+                        <td><span class="pill mute">No</span></td>
+                        <td class="wrap">—</td>
+                        <td><a class="adn-btn sm ghost" href="http://localhost/admin/packages/7/edit">Edit</a></td>
+                    </tr>
+                                    <tr>
+                        <td><b>HIMALAYA BALANCE</b></td>
+                        <td class="num-cell">₹1,600</td>
+                        <td class="num-cell who"><b>5</b><span>3 buyers</span></td>
+                        <td class="num-cell"><b>₹8,200</b></td>
+                        <td><div class="bar" title="1.1%"><i style="width: 1.078242254736%"></i></div></td>
+                        <td class="num-cell who"><b>₹8,200</b><span>5 sold</span></td>
+                        <td><span class="pill info">10%</span> <span class="pill ok">10%</span></td>
+                        <td><span class="pill warn">₹100</span></td>
+                        <td class="wrap">Starter Package (₹1,000 repurchase), Seven + One Package, Thirteen + Three Package, HIMALAYA PAIR 1600</td>
+                        <td><a class="adn-btn sm ghost" href="http://localhost/admin/packages/8/edit">Edit</a></td>
+                    </tr>
+                                    <tr>
+                        <td><b>HIMALAYA PAIR 1600</b></td>
+                        <td class="num-cell">₹1,600</td>
+                        <td class="num-cell who"><b>0</b><span>0 buyers</span></td>
+                        <td class="num-cell"><b>₹0</b></td>
+                        <td><div class="bar" title="0.0%"><i style="width: 0%"></i></div></td>
+                        <td class="num-cell who"><b>₹0</b><span>0 sold</span></td>
+                        <td><span class="pill info">10%</span> <span class="pill ok">₹300</span></td>
+                        <td><span class="pill warn">₹100</span></td>
+                        <td class="wrap">HIMALAYA BALANCE</td>
+                        <td><a class="adn-btn sm ghost" href="http://localhost/admin/packages/9/edit">Edit</a></td>
+                    </tr>
+                                </tbody>
+        </table></div>
+    </div>
+
+    
+    <div class="row adn-3">
+        <div class="card">
+            <div class="card-head"><h3>🏆 Top earners</h3><span class="sub">All time</span></div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/566/edit">1. HGNL1566</a></b><span>Devender kumar · 26 credits</span></div>
+                    <b>₹62,000</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/17/edit">2. HGNL1017</a></b><span>Devender kumar · 21 credits</span></div>
+                    <b>₹36,910</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/589/edit">3. HGNL1589</a></b><span>usery · 10 credits</span></div>
+                    <b>₹20,610</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/10/edit">4. HGNL1010</a></b><span>ISRO Thakur · 40 credits</span></div>
+                    <b>₹14,050</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/595/edit">5. HGNL1595</a></b><span>ssfsfd · 21 credits</span></div>
+                    <b>₹11,100</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/11/edit">6. HGNL1011</a></b><span>SONU · 28 credits</span></div>
+                    <b>₹8,245</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/588/edit">7. HGNL1588</a></b><span>user x · 10 credits</span></div>
+                    <b>₹5,090</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/25/edit">8. HGNL1025</a></b><span>BRIJENDERK75 · 35 credits</span></div>
+                    <b>₹3,500</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/580/edit">9. HGNL1580</a></b><span>user a · 12 credits</span></div>
+                    <b>₹3,310</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/26/edit">10. HGNL1026</a></b><span>AJAY · 33 credits</span></div>
+                    <b>₹3,300</b>
+                </div>
+                    </div>
+        <div class="card">
+            <div class="card-head"><h3>🤝 Top sponsors</h3><span class="sub">new directs · All time</span></div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/user-tree/6">1. HGNL1006</a></b><span>CC · directs' business ₹0</span></div>
+                    <b>137</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/user-tree/4">2. HGNL1004</a></b><span>AAA · directs' business ₹0</span></div>
+                    <b>83</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/user-tree/7">3. HGNL1007</a></b><span>DD · directs' business ₹0</span></div>
+                    <b>49</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/user-tree/566">4. HGNL1566</a></b><span>Devender kumar · directs' business ₹1,08,500</span></div>
+                    <b>15</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/user-tree/178">5. HGNL1178</a></b><span>Suman Thakur · directs' business ₹1,100</span></div>
+                    <b>12</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/user-tree/17">6. HGNL1017</a></b><span>Devender kumar · directs' business ₹2,32,298</span></div>
+                    <b>11</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/user-tree/146">7. HGNL1146</a></b><span>SHAMA · directs' business ₹11,000</span></div>
+                    <b>10</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/user-tree/25">8. HGNL1025</a></b><span>BRIJENDERK75 · directs' business ₹3,300</span></div>
+                    <b>9</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/user-tree/11">9. HGNL1011</a></b><span>SONU · directs' business ₹7,700</span></div>
+                    <b>7</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/user-tree/26">10. HGNL1026</a></b><span>AJAY · directs' business ₹4,400</span></div>
+                    <b>7</b>
+                </div>
+                    </div>
+        <div class="card">
+            <div class="card-head"><h3>👛 Biggest wallets</h3><span class="sub">now</span></div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/566/edit">1. HGNL1566</a></b><span>Devender kumar</span></div>
+                    <b>₹62,72,602</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/2/edit">2. HGNL1002</a></b><span>HGNLPAY</span></div>
+                    <b>₹46,07,905</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/593/edit">3. HGNL1593</a></b><span>abc</span></div>
+                    <b>₹8,98,600</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/588/edit">4. HGNL1588</a></b><span>user x</span></div>
+                    <b>₹4,50,890</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/589/edit">5. HGNL1589</a></b><span>usery</span></div>
+                    <b>₹4,16,410</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/597/edit">6. HGNL1597</a></b><span>Left</span></div>
+                    <b>₹4,00,900</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/596/edit">7. HGNL1596</a></b><span>ssfdf</span></div>
+                    <b>₹99,760</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/573/edit">8. HGNL1573</a></b><span>sfsfsf</span></div>
+                    <b>₹95,900</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/583/edit">9. HGNL1583</a></b><span>user d</span></div>
+                    <b>₹42,680</b>
+                </div>
+                            <div class="adn-list-row">
+                    <div class="who"><b><a href="http://localhost/admin/users/598/edit">10. HGNL1598</a></b><span>L1597</span></div>
+                    <b>₹40,100</b>
+                </div>
+                    </div>
+    </div>
+
+    
+    <div class="row adn-2-1">
+        <div class="card" id="lookup">
+            <div class="card-head"><h3>🔎 Member lookup</h3><span class="sub">member ID, name, mobile or email</span></div>
+            <form class="adn-search" method="GET" action="http://localhost/admin/dashboard-new#lookup">
+                                    <input type="hidden" name="period" value="all">
+                                <input type="search" name="q" value="" placeholder="e.g. HGNL1597 or Rahul or 98xxxxxx" autocomplete="off">
+                <button class="adn-btn" type="submit">Search</button>
+            </form>
+                            <div class="sub" style="margin-top:16px;">Quick links</div>
+                <div class="adn-quick">
+                    <a href="http://localhost/admin/users">👥 <span>Users<small>edit, tree, password</small></span></a>
+                    <a href="http://localhost/payments">💳 <span>Payments<small>10 pending</small></span></a>
+                    <a href="http://localhost/payouts">🏦 <span>Payouts<small>2 pending</small></span></a>
+                    <a href="http://localhost/admin/packages">📦 <span>Packages<small>bonuses &amp; pairing</small></span></a>
+                    <a href="http://localhost/support">🆘 <span>Support<small>0 to answer</small></span></a>
+                    <a href="http://localhost/lucky">🎁 <span>Lucky draw<small>7 active</small></span></a>
+                </div>
+                    </div>
+        <div class="card">
+            <div class="card-head"><h3>🌐 Network snapshot</h3><span class="sub">now</span></div>
+            <div class="adn-stats">
+                <div class="adn-stat"><b>608</b><span>Total members</span></div>
+                <div class="adn-stat"><b style="color:var(--ok)">208</b><span>With a package (34%)</span></div>
+                <div class="adn-stat"><b style="color:var(--warn)">400</b><span>No package yet</span></div>
+                <div class="adn-stat"><b>1</b><span>EMIs completed · 207 ongoing</span></div>
+            </div>
+            <div style="margin-top:16px;">
+                <div class="sub" style="margin-bottom:6px;">Members by state</div>
+                                                    <div class="adn-list-row" style="padding:6px 0;">
+                        <span style="min-width:110px">Himachal Pradesh</span>
+                        <div class="bar" style="flex:1"><i style="width: 100%"></i></div>
+                        <b style="min-width:40px;text-align:right">568</b>
+                    </div>
+                                    <div class="adn-list-row" style="padding:6px 0;">
+                        <span style="min-width:110px">Bihar</span>
+                        <div class="bar" style="flex:1"><i style="width: 2.2887323943662%"></i></div>
+                        <b style="min-width:40px;text-align:right">13</b>
+                    </div>
+                                    <div class="adn-list-row" style="padding:6px 0;">
+                        <span style="min-width:110px">Assam</span>
+                        <div class="bar" style="flex:1"><i style="width: 1.4084507042254%"></i></div>
+                        <b style="min-width:40px;text-align:right">8</b>
+                    </div>
+                                    <div class="adn-list-row" style="padding:6px 0;">
+                        <span style="min-width:110px">Goa</span>
+                        <div class="bar" style="flex:1"><i style="width: 0.88028169014085%"></i></div>
+                        <b style="min-width:40px;text-align:right">5</b>
+                    </div>
+                                    <div class="adn-list-row" style="padding:6px 0;">
+                        <span style="min-width:110px">Chhattisgarh</span>
+                        <div class="bar" style="flex:1"><i style="width: 0.70422535211268%"></i></div>
+                        <b style="min-width:40px;text-align:right">4</b>
+                    </div>
+                                    <div class="adn-list-row" style="padding:6px 0;">
+                        <span style="min-width:110px">Arunachal Pradesh</span>
+                        <div class="bar" style="flex:1"><i style="width: 0.52816901408451%"></i></div>
+                        <b style="min-width:40px;text-align:right">3</b>
+                    </div>
+                                    <div class="adn-list-row" style="padding:6px 0;">
+                        <span style="min-width:110px">Gujarat</span>
+                        <div class="bar" style="flex:1"><i style="width: 0.35211267605634%"></i></div>
+                        <b style="min-width:40px;text-align:right">2</b>
+                    </div>
+                                    <div class="adn-list-row" style="padding:6px 0;">
+                        <span style="min-width:110px">Not set</span>
+                        <div class="bar" style="flex:1"><i style="width: 0.17605633802817%"></i></div>
+                        <b style="min-width:40px;text-align:right">1</b>
+                    </div>
+                            </div>
+        </div>
+    </div>
+
+    
+    <div class="card" style="margin-bottom:18px;">
+        <div class="card-head">
+            <h3>🕒 Recent activity</h3>
+            <div class="adn-tabs" data-tabs="recent">
+                <button class="on" data-tab="orders">Top-ups</button>
+                <button data-tab="members">New members</button>
+                <button data-tab="income">Income credits</button>
+            </div>
+        </div>
+        <div data-tab-panel="orders" class="on"><div class="adn-table-wrap"><table>
+            <thead><tr><th>#</th><th>Member</th><th>Package</th><th class="num-cell">Amount</th><th>Paid by</th><th>Via</th><th>When</th></tr></thead>
+            <tbody>
+                            <tr>
+                    <td class="mono">356</td>
+                    <td class="who"><b><a href="http://localhost/admin/users/598/edit">HGNL1598</a></b><span>L1597</span></td>
+                    <td>HIMALAYA BALANCE</td>
+                    <td class="num-cell"><b>₹1,600</b></td>
+                    <td>HGNL1598</td>
+                    <td><span class="pill mute">Wallet</span></td>
+                    <td class="sub">30 Sep, 11:38 AM</td>
+                </tr>
+                            <tr>
+                    <td class="mono">355</td>
+                    <td class="who"><b><a href="http://localhost/admin/users/598/edit">HGNL1598</a></b><span>L1597</span></td>
+                    <td>Starter Package</td>
+                    <td class="num-cell"><b>₹1,000</b></td>
+                    <td>HGNL1598</td>
+                    <td><span class="pill mute">Wallet</span></td>
+                    <td class="sub">30 Sep, 11:34 AM</td>
+                </tr>
+                            <tr>
+                    <td class="mono">354</td>
+                    <td class="who"><b><a href="http://localhost/admin/users/606/edit">HGNL1606</a></b><span>G</span></td>
+                    <td>Fifty Thousand Golden Package</td>
+                    <td class="num-cell"><b>₹50,000</b></td>
+                    <td>HGNL1600</td>
+                    <td><span class="pill mute">Wallet</span></td>
+                    <td class="sub">09 Aug, 12:52 PM</td>
+                </tr>
+                            <tr>
+                    <td class="mono">353</td>
+                    <td class="who"><b><a href="http://localhost/admin/users/602/edit">HGNL1602</a></b><span>C</span></td>
+                    <td>Starter Package</td>
+                    <td class="num-cell"><b>₹1,000</b></td>
+                    <td>HGNL1598</td>
+                    <td><span class="pill mute">Wallet</span></td>
+                    <td class="sub">04 Aug, 12:21 PM</td>
+                </tr>
+                            <tr>
+                    <td class="mono">352</td>
+                    <td class="who"><b><a href="http://localhost/admin/users/601/edit">HGNL1601</a></b><span>B</span></td>
+                    <td>Starter Package</td>
+                    <td class="num-cell"><b>₹1,000</b></td>
+                    <td>HGNL1598</td>
+                    <td><span class="pill mute">Wallet</span></td>
+                    <td class="sub">04 Aug, 12:20 PM</td>
+                </tr>
+                            <tr>
+                    <td class="mono">351</td>
+                    <td class="who"><b><a href="http://localhost/admin/users/601/edit">HGNL1601</a></b><span>B</span></td>
+                    <td>Starter Package</td>
+                    <td class="num-cell"><b>₹1,000</b></td>
+                    <td>HGNL1598</td>
+                    <td><span class="pill mute">Wallet</span></td>
+                    <td class="sub">04 Aug, 12:19 PM</td>
+                </tr>
+                            <tr>
+                    <td class="mono">350</td>
+                    <td class="who"><b><a href="http://localhost/admin/users/602/edit">HGNL1602</a></b><span>C</span></td>
+                    <td>Starter Package</td>
+                    <td class="num-cell"><b>₹1,600</b></td>
+                    <td>HGNL1598</td>
+                    <td><span class="pill mute">Wallet</span></td>
+                    <td class="sub">04 Aug, 12:09 PM</td>
+                </tr>
+                            <tr>
+                    <td class="mono">349</td>
+                    <td class="who"><b><a href="http://localhost/admin/users/601/edit">HGNL1601</a></b><span>B</span></td>
+                    <td>Starter Package</td>
+                    <td class="num-cell"><b>₹1,600</b></td>
+                    <td>HGNL1598</td>
+                    <td><span class="pill mute">Wallet</span></td>
+                    <td class="sub">04 Aug, 12:08 PM</td>
+                </tr>
+                            <tr>
+                    <td class="mono">338</td>
+                    <td class="who"><b><a href="http://localhost/admin/users/599/edit">HGNL1599</a></b><span>R1597</span></td>
+                    <td>Starter Package</td>
+                    <td class="num-cell"><b>₹1,000</b></td>
+                    <td>HGNL1597</td>
+                    <td><span class="pill mute">Wallet</span></td>
+                    <td class="sub">02 Aug, 10:52 AM</td>
+                </tr>
+                            <tr>
+                    <td class="mono">337</td>
+                    <td class="who"><b><a href="http://localhost/admin/users/599/edit">HGNL1599</a></b><span>R1597</span></td>
+                    <td>Starter Package</td>
+                    <td class="num-cell"><b>₹1,600</b></td>
+                    <td>HGNL1597</td>
+                    <td><span class="pill mute">Wallet</span></td>
+                    <td class="sub">02 Aug, 10:52 AM</td>
+                </tr>
+                        </tbody>
+        </table></div></div>
+        <div data-tab-panel="members"><div class="adn-table-wrap"><table>
+            <thead><tr><th>Member</th><th>Sponsor</th><th>Leg</th><th>Status</th><th>Joined</th><th></th></tr></thead>
+            <tbody>
+                            <tr>
+                    <td class="who"><b>HGNL1611</b><span>ssfsf</span></td>
+                    <td>HGNL1597</td>
+                    <td>Right</td>
+                    <td><span class="pill warn">No package</span></td>
+                    <td class="sub">02 Aug 2026, 10:55 AM</td>
+                    <td><div class="actions"><a class="adn-btn sm ghost" href="http://localhost/admin/users/611/edit">Edit</a><a class="adn-btn sm ghost" href="http://localhost/admin/user-tree/611">Tree</a></div></td>
+                </tr>
+                            <tr>
+                    <td class="who"><b>HGNL1610</b><span>K</span></td>
+                    <td>HGNL1604</td>
+                    <td>Right</td>
+                    <td><span class="pill warn">No package</span></td>
+                    <td class="sub">30 Jun 2026, 11:30 AM</td>
+                    <td><div class="actions"><a class="adn-btn sm ghost" href="http://localhost/admin/users/610/edit">Edit</a><a class="adn-btn sm ghost" href="http://localhost/admin/user-tree/610">Tree</a></div></td>
+                </tr>
+                            <tr>
+                    <td class="who"><b>HGNL1609</b><span>J</span></td>
+                    <td>HGNL1604</td>
+                    <td>Left</td>
+                    <td><span class="pill warn">No package</span></td>
+                    <td class="sub">30 Jun 2026, 11:29 AM</td>
+                    <td><div class="actions"><a class="adn-btn sm ghost" href="http://localhost/admin/users/609/edit">Edit</a><a class="adn-btn sm ghost" href="http://localhost/admin/user-tree/609">Tree</a></div></td>
+                </tr>
+                            <tr>
+                    <td class="who"><b>HGNL1608</b><span>I</span></td>
+                    <td>HGNL1603</td>
+                    <td>Right</td>
+                    <td><span class="pill warn">No package</span></td>
+                    <td class="sub">30 Jun 2026, 11:27 AM</td>
+                    <td><div class="actions"><a class="adn-btn sm ghost" href="http://localhost/admin/users/608/edit">Edit</a><a class="adn-btn sm ghost" href="http://localhost/admin/user-tree/608">Tree</a></div></td>
+                </tr>
+                            <tr>
+                    <td class="who"><b>HGNL1607</b><span>H</span></td>
+                    <td>HGNL1603</td>
+                    <td>Left</td>
+                    <td><span class="pill warn">No package</span></td>
+                    <td class="sub">30 Jun 2026, 11:26 AM</td>
+                    <td><div class="actions"><a class="adn-btn sm ghost" href="http://localhost/admin/users/607/edit">Edit</a><a class="adn-btn sm ghost" href="http://localhost/admin/user-tree/607">Tree</a></div></td>
+                </tr>
+                            <tr>
+                    <td class="who"><b>HGNL1606</b><span>G</span></td>
+                    <td>HGNL1602</td>
+                    <td>Right</td>
+                    <td><span class="pill ok">Active</span></td>
+                    <td class="sub">30 Jun 2026, 11:24 AM</td>
+                    <td><div class="actions"><a class="adn-btn sm ghost" href="http://localhost/admin/users/606/edit">Edit</a><a class="adn-btn sm ghost" href="http://localhost/admin/user-tree/606">Tree</a></div></td>
+                </tr>
+                            <tr>
+                    <td class="who"><b>HGNL1605</b><span>F</span></td>
+                    <td>HGNL1602</td>
+                    <td>Left</td>
+                    <td><span class="pill ok">Active</span></td>
+                    <td class="sub">30 Jun 2026, 11:23 AM</td>
+                    <td><div class="actions"><a class="adn-btn sm ghost" href="http://localhost/admin/users/605/edit">Edit</a><a class="adn-btn sm ghost" href="http://localhost/admin/user-tree/605">Tree</a></div></td>
+                </tr>
+                            <tr>
+                    <td class="who"><b>HGNL1604</b><span>E</span></td>
+                    <td>HGNL1601</td>
+                    <td>Right</td>
+                    <td><span class="pill ok">Active</span></td>
+                    <td class="sub">30 Jun 2026, 11:22 AM</td>
+                    <td><div class="actions"><a class="adn-btn sm ghost" href="http://localhost/admin/users/604/edit">Edit</a><a class="adn-btn sm ghost" href="http://localhost/admin/user-tree/604">Tree</a></div></td>
+                </tr>
+                        </tbody>
+        </table></div></div>
+        <div data-tab-panel="income"><div class="adn-table-wrap"><table>
+            <thead><tr><th>Member</th><th>Type</th><th class="num-cell">Amount</th><th>When</th></tr></thead>
+            <tbody>
+                            <tr>
+                    <td class="who"><b><a href="http://localhost/admin/users/17/edit">HGNL1017</a></b><span>Devender kumar</span></td>
+                    <td><span class="pill info">Pair Income</span></td>
+                    <td class="num-cell"><b>₹300</b></td>
+                    <td class="sub">30 Sep, 11:38 AM</td>
+                </tr>
+                            <tr>
+                    <td class="who"><b><a href="http://localhost/admin/users/17/edit">HGNL1017</a></b><span>Devender kumar</span></td>
+                    <td><span class="pill info">Pair Income</span></td>
+                    <td class="num-cell"><b>₹100</b></td>
+                    <td class="sub">30 Sep, 11:34 AM</td>
+                </tr>
+                            <tr>
+                    <td class="who"><b><a href="http://localhost/admin/users/600/edit">HGNL1600</a></b><span>A</span></td>
+                    <td><span class="pill info">Pair Income</span></td>
+                    <td class="num-cell"><b>₹100</b></td>
+                    <td class="sub">04 Aug, 12:21 PM</td>
+                </tr>
+                            <tr>
+                    <td class="who"><b><a href="http://localhost/admin/users/2/edit">HGNL1002</a></b><span>HGNLPAY</span></td>
+                    <td><span class="pill info">Pair Income</span></td>
+                    <td class="num-cell"><b>₹330</b></td>
+                    <td class="sub">04 Aug, 12:19 PM</td>
+                </tr>
+                            <tr>
+                    <td class="who"><b><a href="http://localhost/admin/users/5/edit">HGNL1005</a></b><span>BBB</span></td>
+                    <td><span class="pill info">Pair Income</span></td>
+                    <td class="num-cell"><b>₹110</b></td>
+                    <td class="sub">04 Aug, 12:19 PM</td>
+                </tr>
+                            <tr>
+                    <td class="who"><b><a href="http://localhost/admin/users/10/edit">HGNL1010</a></b><span>ISRO Thakur</span></td>
+                    <td><span class="pill info">Pair Income</span></td>
+                    <td class="num-cell"><b>₹3,300</b></td>
+                    <td class="sub">04 Aug, 12:19 PM</td>
+                </tr>
+                            <tr>
+                    <td class="who"><b><a href="http://localhost/admin/users/11/edit">HGNL1011</a></b><span>SONU</span></td>
+                    <td><span class="pill info">Pair Income</span></td>
+                    <td class="num-cell"><b>₹1,320</b></td>
+                    <td class="sub">04 Aug, 12:19 PM</td>
+                </tr>
+                            <tr>
+                    <td class="who"><b><a href="http://localhost/admin/users/17/edit">HGNL1017</a></b><span>Devender kumar</span></td>
+                    <td><span class="pill info">Pair Income</span></td>
+                    <td class="num-cell"><b>₹5,000</b></td>
+                    <td class="sub">04 Aug, 12:19 PM</td>
+                </tr>
+                            <tr>
+                    <td class="who"><b><a href="http://localhost/admin/users/580/edit">HGNL1580</a></b><span>user a</span></td>
+                    <td><span class="pill info">Pair Income</span></td>
+                    <td class="num-cell"><b>₹710</b></td>
+                    <td class="sub">04 Aug, 12:19 PM</td>
+                </tr>
+                            <tr>
+                    <td class="who"><b><a href="http://localhost/admin/users/583/edit">HGNL1583</a></b><span>user d</span></td>
+                    <td><span class="pill info">Pair Income</span></td>
+                    <td class="num-cell"><b>₹410</b></td>
+                    <td class="sub">04 Aug, 12:19 PM</td>
+                </tr>
+                        </tbody>
+        </table></div></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    // ---------- tabs ----------
+    function openTab(group, name) {
+        group.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+        const card = group.closest('.card');
+        card.querySelectorAll('[data-tab-panel]').forEach(p => p.classList.toggle('on', p.dataset.tabPanel === name));
+    }
+    document.querySelectorAll('[data-tabs]').forEach(group => {
+        group.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => openTab(group, btn.dataset.tab)));
+    });
+    document.querySelectorAll('[data-open-tab]').forEach(a => a.addEventListener('click', () => {
+        openTab(document.querySelector('[data-tabs="actions"]'), a.dataset.openTab);
+    }));
+
+    // ---------- reject with reason ----------
+    document.querySelectorAll('form[data-reject]').forEach(form => form.addEventListener('submit', e => {
+        const reason = prompt('Reason for rejecting (sent to the member):', '');
+        if (reason === null) { e.preventDefault(); return; }
+        form.querySelector('[name="reject_reason"]').value = reason;
+    }));
+
+    if (typeof Chart === 'undefined') return;
+
+    // ---------- charts ----------
+    const C = { ok: '#a7ff1e', info: '#5cc8ff', warn: '#ffb547', bad: '#ff5c7a', violet: '#b38cff', teal: '#3fd0b0', grid: '#1b222b', text: '#8b98a5' };
+    Chart.defaults.color = C.text;
+    Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+    Chart.defaults.font.size = 11;
+    const inr = v => '₹' + Number(v).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+    const short = v => v >= 1e7 ? '₹' + (v / 1e7).toFixed(1) + 'Cr' : v >= 1e5 ? '₹' + (v / 1e5).toFixed(1) + 'L' : v >= 1e3 ? '₹' + (v / 1e3).toFixed(0) + 'k' : '₹' + v;
+    const grid = { color: C.grid, drawBorder: false };
+
+    const S = {"monthly":true,"labels":["Mar 2026","Apr 2026","May 2026","Jun 2026","Jul 2026","Aug 2026","Sep 2026","Oct 2026"],"business":[180400,255000,107300,155397,1000,58800,2600,0],"members":[526,59,5,18,0,1,0,0],"income":[33800,36130,17445,93360,0,27980,400,0],"funds":[0,0,0,1499999,0,50000,0,0],"payouts":[0,0,0,0,0,0,0,0]};
+    const trendSets = {
+        growth: {
+            datasets: [
+                { type: 'bar', label: 'Business', data: S.business, backgroundColor: 'rgba(167,255,30,.55)', borderRadius: 4, yAxisID: 'y' },
+                { type: 'line', label: 'Income paid', data: S.income, borderColor: C.warn, backgroundColor: C.warn, tension: .35, pointRadius: 2, yAxisID: 'y' },
+            ],
+            money: true,
+        },
+        members: {
+            datasets: [{ type: 'bar', label: 'New members', data: S.members, backgroundColor: 'rgba(92,200,255,.6)', borderRadius: 4, yAxisID: 'y' }],
+            money: false,
+        },
+        cash: {
+            datasets: [
+                { type: 'bar', label: 'Funds added', data: S.funds, backgroundColor: 'rgba(167,255,30,.55)', borderRadius: 4, yAxisID: 'y' },
+                { type: 'bar', label: 'Withdrawals paid', data: S.payouts.map(v => -v), backgroundColor: 'rgba(255,92,122,.6)', borderRadius: 4, yAxisID: 'y' },
+            ],
+            money: true,
+        },
+    };
+    const trend = new Chart(document.getElementById('adnTrend'), {
+        data: { labels: S.labels, datasets: trendSets.growth.datasets },
+        options: {
+            maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10 } }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + (trendSets.current?.money === false ? c.parsed.y : inr(Math.abs(c.parsed.y))) } } },
+            scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } }, y: { grid, ticks: { callback: v => (trendSets.current?.money === false ? v : short(Math.abs(v))) } } },
+        },
+    });
+    trendSets.current = trendSets.growth;
+    document.querySelectorAll('[data-chart-switch="trend"] button').forEach(btn => btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+        trendSets.current = trendSets[btn.dataset.series];
+        trend.data.datasets = trendSets.current.datasets;
+        trend.update();
+    }));
+
+    const incomeRows = [{"type":"pair_bonus_normal","label":"Pair Income","entries":275,"earners":49,"total":96950},{"type":"direct_income","label":"Direct Income","entries":214,"earners":136,"total":29140},{"type":"pair_bonus_2000","label":"Pair Bonus 2000","entries":10,"earners":10,"total":21000},{"type":"reward","label":"Reward","entries":4,"earners":1,"total":20000},{"type":"commission","label":"Level Commission","entries":28,"earners":8,"total":18325},{"type":"level_income","label":"Level Income","entries":27,"earners":6,"total":13100},{"type":"reward_after_full_emi","label":"EMI Completion Reward","entries":2,"earners":1,"total":10000},{"type":"pair_bonus_starter","label":"Starter Pair Income","entries":2,"earners":2,"total":600}];
+    const incomeEl = document.getElementById('adnIncome');
+    if (incomeEl && incomeRows.length) {
+        const colors = [C.ok, C.info, C.warn, C.violet, C.teal, C.bad, '#f5e663', '#9aa5b1', '#ff9ad5'];
+        new Chart(incomeEl, {
+            type: 'doughnut',
+            data: { labels: incomeRows.map(r => r.label), datasets: [{ data: incomeRows.map(r => r.total), backgroundColor: colors, borderColor: '#10171f', borderWidth: 3 }] },
+            options: { maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.label + ': ' + inr(c.parsed) } } } },
+        });
+        const total = incomeRows.reduce((s, r) => s + r.total, 0);
+        document.getElementById('adnIncomeLegend').innerHTML = incomeRows.map((r, i) =>
+            `<div><i style="background:${colors[i % colors.length]}"></i><span>${r.label} <small>(${r.earners} members)</small></span><b>${inr(r.total)}</b><small style="color:${C.text};width:40px;text-align:right">${(r.total / total * 100).toFixed(0)}%</small></div>`
+        ).join('');
+    }
+
+})();
+</script>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const sidebar = document.getElementById('sidebar');
+    const toggle  = document.getElementById('toggleBtn');
+    const overlay = document.getElementById('sidebarOverlay');
+    const main    = document.querySelector('main');
+
+    function openSidebar(){
+        sidebar.classList.add('open');
+        document.body.classList.add('sidebar-open');
+    }
+
+    function closeSidebar(){
+        sidebar.classList.remove('open');
+        document.body.classList.remove('sidebar-open');
+    }
+
+    /* Toggle */
+    if(toggle){
+        toggle.addEventListener('click', function(){
+            if(window.innerWidth <= 768){
+                sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+            }
+        });
+    }
+
+    /* Click on overlay */
+    overlay.addEventListener('click', closeSidebar);
+
+    /* Click on main content */
+    main.addEventListener('click', function(){
+        if(window.innerWidth <= 768 && sidebar.classList.contains('open')){
+            closeSidebar();
+        }
+    });
+
+    /* Sidebar link click */
+    document.querySelectorAll('.sidebar a').forEach(link=>{
+        link.addEventListener('click', function(){
+            if(window.innerWidth <= 768){
+                closeSidebar();
+            }
+        });
+    });
+
+    /* ESC key */
+    document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape'){
+            closeSidebar();
+        }
+    });
+});
+</script>
+<script>
+document.querySelectorAll('.team-menu').forEach(menu => {
+    menu.addEventListener('click', () => {
+        const parent = menu.closest('.team-item');
+
+        // Close others (optional – accordion behavior)
+        document.querySelectorAll('.team-item').forEach(item => {
+            if (item !== parent) item.classList.remove('open');
+        });
+
+        parent.classList.toggle('open');
+    });
+});
+</script>
+
+</body>
+</html>

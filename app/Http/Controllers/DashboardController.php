@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Services\MailNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -179,12 +179,50 @@ class DashboardController extends Controller
         $fiftyKTotal = $packageSums['50000.00'] ?? 0;
         $oneLakhTotal = $packageSums['100000.00'] ?? 0;
         // $totalLevelIncome = DB::table('transactions')->where('user_id', $user->id)->where('type', 'credit')->where('remarks', 'like', 'Level Income%')->sum('amount');
-        $totalLevelIncome = DB::table('transactions')
-    ->where('user_id', $user->id)
-    ->where('type', 'credit')
-    ->where('bonus_type', BonusType::LevelIncome->value)
-    ->sum('amount');
-// dd($totalLevelIncome);
+        $totalLevelIncome = DB::table('transactions')->where('user_id', $user->id)->where('type', 'credit')->where('bonus_type', BonusType::LevelIncome->value)->sum('amount');
+        // dd($totalLevelIncome);
+        // ============================
+// 📦 Product / Package Sales Stats (Today & All-Time)
+// Assumes: orders(package_id, amount, status, created_at) + packages(id, name)
+// ============================
+
+$todayPackageStats = DB::table('orders')
+    ->join('packages', 'packages.id', '=', 'orders.package_id')
+    ->select(
+        'packages.id as package_id',
+        'packages.name as package_name',
+        DB::raw('COUNT(orders.id) as qty'),
+        DB::raw('SUM(orders.amount) as amount')
+    )
+    ->whereBetween('orders.created_at', [$startOfTodayIST, $endOfTodayIST])
+    ->where('orders.status', 'completed') // remove if orders has no status column
+    ->groupBy('packages.id', 'packages.name')
+    ->orderByDesc('amount')
+    ->get();
+
+$allTimePackageStats = DB::table('orders')
+    ->join('packages', 'packages.id', '=', 'orders.package_id')
+    ->select(
+        'packages.id as package_id',
+        'packages.name as package_name',
+        DB::raw('COUNT(orders.id) as qty'),
+        DB::raw('SUM(orders.amount) as amount')
+    )
+    ->where('orders.status', 'completed') // remove if orders has no status column
+    ->groupBy('packages.id', 'packages.name')
+    ->orderByDesc('amount')
+    ->get();
+
+// These two power the summary-strip you pasted
+$todayPackageTotals = [
+    'qty'    => $todayPackageStats->sum('qty'),
+    'amount' => $todayPackageStats->sum('amount'),
+];
+
+$allTimePackageTotals = [
+    'qty'    => $allTimePackageStats->sum('qty'),
+    'amount' => $allTimePackageStats->sum('amount'),
+];
         if ($user->hasRole('customer')) {
             // 1️⃣ Payouts
             // dd($user->id);
@@ -197,6 +235,17 @@ class DashboardController extends Controller
             // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Direct 10% Commission%')->sum('amount');
             // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', '%Commission%')->sum('amount');
             // $pairIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
+            // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('bonus_type', BonusType::DirectIncome->value)->sum('amount');
+
+            // $pairIncome = DB::table('transactions')
+            //     ->where('user_id', $user->id)
+            //     ->whereIn('bonus_type', [
+            //         BonusType::PairBonusNormal->value,
+            //         // BonusType::PairBonus2000->value,
+            //         BonusType::PairBonus->value,
+            //     ])
+            //     ->sum('amount');
+
             $directIncome = DB::table('transactions')
     ->where('user_id', $user->id)
     ->where('bonus_type', BonusType::DirectIncome->value)
@@ -206,14 +255,28 @@ $pairIncome = DB::table('transactions')
     ->where('user_id', $user->id)
     ->whereIn('bonus_type', [
         BonusType::PairBonusNormal->value,
+        BonusType::PairBonusStarter->value,
         // BonusType::PairBonus2000->value,
         BonusType::PairBonus->value,
     ])
     ->sum('amount');
 
+$sponsorBinaryIncome = DB::table('transactions')
+    ->where('user_id', $user->id)
+    ->where('bonus_type', BonusType::SponsorBinaryBonus->value)
+    ->sum('amount');
+
+$rankRewardIncome = DB::table('transactions')
+    ->where('user_id', $user->id)
+    ->where('bonus_type', BonusType::RankReward->value)
+    ->sum('amount');
+
+$rankProgress = \App\Services\RankRewardService::progressFor($user->id);
+$rankLadder = \App\Services\RankRewardService::ladder();
+
             // 3️⃣ Wallet & Earnings
             $walletBalance = DB::table('wallets')->where('user_id', $user->id)->value('balance') ?? 0;
-            $totalEarning = $directIncome + $pairIncome;
+            $totalEarning = $directIncome + $pairIncome + $sponsorBinaryIncome + $rankRewardIncome;
 
             // 4️⃣ Total Downline (Global)
             // $totalDownline = DB::table('users')->where('sponsor_id', $user->id)->orWhere('placement_id', $user->id)->count();
@@ -273,11 +336,17 @@ $pairIncome = DB::table('transactions')
                 $rewards = DB::table('lucky_rewards')->where('cycle_id', $cycle->id)->get();
             }
             // dd($totalDownline, $leftDownline, $rightDownline);
-            return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'walletBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning', 'progress', 'totalLevelIncome'));
+            return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'sponsorBinaryIncome', 'rankRewardIncome', 'rankProgress', 'rankLadder', 'walletBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning', 'progress', 'totalLevelIncome'));
         }
 
         // Admin dashboard view
-        return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal', 'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData'));
+        // return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal', 'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData'));
+        return view('dashboard', compact(
+    'user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws',
+    'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal',
+    'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData',
+    'todayPackageStats', 'allTimePackageStats', 'todayPackageTotals', 'allTimePackageTotals'
+));
     }
     private function crawlAndForceSide($node, $side, &$list)
     {

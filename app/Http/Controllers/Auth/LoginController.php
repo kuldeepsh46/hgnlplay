@@ -43,4 +43,15 @@ class LoginController extends Controller
 {
     return 'member_id';
 }
+
+    /**
+     * The Log out button on the "temporarily paused" page sends to=login,
+     * so the person lands on the login form instead of the paused page.
+     */
+    protected function loggedOut(Request $request)
+    {
+        if ($request->input('to') === 'login') {
+            return redirect('/login');
+        }
+    }
 }
