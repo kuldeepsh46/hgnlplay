@@ -80,7 +80,7 @@
 
             <button type="button"
                     class="btn-action"
-                    style="background:#6c757d; color:#fff;"
+                    style="background:#6c757d; color:#203c30;"
                     onclick="hidePayoutRejectBox({{ $row->id }})">
                 Cancel
             </button>

@@ -14,7 +14,7 @@
             justify-content: center;
             padding: 40px 0;
             box-sizing: border-box;
-            background: radial-gradient(circle at 30% -20%, #1a2a1f 0%, transparent 60%), #06090c;
+            background: radial-gradient(circle at 30% -20%, #e5f2e6 0%, transparent 60%), #f0f8ef;
             font-family: 'Inter', sans-serif;
         }
 
@@ -23,8 +23,8 @@
             width: 95%;
             max-width: 1100px;
             /* Wider for desktop consistency */
-            background-color: #10171f;
-            border: 1px solid #1b222b;
+            background-color: #ffffff;
+            border: 1px solid #e5f2e6;
             border-radius: 16px;
             padding: 60px;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
@@ -36,7 +36,7 @@
             display: flex;
             align-items: center;
             margin-bottom: 50px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(40, 100, 65, 0.05);
             padding-bottom: 30px;
         }
 
@@ -62,17 +62,17 @@
             font-size: 32px;
             margin: 0;
             font-weight: 800;
-            color: #fff;
+            color: #203c30;
             letter-spacing: -0.5px;
         }
 
         .brand-accent {
-            color: #a7ff1e;
+            color: #23845b;
             /* Neon Green matched to Register form */
         }
 
         .brand-text p {
-            color: #a0acb3;
+            color: #586d63;
             margin: 5px 0 0 0;
             font-size: 15px;
         }
@@ -97,7 +97,7 @@
         .login-field label {
             font-size: 12px;
             text-transform: uppercase;
-            color: #a0acb3;
+            color: #586d63;
             margin-bottom: 10px;
             font-weight: 700;
             letter-spacing: 1px;
@@ -108,9 +108,9 @@
             width: 100%;
             padding: 18px;
             border-radius: 8px;
-            border: 1px solid #1b222b;
-            background-color: #0b0e12;
-            color: #fff;
+            border: 1px solid #e5f2e6;
+            background-color: #f0f8ef;
+            color: #203c30;
             font-size: 16px;
             transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-sizing: border-box;
@@ -118,15 +118,15 @@
 
         .login-input:focus {
             outline: none;
-            border-color: #a7ff1e;
-            background-color: #0d1218;
+            border-color: #23845b;
+            background-color: #ffffff;
             box-shadow: 0 0 15px rgba(167, 255, 30, 0.1);
         }
 
         .forgot-link {
             align-self: flex-end;
             font-size: 13px;
-            color: #a7ff1e;
+            color: #23845b;
             text-decoration: none;
             margin-top: 10px;
             font-weight: 600;
@@ -146,7 +146,7 @@
         }
 
         .hgnl-btn-primary {
-            background-color: #a7ff1e;
+            background-color: #23845b;
             color: #000;
             font-weight: 800;
             border: none;
@@ -166,9 +166,9 @@
 
         .hgnl-btn-secondary {
             background: transparent;
-            color: #a7ff1e;
+            color: #23845b;
             font-weight: 700;
-            border: 2px solid #a7ff1e;
+            border: 2px solid #23845b;
             border-radius: 10px;
             padding: 18px;
             font-size: 14px;

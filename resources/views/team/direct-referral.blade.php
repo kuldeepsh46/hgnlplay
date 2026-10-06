@@ -3,12 +3,12 @@
 @section('main')
     <style>
         :root {
-            --bg: #0b0e12;
-            --card: #10171f;
-            --sidebar: #0f141b;
-            --accent: #a7ff1e;
-            --text: #e9eef3;
-            --muted: #a0acb3;
+            --bg: #f0f8ef;
+            --card: #ffffff;
+            --sidebar: #ffffff;
+            --accent: #23845b;
+            --text: #203c30;
+            --muted: #52695f;
         }
 
         body {
@@ -29,7 +29,7 @@
         }
 
         .user-info {
-            background: #141c22;
+            background: #ffffff;
             padding: 8px 14px;
             border-radius: 999px;
             color: var(--accent);
@@ -37,8 +37,8 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(40, 100, 65, 0.02);
+            border: 1px solid rgba(40, 100, 65, 0.05);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
@@ -53,23 +53,23 @@
 
         th,
         td {
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(40, 100, 65, 0.1);
             padding: 10px;
             text-align: left;
             font-size: 14px;
         }
 
         th {
-            background: #161f29;
-            color: #a9b9c7;
+            background: #e5f2e6;
+            color: #203c30;
         }
 
         td {
-            color: #d4dee8;
+            color: #203c30;
         }
 
         tr:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(40, 100, 65, 0.04);
         }
 
         /* ===== Password Modal ===== */
@@ -129,9 +129,9 @@
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #2a3442;
-            background: #0f1620;
-            color: #fff;
+            border: 1px solid #e5f2e6;
+            background: #ffffff;
+            color: #203c30;
         }
 
         /* ===== Header ===== */
@@ -143,7 +143,7 @@
         }
 
         .user-info {
-            background: #141c22;
+            background: #ffffff;
             padding: 8px 14px;
             border-radius: 999px;
             color: var(--accent);
@@ -176,24 +176,24 @@
         .table th,
         .table td {
             padding: 12px 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(40, 100, 65, 0.08);
             text-align: left;
             font-size: 14px;
             white-space: nowrap;
         }
 
         .table th {
-            background: #161f29;
-            color: #a9b9c7;
+            background: #e5f2e6;
+            color: #203c30;
             font-weight: 600;
         }
 
         .table td {
-            color: #e3ebf3;
+            color: #203c30;
         }
 
         .table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(40, 100, 65, 0.04);
         }
 
         /* ===== Position Badge ===== */
@@ -205,12 +205,12 @@
         }
 
         .badge.left {
-            background: #1f3a1a;
-            color: #a7ff1e;
+            background: #e5f2e6;
+            color: #23845b;
         }
 
         .badge.right {
-            background: #183041;
+            background: #e5f2e6;
             color: #5fd2ff;
         }
 
@@ -288,7 +288,7 @@
                 <button type="submit" class="btn btn-copy" style="width:100%;">Update Password</button>
             </form>
             @if (session('success'))
-                <p style="color:#a7ff1e; text-align:center;">{{ session('success') }}</p>
+                <p style="color:#23845b; text-align:center;">{{ session('success') }}</p>
             @endif
             @if (session('error'))
                 <p style="color:#ff5555; text-align:center;">{{ session('error') }}</p>

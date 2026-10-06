@@ -7,13 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b0e12;
-      --card:#0f141b;
-      --muted:#8b9aa5;
-      --text:#e9eef3;
-      --accent:#a7ff1e;
-      --accent-2:#2ee6a6;
-      --border:#1b222b;
+      --bg:#f0f8ef;
+      --card:#ffffff;
+      --muted:#52695f;
+      --text:#203c30;
+      --accent:#23845b;
+      --accent-2:#218c78;
+      --border:#cddfd3;
       --radius:14px;
       --shadow:0 10px 30px rgba(0,0,0,.45);
     }
@@ -25,14 +25,14 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background: radial-gradient(900px 600px at 30% -10%, #0f1a12 0%, transparent 70%), var(--bg);
+    background: radial-gradient(900px 600px at 30% -10%, #ffffff 0%, transparent 70%), var(--bg);
     overflow: hidden;
 }
     body{
       margin:0;
       padding: 0px;
       font-family:"Inter",-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      background:radial-gradient(900px 600px at 30% -10%,#0f1a12 0%,transparent 70%),var(--bg);
+      background:radial-gradient(900px 600px at 30% -10%,#ffffff 0%,transparent 70%),var(--bg);
       color:var(--text);
       display:flex;
       align-items:center;
@@ -41,8 +41,8 @@
       overflow:hidden;
     }
     .login-container{
-      background:linear-gradient(180deg,#0f1620,#0b1117);
-      border:1px solid #1f2832;
+      background:linear-gradient(180deg,#ffffff,#ffffff);
+      border:1px solid #e5f2e6;
       border-radius:20px;
       padding:40px 35px;
       width:100%;
@@ -56,13 +56,13 @@
       position:absolute;
       inset:-40px;
       background:radial-gradient(circle at 50% 0%,#bfff2d22,transparent 60%),
-                 radial-gradient(circle at 0% 80%,#12d1ff1b,transparent 60%);
+                 radial-gradient(circle at 0% 80%,#327f9e1b,transparent 60%);
       filter:blur(8px);
       z-index:-1;
     }
     .logo{
       width:56px;height:56px;margin:0 auto 14px;border-radius:50%;
-      /* background:conic-gradient(from 120deg,#2ee6a6,#a7ff1e,#12d1ff,#2ee6a6); */
+      /* background:conic-gradient(from 120deg,#218c78,#23845b,#327f9e,#218c78); */
       display:grid;place-items:center;font-weight:900;color:#000;box-shadow:0 0 0 3px #0f141b;
     }
     .brand h1 {
@@ -70,7 +70,7 @@
     margin: 0;
     letter-spacing: .5px;
 }.brand-green {
-    color: #e84e6d;
+    color: #b64f70;
 }
     .logo img {
     width: 60px ;
@@ -85,7 +85,7 @@
       margin-bottom:6px;
     }
     p.subtitle{
-      color:#b2bec7;
+      color:#203c30;
       margin-bottom:30px;
       font-size:14px;
     }
@@ -98,41 +98,41 @@
       display:block;
       font-weight:600;
       margin-bottom:6px;
-      color:#b9c6cf;
+      color:#203c30;
     }
     input{
       width:100%;
       padding:12px 14px;
       border-radius:10px;
-      border:1px solid #24303f;
-      background:#0f1620;
-      color:#fff;
+      border:1px solid #e5f2e6;
+      background:#ffffff;
+      color:#203c30;
       font-size:15px;
       transition:border .25s;
     }
     input:focus{
       outline:none;
-      border-color:#a7ff1e;
-      box-shadow:0 0 10px #a7ff1e33;
+      border-color:#23845b;
+      box-shadow:0 0 10px #23845b33;
     }
    .btn {
     width: 100%;
     padding: 9px !important;
     border: none;
     border-radius: 10px;
-    background: #3f7871 !important;
+    background: #287b62 !important;
     color: #071003;
     font-weight: 700;
     font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 0 0 6px #a7ff1e15;
+    box-shadow: 0 0 0 6px #23845b15;
     transition: all .25s;
     font-size: 21px;
     padding: 20px;
 }
     .btn:hover{
       transform:translateY(-1px);
-      box-shadow:0 0 0 8px #a7ff1e25;
+      box-shadow:0 0 0 8px #23845b25;
     }
     .extra-links{
       margin-top:20px;
@@ -153,6 +153,7 @@
       }
     }
   </style>
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
 </head>
 <body>
 

@@ -12,19 +12,19 @@
 /* MAIN CONTAINER */
 .common-section .container {
     width: 63%;
-    background: linear-gradient(180deg, #0f1620, #0b1117);
-    border: 1px solid #1f2832;
+    background: linear-gradient(180deg, #ffffff, #ffffff);
+    border: 1px solid #e5f2e6;
     border-radius: 20px;
     padding: 35px;
 }
 .input-custom select {
     padding: 9px;
     font-size: 20px;
-    color: #f8f8f8;
+    color: #203c30;
     width: 100%;
     border-radius: 10px;
-    background: #000;
-    border: 1px solid #1f2937;
+    background: #f0f8ef;
+    border: 1px solid #e5f2e6;
 }
 /* INPUTS */
 .input-custom {
@@ -32,19 +32,19 @@
 }
 
 .input-custom .form-control {
-    background: #000;
-    border: 1px solid #1f2937;
-    color: #e7dede;
+    background: #f0f8ef;
+    border: 1px solid #e5f2e6;
+    color: #203c30;
     height: 44px;
     border-radius: 8px;
 }
 
 .input-custom .form-control::placeholder {
-    color: #9ca3af;
+    color: #586d63;
 }
 
 label {
-    color: #cbd5e1;
+    color: #203c30;
     font-weight: 500;
     font-size: 18px !important;
 }
@@ -56,7 +56,7 @@ label {
     height: 56px;
     margin: 0 auto 14px;
     border-radius: 50%;
-    /* background:conic-gradient(from 120deg,#2ee6a6,#a7ff1e,#12d1ff,#2ee6a6); */
+    /* background:conic-gradient(from 120deg,#218c78,#23845b,#327f9e,#218c78); */
     display: grid;
     place-items: center;
     font-weight: 900;
@@ -73,7 +73,7 @@ label {
 }
 
 .brand-green {
-    color: #e84e6d;
+    color: #b64f70;
 }
 
 .logo img {

@@ -92,7 +92,7 @@
 .node-text {
     font-size: 11px;
     font-weight: 600;
-    color: #fff;
+    color: #203c30;
     white-space: nowrap;
 }
 

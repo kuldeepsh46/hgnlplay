@@ -32,7 +32,7 @@ body{
 }
 .header h1{font-size:22px;}
 .user-info{
-  background:#141c22;
+  background:#ffffff;
   padding:8px 14px;
   border-radius:999px;
   color:var(--accent);
@@ -80,11 +80,11 @@ body{
 
 .form-group input[type="file"]{
   width:100%;
-  background:#141c22;
-  border:1px dashed #2a3442;
+  background:#ffffff;
+  border:1px dashed #e5f2e6;
   padding:12px;
   border-radius:10px;
-  color:#fff;
+  color:#203c30;
   cursor:pointer;
 }
 
@@ -121,7 +121,7 @@ body{
 /* ================= KYC PREVIEW ================= */
 .kyc-preview{
   margin-top:22px;
-  background:#0f1620;
+  background:#ffffff;
   border:1px solid var(--border);
   border-radius:12px;
   padding:16px;
@@ -143,7 +143,7 @@ body{
   align-items:center;
   gap:10px;
   padding:8px 0;
-  border-bottom:1px dashed #222c36;
+  border-bottom:1px dashed #e5f2e6;
   flex-wrap:wrap;
 }
 

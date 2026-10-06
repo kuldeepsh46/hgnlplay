@@ -1,0 +1,160 @@
+/* Visual theme only. Rich emerald actions, crisp mint surfaces, and jewel accents. */
+:root {
+    color-scheme: light;
+    --bg: #edf7f1 !important;
+    --bg-dark: #edf7f1 !important;
+    --ink: #edf7f1 !important;
+    --ink-2: #d8eee1 !important;
+    --card: #fff !important;
+    --sidebar: #cde9d8 !important;
+    --text: #142e25 !important;
+    --text-main: #142e25 !important;
+    --text-muted: #496359 !important;
+    --text-dim: #496359 !important;
+    --muted: #496359 !important;
+    --border: #bcd9ca !important;
+    --accent: #08734f !important;
+    --accent2: #5f48aa !important;
+    --accent-2: #5f48aa !important;
+    --accent-blue: #3759a3 !important;
+    --accent-cyan: #087e96 !important;
+    --glass: #fff !important;
+    --glass-strong: #dcefe4 !important;
+    --glass-border: #bcd9ca !important;
+    --line: #bcd9ca !important;
+    --line-soft: #dcebe2 !important;
+    --gold: #a15c0c !important;
+    --gold-2: #a15c0c !important;
+    --teal: #007d69 !important;
+    --teal-2: #007d69 !important;
+    --coral: #bd3e57 !important;
+    --shadow: 0 14px 38px rgba(13, 77, 51, .12) !important;
+    --bs-body-color: #142e25;
+    --bs-body-bg: #edf7f1;
+    --bs-border-color: #bcd9ca;
+    --bs-primary: #08734f;
+    --bs-primary-rgb: 8, 115, 79;
+}
+body { color: var(--text); }
+.sidebar, .mobile-header {
+    background: linear-gradient(160deg, #d7f0df, #b9dec9);
+    border-color: #a7ceb8;
+    box-shadow: 4px 0 24px rgba(13, 77, 51, .06);
+}
+.sidebar ul li:hover, .sidebar ul li.active,
+.submenu li a:hover, .submenu li a.active,
+.team-item.active > .team-menu {
+    background: #08734f;
+    color: #fff;
+    border-left-color: #63dba0;
+}
+.sidebar ul li.active a, .sidebar ul li:hover a { color: inherit; }
+.card, .glass-card, .login-container, .modal-content, body .glass {
+    background-color: #fff;
+    border-color: #bcd9ca;
+    box-shadow: 0 10px 30px rgba(13, 77, 51, .10);
+}
+body .glass:hover { border-color: #79b696; box-shadow: 0 16px 38px rgba(13, 77, 51, .15); }
+.user-info { background: #e8defa; color: #5b3497 !important; }
+/* Explicit foreground/background pairs preserve contrast in every action state. */
+body .btn-primary, body .hgnl-btn-primary, body .hgnl-btn,
+body button.btn:not(.btn-danger):not(.btn-warning):not(.btn-outline):not(.btn-secondary):not(.btn-ghost),
+body .btn-view, body .toggle-btn {
+    background: linear-gradient(135deg, #109467, #056344) !important;
+    border-color: #08734f !important;
+    color: #fff !important;
+    box-shadow: 0 6px 18px rgba(8, 115, 79, .23);
+    transition: background .2s, box-shadow .2s, transform .2s;
+}
+body .btn-primary:hover, body .btn-primary:focus-visible,
+body .hgnl-btn-primary:hover, body .hgnl-btn-primary:focus-visible,
+body .hgnl-btn:hover, body .hgnl-btn:focus-visible,
+body button.btn:not(.btn-danger):not(.btn-warning):not(.btn-outline):not(.btn-secondary):not(.btn-ghost):hover,
+body .btn-view:hover {
+    background: linear-gradient(135deg, #087b54, #034e37) !important;
+    border-color: #034e37 !important;
+    color: #fff !important;
+    box-shadow: 0 9px 24px rgba(8, 115, 79, .30);
+}
+body .btn-ghost, body .btn-outline, body .btn-secondary, body .hgnl-btn-secondary {
+    background: #fff !important;
+    border: 2px solid #08734f !important;
+    color: #066344 !important;
+    box-shadow: none;
+    transition: background .2s, color .2s, border-color .2s, box-shadow .2s;
+}
+body .btn-ghost:hover, body .btn-outline:hover, body .btn-secondary:hover,
+body .hgnl-btn-secondary:hover,
+body .btn-ghost:focus-visible, body .btn-outline:focus-visible,
+body .btn-secondary:focus-visible, body .hgnl-btn-secondary:focus-visible {
+    background: #08734f !important;
+    border-color: #08734f !important;
+    color: #fff !important;
+    box-shadow: 0 6px 18px rgba(8, 115, 79, .20);
+}
+body .btn-danger { background: #b9304b !important; color: #fff !important; }
+body .btn-danger:hover, body .btn-danger:focus-visible { background: #922039 !important; color: #fff !important; }
+body .btn-warning { background: #f5ce72 !important; color: #513507 !important; }
+body .btn-warning:hover, body .btn-warning:focus-visible { background: #e9b94e !important; color: #513507 !important; }
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+select, textarea, .form-control, .form-select {
+    color: #142e25;
+    background-color: #fff;
+    border-color: #a9cbbb;
+    color-scheme: light;
+}
+input::placeholder, textarea::placeholder { color: #60776c; opacity: 1; }
+input[type="checkbox"], input[type="radio"] { accent-color: #08734f; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: none !important; }
+:focus-visible { outline: 3px solid #218e65; outline-offset: 3px; }
+body input:focus, body select:focus, body textarea:focus {
+    border-color: #08734f;
+    box-shadow: 0 0 0 4px rgba(8, 115, 79, .12);
+}
+th { background-color: #d8eee1; color: #194c36; }
+.table { --bs-table-color: #142e25; --bs-table-bg: #fff; --bs-table-border-color: #bcd9ca; }
+.custom-row label, div#passwordModal h2 { color: #142e25 !important; }
+::selection { background: #97ddb5; color: #142e25; }
+.hero-banner {
+    background: radial-gradient(ellipse at 5% 20%, #aee4bf, transparent 60%),
+                radial-gradient(ellipse at 100% 80%, #dcd1f5, transparent 55%), #edf7f1;
+}
+.hero-content h1 { color: #123c2a; }
+.hero-content h1 span { color: #08734f; }
+.hero-eyebrow { color: #5f48aa; }
+.hero-marquee { background: #bfe5cd; border-color: #95c9aa; }
+.home-products { background: #f7fcf9; }
+.testimonial-section { background: #e8e1f4; }
+body .tile:nth-child(4n + 1) { background: #ccebd7; border-color: #9acaaa; }
+body .tile:nth-child(4n + 2) { background: #dce7fb; border-color: #b3c8ec; }
+body .tile:nth-child(4n + 3) { background: #e7dcfa; border-color: #ccbae9; }
+body .tile:nth-child(4n) { background: #fce5b5; border-color: #e6c78c; }
+body .tile:hover { box-shadow: 0 8px 20px rgba(13, 77, 51, .12); }
+/* Login: strong branding on a bright card, with a framed green backdrop. */
+body .hgnl-login-wrapper {
+    background: radial-gradient(ellipse at 12% 15%, #8dd9ac, transparent 55%),
+                radial-gradient(ellipse at 95% 90%, #c6b8ec, transparent 50%),
+                linear-gradient(135deg, #ddf4e5, #f2f8f4 55%, #e9e3f5);
+    padding: 48px 0;
+}
+body .hgnl-login-card {
+    background: linear-gradient(145deg, #fff 75%, #f1faf5);
+    border: 1px solid #a5cdb6;
+    border-top: 6px solid #08734f;
+    border-radius: 24px;
+    box-shadow: 0 24px 65px rgba(16, 75, 48, .18), 0 2px 6px rgba(16, 75, 48, .06);
+}
+body .login-header { border-bottom-color: #c9e1d2; }
+body .login-logo {
+    border: 1px solid #c5e2cf;
+    box-shadow: 0 6px 18px rgba(8, 115, 79, .10);
+    border-radius: 16px;
+}
+body .brand-text h1 { color: #123c2a; }
+body .brand-accent, body .forgot-link { color: #08734f; }
+body .login-field label { color: #264b3a; }
+body .login-input { background: #f8fcf9; border: 1px solid #a9cbbb; border-radius: 12px; }
+body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-spacing: .5px; }
+@media (prefers-reduced-motion: reduce) {
+    body .btn, body .hgnl-btn-primary, body .hgnl-btn-secondary, body .hgnl-btn { transition: none; }
+}

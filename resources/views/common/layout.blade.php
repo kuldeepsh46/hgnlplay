@@ -9,29 +9,29 @@
 
 <style>
 :root {
-    --bg:#0b0e12;
-    --card:#10171f;
-    --sidebar:#0f141b;
-    --accent:#3f7871;
-    --text:#e9eef3;
-    --muted:#a0acb3;
+    --bg:#f0f8ef;
+    --card:#ffffff;
+    --sidebar:#ffffff;
+    --accent:#287b62;
+    --text:#203c30;
+    --muted:#52695f;
     --radius:12px;
-      --bg: #0b0e12;
-    --card: #10171f;
-    --sidebar: #0f141b;
-    --accent:#3f7871;
-    --accent2: #3f7871;
-    --border: #1b222b;
-    --text: #e9eef3;
-    --muted: #a0acb3;
+      --bg: #f0f8ef;
+    --card: #ffffff;
+    --sidebar: #ffffff;
+    --accent:#287b62;
+    --accent2: #287b62;
+    --border: #cddfd3;
+    --text: #203c30;
+    --muted: #52695f;
     --radius: 12px;
- --bg:#0b0e12;
-  --card:#10171f;
-  --sidebar:#0f141b;
+ --bg:#f0f8ef;
+  --card:#ffffff;
+  --sidebar:#ffffff;
 
-  --border:#1b222b;
-  --text:#e9eef3;
-  --muted:#a0acb3;
+  --border:#cddfd3;
+  --text:#203c30;
+  --muted:#52695f;
   --radius:12px;
 
 }
@@ -80,7 +80,7 @@ body{
     position: absolute;
     top: 16px;
     right: -18px;
-    background: #3f7871 !important;
+    background: #287b62 !important;
     color: #ffffffff;
     width: 34px;
     height: 34px;
@@ -88,13 +88,13 @@ body{
     display: grid;
     place-items: center;
     cursor: pointer;
-    box-shadow: 0 0 10px #a7ff1e66;
+    box-shadow: 0 0 10px #23845b66;
 }
 /* ===== SIDEBAR (from header file) ===== */
 .sidebar{
     width:250px;
     background:var(--sidebar);
-    border-right:1px solid #12181f;
+    border-right:1px solid #ffffff;
     display:flex;
     flex-direction:column;
     position:relative;
@@ -110,7 +110,7 @@ body{
  
 }
 .user-info {
-    color: #e84e6d !important;
+    color: #b64f70 !important;
 }
 .sidebar ul{list-style:none;margin:0;padding:0}
 .sidebar ul li{
@@ -119,12 +119,12 @@ body{
     display:flex;
     align-items:center;
     gap:10px;
-    border-left: 4px solid #a7ff1e00;
+    border-left: 4px solid #23845b00;
 }
 .sidebar ul li:hover,
 .sidebar ul li.active{
-    background:#141c26;
-    color:#fff;
+    background:#ffffff;
+    color:#203c30;
     border-left:4px solid var(--accent);
 }
 
@@ -225,7 +225,7 @@ main.main{
 }
 
 .logo h1 span {
-    color: #e84e6d;
+    color: #b64f70;
 }
 /* ===== DESKTOP ONLY ===== */
 @media (min-width:769px){
@@ -262,7 +262,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 }
 
 .user-info {
-    background: #141c22;
+    background: #ffffff;
     padding: 8px 14px;
     border-radius: 999px;
     display: flex;
@@ -290,7 +290,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 }
 
 .team-item.active > .team-menu {
-    color: #fff;
+    color: #203c30;
 }
 
 /* Arrow */
@@ -335,12 +335,12 @@ ul.submenu li:hover {
 
 .submenu li a:hover,
 .submenu li a.active {
-    color: #fff;
-    background: #141c26;
+    color: #203c30;
+    background: #ffffff;
     border-left: 3px solid var(--accent);
 }
 .btn-view {
-    background: #a7ff1e;
+    background: #23845b;
     color: #000;
     border: none;
     padding: 10px 10px;
@@ -352,6 +352,7 @@ ul.submenu li:hover {
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
 </head>
 
 <body>
