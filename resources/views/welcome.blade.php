@@ -22,9 +22,9 @@
         --accent-3: #12d1ff;
         /* cyan for subtle touches */
         --border: #e6e6e6;
-        --ring: 0 0 0 8px #3f51b51a,, 0 0 60px 10px #3f51b51a inset;
+        --ring: 0 0 0 8px #3f51b51a;
         --radius: 14px;
-        --shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 4px 14px rgba(0, 0, 0, .35);
+        --shadow: 0 10px 30px rgba(20, 30, 60, .08), 0 2px 8px rgba(20, 30, 60, .06);
     }
 
     * {
@@ -114,9 +114,13 @@
     }
 
     header {
-        background: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: rgba(255, 255, 255, .96);
+        backdrop-filter: saturate(160%) blur(8px);
+        border-bottom: 1px solid var(--border);
         padding: 6px 0px;
-
     }
 
     .logo img {
@@ -216,9 +220,35 @@
     .burger {
         display: none;
         flex-direction: column;
-        gap: 4px;
-        width: 28px;
+        justify-content: center;
+        gap: 5px;
+        width: 44px;
+        height: 44px;
+        padding: 10px 8px;
+        background: transparent;
+        border: 0;
+        border-radius: 10px;
         cursor: pointer
+    }
+
+    .burger:hover {
+        background: #f1f3f9
+    }
+
+    .burger span {
+        transition: transform .25s, opacity .25s
+    }
+
+    .burger[aria-expanded="true"] span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg)
+    }
+
+    .burger[aria-expanded="true"] span:nth-child(2) {
+        opacity: 0
+    }
+
+    .burger[aria-expanded="true"] span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg)
     }
 
   .burger span {
@@ -233,7 +263,8 @@
     left: 0;
     top: 72px;
     width: 100%;
-    background: #fffffffa;
+    background: #fff;
+    box-shadow: 0 16px 30px rgba(20, 30, 60, .12);
     border-top: 1px solid #121a22;
     z-index: 99999;
 }
@@ -256,8 +287,31 @@
 }
 
     .mobile-menu .nav-cta {
-        padding: 12px;
+        display: flex;
+        padding: 0 12px 18px;
         gap: 8px
+    }
+
+    .mobile-menu .nav-cta .btn {
+        flex: 1;
+        justify-content: center
+    }
+
+    .mobile-menu li a {
+        display: block
+    }
+
+    /* The mobile menu is a <nav> too, so undo the desktop-only nav rules */
+    nav.mobile-menu ul {
+        display: block
+    }
+
+    nav.mobile-menu .btn-primary {
+        color: #fff !important
+    }
+
+    nav.mobile-menu .btn-ghost {
+        color: #dce7f0 !important
     }
 
     /* ---------- Hero ---------- */
@@ -595,7 +649,7 @@
     }
 
     .f-brand p {
-        color: #97a8b4
+        color: #5f6b75
     }
 
     .f-col h5 {
@@ -636,10 +690,10 @@
     }
 
     .copy {
-        border-top: 1px solid #131a24;
+        border-top: 1px solid var(--border);
         margin-top: 24px;
         padding-top: 14px;
-        color: #8ea0ae;
+        color: #5f6b75;
         font-size: 14px;
         display: flex;
         justify-content: space-between;
@@ -656,27 +710,96 @@
         position: fixed;
         right: 16px;
         bottom: 16px;
-        width: 35px;
-        height: 35px;
+        width: 44px;
+        height: 44px;
         border-radius: 999px;
-        border: 1px solid #2a3543;
+        border: 0;
         display: grid;
         place-items: center;
-        background: #ffffff;
-        box-shadow: 0 12px 28px #00000050;
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(41, 59, 143, .35);
         cursor: pointer;
         z-index: 40;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .25s ease, transform .2s ease, background .2s
+    }
+
+    .float-btn.visible {
+        opacity: 1;
+        pointer-events: auto
     }
 
     .float-btn:hover {
-        border-color: #3a4758;
+        background: var(--accent-2);
         transform: translateY(-2px)
     }
 
     .float-btn svg {
         width: 22px;
-        height: 22px;
-        stroke: #c7d7e3
+        height: 22px
+    }
+
+    /* ---------- Accessibility ---------- */
+    .skip-link {
+        position: absolute;
+        left: 12px;
+        top: -60px;
+        z-index: 100000;
+        background: var(--accent);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 700;
+        transition: top .15s
+    }
+
+    .skip-link:focus {
+        top: 12px
+    }
+
+    :focus-visible {
+        outline: 3px solid #3f5193;
+        outline-offset: 3px;
+        border-radius: 4px
+    }
+
+    .why-choose-dark :focus-visible,
+    footer :focus-visible {
+        outline-color: #9fb0ff
+    }
+
+    main:focus {
+        outline: none
+    }
+
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 90px
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto
+        }
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important
+        }
+
+        .reveal {
+            opacity: 1;
+            transform: none
+        }
+    }
+
+    .cta-action {
+        text-align: right
     }
 
     /* ---------- Animations ---------- */
@@ -1651,22 +1774,23 @@ padding-top: 20px;
 
 <body>
 
+    <a class="skip-link" href="#home">Skip to main content</a>
+
     <!-- Header -->
     <header>
         <div class="container nav">
             <div class="brand">
                 <div class="logo">
-                   <a href="/#home" ><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading"></a>
+                   <a href="/#home"><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading – home"></a>
                 </div>
                 <!-- <h1>Himalaya <span class="brand-green">Trading</span></h1> -->
             </div>
 
-            <nav>
+            <nav aria-label="Main">
                 <ul>
                     <li><a href="/#home">Home</a></li>
                     <li><a href="/#about">About Us</a></li>
                     <li><a href="/#plan">Business Plan</a></li>
-                                   <li><a href="/#teams">Team</a></li>
                     <li><a href="/#our-products">Products / Services</a></li>
                 </ul>
             </nav>
@@ -1676,40 +1800,38 @@ padding-top: 20px;
                 <a class="btn btn-primary" href="/#contact">Contact Us</a>
             </div>
 
-            <div class="burger" id="burger" aria-label="Open Menu" aria-expanded="false">
+            <button type="button" class="burger" id="burger" aria-label="Open menu" aria-expanded="false"
+                aria-controls="mobileMenu">
                 <span></span><span></span><span></span>
-            </div>
+            </button>
         </div>
 
         <!-- Mobile menu -->
-        <div class="mobile-menu" id="mobileMenu">
+        <nav class="mobile-menu" id="mobileMenu" aria-label="Mobile">
             <ul class="container">
                 <li><a href="/#home" class="m-link">Home</a></li>
                 <li><a href="/#about" class="m-link">About Us</a></li>
                 <li><a href="/#plan" class="m-link">Business Plan</a></li>
                 <li><a href="/#our-products" class="m-link">Products / Services</a></li>
-                <div class="container nav-cta mobile-sec" style="padding-bottom:18px">
-                    <a class="btn btn-ghost" href="/login">Log in</a>
-                    <a class="btn btn-primary" href="/#contact">Contact Us</a>
-                </div>
             </ul>
-            <div class="container nav-cta destop-view" style="padding-bottom:18px">
-                <a class="btn btn-ghost" href="/login">Log in</a>
-                <a class="btn btn-primary" href="/#contact">Contact Us</a>
+            <div class="container nav-cta mobile-sec">
+                <a class="btn btn-ghost m-link" href="/login">Log in</a>
+                <a class="btn btn-primary m-link" href="/#contact">Contact Us</a>
             </div>
-        </div>
+        </nav>
     </header>
 
 
 
 
+    <main id="home" tabindex="-1">
     <section class="hero-banner">
         <div class="container hero-grid">
 
             <!-- LEFT CONTENT -->
             <div class="hero-content">
                 <span class="hero-eyebrow">
-                    ✔ Power Your Business With Us
+                    <span aria-hidden="true">✔</span> Power Your Business With Us
                 </span>
 
                 <h1>
@@ -1750,7 +1872,7 @@ padding-top: 20px;
         </div>
 
         <!-- MARQUEE -->
-        <div class="hero-marquee">
+        <div class="hero-marquee" aria-hidden="true">
             <div class="marquee-track">
                 <span>Network Marketing</span>
                 <span>Entrepreneurship</span>
@@ -1856,12 +1978,12 @@ padding-top: 20px;
             <h2 class="hp-title">Products by <span>Himalaya Trading</span></h2>
             <div class="hp-grid">
                 @foreach ($homeProducts as $p)
-                    <a class="hp-card" href="https://wa.me/919805032635?text={{ rawurlencode("Hi, I'm interested in " . $p['name']) }}" target="_blank" rel="noopener" title="Enquire on WhatsApp">
+                    <a class="hp-card" href="https://wa.me/919805032635?text={{ rawurlencode("Hi, I'm interested in " . $p['name']) }}" target="_blank" rel="noopener" aria-label="Enquire about {{ $p['name'] }} on WhatsApp (opens in a new tab)">
                         <div class="hp-img">
                             <img src="{{ asset('images/products/' . $p['img']) }}" alt="{{ $p['name'] }}" loading="lazy">
                         </div>
                         <span class="hp-name">{{ $p['name'] }}</span>
-                        <span class="hp-wa">💬 Enquire on WhatsApp</span>
+                        <span class="hp-wa"><span aria-hidden="true">💬</span> Enquire on WhatsApp</span>
                     </a>
                 @endforeach
             </div>
@@ -1935,7 +2057,7 @@ padding-top: 20px;
                 </div>
 
                 <div class="about-illus reveal">
-                    <img src="https://himjantrading.com/HIMJAN/images/trade/trade.png" alt="">
+                    <img src="https://himjantrading.com/HIMJAN/images/trade/trade.png" alt="" loading="lazy">
                     <!-- Dummy art block; replace with your illustration -->
                     <!-- <div class="screen">DUMMY ILLUSTRATION</div> -->
                 </div>
@@ -2115,13 +2237,13 @@ padding-top: 20px;
             <h2 class="testi-title">Testimonials</h2>
 
             <div class="testimonial-wrapper">
-                <button class="nav-btn prev">‹</button>
+                <button type="button" class="nav-btn prev" aria-label="Previous testimonial"><span aria-hidden="true">‹</span></button>
 
-                <div class="testimonial-viewport">
+                <div class="testimonial-viewport" aria-live="off">
                     <div class="testimonial-track">
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/men/32.jpg">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Rajesh Kumar</h4>
                             <span>Independent Associate</span>
                             <p>
@@ -2131,7 +2253,7 @@ padding-top: 20px;
                         </div>
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/women/44.jpg">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Neha Sharma</h4>
                             <span>Entrepreneur</span>
                             <p>
@@ -2141,7 +2263,7 @@ padding-top: 20px;
                         </div>
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/men/56.jpg">
+                            <img src="https://randomuser.me/api/portraits/men/56.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Amit Verma</h4>
                             <span>Team Leader</span>
                             <p>
@@ -2151,7 +2273,7 @@ padding-top: 20px;
                         </div>
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/women/65.jpg">
+                            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Pooja Mehta</h4>
                             <span>Business Associate</span>
                             <p>
@@ -2161,7 +2283,7 @@ padding-top: 20px;
                         </div>
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/men/78.jpg">
+                            <img src="https://randomuser.me/api/portraits/men/78.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Sandeep Singh</h4>
                             <span>Network Builder</span>
                             <p>
@@ -2171,7 +2293,7 @@ padding-top: 20px;
                         </div>
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/women/81.jpg">
+                            <img src="https://randomuser.me/api/portraits/women/81.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Anjali Gupta</h4>
                             <span>Associate Partner</span>
                             <p>
@@ -2183,7 +2305,7 @@ padding-top: 20px;
                     </div>
                 </div>
 
-                <button class="nav-btn next">›</button>
+                <button type="button" class="nav-btn next" aria-label="Next testimonial"><span aria-hidden="true">›</span></button>
             </div>
 
         </div>
@@ -2269,8 +2391,8 @@ padding-top: 20px;
                     <div class="note">
                         Join <b>Himalaya Trading</b> and build a successful business and a secure future.
                     </div>
-                    <div style="text-align:right">
-                        <a href="/login" class="btn btn-primary">Contact Us</a>
+                    <div class="cta-action">
+                        <a href="#contact" class="btn btn-primary">Contact Us</a>
                     </div>
                 </div>
             </div>
@@ -2278,12 +2400,14 @@ padding-top: 20px;
         </div>
     </section>
 
+    </main>
+
     <!-- Footer -->
-    <footer id="products">
+    <footer>
         <div class="container footer-top">
             <div class="f-brand">
                 <div class="logo">
-                   <a href="/#home" ><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading"></a>
+                   <a href="/#home"><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading – home" loading="lazy"></a>
                 </div>
                 <!-- <h4 style="margin:12px 0 8px">Himalaya <span class="brand-green">Trading</span></h4> -->
                 <p>
@@ -2302,7 +2426,7 @@ padding-top: 20px;
                 <ul>
                     <li><a href="/privacy-policy">Privacy Policy</a></li>
                     <li><a href="/terms-conditions">Terms & Conditions</a></li>
-                    <li><a href="/#plan">Contact Us</a></li>
+                    <li><a href="/#contact">Contact Us</a></li>
                 </ul>
             </div>
 
@@ -2320,20 +2444,20 @@ padding-top: 20px;
                 <ul>
                     
                     <li><a href="mailto:info@hgnl.co.in">info@hgnl.co.in</a></li>
-                    <li><a href="tel:+91 62307 14902">+91 62307 14902</a></li>
+                    <li><a href="tel:+916230714902">+91 62307 14902</a></li>
                 </ul>
             </div>
         </div>
 
         <div class="container copy">
             <div>Himalaya <span class="brand-green">Trading</span> © 2026. All Rights Reserved.</div>
-            <div><a href="#home">Back to top ↑</a></div>
+            <div><a href="#home">Back to top <span aria-hidden="true">↑</span></a></div>
         </div>
     </footer>
 
     <!-- Floating button (scroll to top) -->
     <button class="float-btn" id="toTop" aria-label="Back to top">
-        <svg viewBox="0 0 24 24" fill="none">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
             <path d="M12 5l-7 7m7-7l7 7m-7-7v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round" />
         </svg>
@@ -2345,23 +2469,35 @@ padding-top: 20px;
     const mobileMenu = document.getElementById('mobileMenu');
     const links = document.querySelectorAll('.m-link');
 
-    burger.addEventListener('click', () => {
-        const open = mobileMenu.classList.toggle('open');
+    function setMenu(open) {
+        mobileMenu.classList.toggle('open', open);
         burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    }
+    burger.addEventListener('click', () => setMenu(!mobileMenu.classList.contains('open')));
+    links.forEach(l => l.addEventListener('click', () => setMenu(false)));
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && mobileMenu.classList.contains('open')) {
+            setMenu(false);
+            burger.focus();
+        }
     });
-    links.forEach(l => l.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // Scroll to top
     const toTop = document.getElementById('toTop');
     toTop.addEventListener('click', () => window.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior: reduceMotion ? 'auto' : 'smooth'
     }));
-    window.addEventListener('scroll', () => {
-        toTop.style.opacity = window.scrollY > 400 ? '1' : '0.0';
-        toTop.style.pointerEvents = window.scrollY > 400 ? 'auto' : 'none';
-    });
-    toTop.style.transition = 'opacity .25s ease';
+    function syncToTop() {
+        const show = window.scrollY > 400;
+        toTop.classList.toggle('visible', show);
+        toTop.tabIndex = show ? 0 : -1;
+    }
+    window.addEventListener('scroll', syncToTop, { passive: true });
+    syncToTop();
 
     // Reveal-on-scroll animations
     const IO = new IntersectionObserver((entries) => {
@@ -2374,11 +2510,27 @@ padding-top: 20px;
     }, {
         threshold: .2
     });
-    document.querySelectorAll('.reveal').forEach(el => IO.observe(el));
+    document.querySelectorAll('.reveal').forEach(el => reduceMotion ? el.classList.add('show') : IO.observe(el));
     </script>
 
     <script>
-    document.querySelectorAll('.faq-question').forEach(btn => {
+    const faqButtons = document.querySelectorAll('.faq-question');
+    function syncFaq() {
+        faqButtons.forEach(b => {
+            const open = b.closest('.faq-item').classList.contains('active');
+            b.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+    }
+    faqButtons.forEach((btn, i) => {
+        const answer = btn.nextElementSibling;
+        answer.id = 'faq-answer-' + i;
+        btn.id = 'faq-question-' + i;
+        btn.type = 'button';
+        btn.setAttribute('aria-controls', answer.id);
+        answer.setAttribute('role', 'region');
+        answer.setAttribute('aria-labelledby', btn.id);
+        btn.querySelector('.faq-icon')?.setAttribute('aria-hidden', 'true');
+
         btn.addEventListener('click', () => {
             const item = btn.closest('.faq-item');
 
@@ -2387,8 +2539,10 @@ padding-top: 20px;
             });
 
             item.classList.toggle('active');
+            syncFaq();
         });
     });
+    syncFaq();
     </script>
     <script>
     const track = document.querySelector('.testimonial-track');
@@ -2413,8 +2567,13 @@ padding-top: 20px;
 
         const visible = visibleCards();
 
-        const firstClones = cards.slice(0, visible).map(c => c.cloneNode(true));
-        const lastClones = cards.slice(-visible).map(c => c.cloneNode(true));
+        const clone = c => {
+            const n = c.cloneNode(true);
+            n.setAttribute('aria-hidden', 'true');
+            return n;
+        };
+        const firstClones = cards.slice(0, visible).map(clone);
+        const lastClones = cards.slice(-visible).map(clone);
 
         lastClones.reverse().forEach(c => track.prepend(c));
         firstClones.forEach(c => track.appendChild(c));
@@ -2461,8 +2620,10 @@ padding-top: 20px;
     document.querySelector('.next').onclick = () => move(1);
     document.querySelector('.prev').onclick = () => move(-1);
 
-    /* AUTOPLAY */
+    /* AUTOPLAY (skipped for users who prefer reduced motion) */
     function startAuto() {
+        if (reduceMotion) return;
+        clearInterval(auto);
         auto = setInterval(() => move(1), 5000);
     }
 
@@ -2473,6 +2634,8 @@ padding-top: 20px;
     /* Pause on hover */
     wrapper.addEventListener('mouseenter', stopAuto);
     wrapper.addEventListener('mouseleave', startAuto);
+    wrapper.addEventListener('focusin', stopAuto);
+    wrapper.addEventListener('focusout', startAuto);
 
     /* Resize */
     window.addEventListener('resize', () => {

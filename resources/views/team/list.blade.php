@@ -12,41 +12,6 @@
             --muted: #a0acb3;
         }
 
-        body {
-            margin: 0;
-            font-family: "Inter", sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: var(--sidebar);
-            border-right: 1px solid #12181f;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .sidebar ul li {
-            padding: 14px 18px;
-            color: var(--muted);
-            cursor: pointer;
-        }
-
-        .sidebar ul li:hover,
-        .sidebar ul li.active {
-            background: #141c26;
-            color: #fff;
-        }
-
         .main {
             flex: 1;
             padding: 20px;

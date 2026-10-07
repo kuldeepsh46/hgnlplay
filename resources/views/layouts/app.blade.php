@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,11 +7,13 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <meta name="theme-color" content="#0b0e12">
+
+    <title>@hasSection('title')@yield('title') - @endif{{ config('app.name', 'HGNL Pay') }}</title>
 
     <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -29,34 +31,42 @@
       --text:#e9eef3;
       --accent:#3f7871;
       --accent-2:#3f7871;
+      --accent-text:#6cc3b7;
+      --focus:#8fd8cd;
       --border:#1b222b;
       --radius:14px;
       --shadow:0 10px 30px rgba(0,0,0,.45);
     }
-    *{box-sizing:border-box;
-    margin:0px;
-    padding:0px;
-    }
+    *{box-sizing:border-box}
     body{
       margin:0;
       font-family:"Inter",-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       background:radial-gradient(900px 600px at 30% -10%,#0f1a12 0%,transparent 70%),var(--bg);
       color:var(--text);
-    
+      line-height:1.5;
+      -webkit-font-smoothing:antialiased;
       overflow-x:hidden !important;
+    }
+    :focus-visible{
+      outline:2px solid var(--focus);
+      outline-offset:2px;
+    }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.01ms !important;
+        transition-duration:.01ms !important;
+        scroll-behavior:auto !important;
+      }
     }
 .custom-row label {
     text-align: start !important;
-    font-size: 20px !important;
+    font-size: 16px !important;
     color: #fff !important;
 }
-.input-custom select{
-        padding: 20px;
-    font-size: 20px;
-}
+.input-custom select,
 .input-custom input {
-    padding: 20px;
-    font-size: 20px;
+    padding: 12px 14px;
+    font-size: 16px;
 }
 
 .check-box-custom {
@@ -74,7 +84,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
+    padding: 24px 16px;
     background: radial-gradient(900px 600px at 30% -10%, #0f1a12 0%, transparent 70%), var(--bg);
 }
 .reg-section{
@@ -127,7 +138,7 @@
     font-weight: 600;
     margin-bottom: 6px;
     color: #b9c6cf;
-    font-size: 22px;
+    font-size: 16px;
 }
     input{
       width:100%;
@@ -139,10 +150,11 @@
       font-size:15px;
       transition:border .25s;
     }
+    input::placeholder{color:#6b7782}
     input:focus{
       outline:none;
-      border-color:#a7ff1e;
-      box-shadow:0 0 10px #a7ff1e33;
+      border-color:var(--accent-text);
+      box-shadow:0 0 0 3px rgba(108,195,183,.25);
     }
     .btn {
     width: 100%;
@@ -154,21 +166,22 @@
     font-weight: 700;
     font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 0 0 6px #a7ff1e15;
+    box-shadow: 0 0 0 6px rgba(63,120,113,.15);
     transition: all .25s;
-    font-size: 25px;
-    padding: 10px;
+    font-size: 18px;
+    padding: 12px;
 }
     .btn:hover{
       transform:translateY(-1px);
-      box-shadow:0 0 0 8px #a7ff1e25;
+      filter:brightness(1.1);
+      box-shadow:0 0 0 8px rgba(63,120,113,.25);
     }
     .extra-links{
       margin-top:20px;
       font-size:14px;
     }
     .extra-links a{
-      color:var(--accent);
+      color:var(--accent-text);
       text-decoration:none;
     }
     .extra-links a:hover{
@@ -188,7 +201,7 @@
     <div id="app">
         
 
-        <main >
+        <main id="main-content">
             @yield('content')
         </main>
     </div>
