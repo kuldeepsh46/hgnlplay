@@ -13,7 +13,7 @@
         }
 
         .user-info {
-            background: #141c22;
+            background: #ffffff;
             padding: 8px 14px;
             border-radius: 999px;
             display: flex;
@@ -25,7 +25,7 @@
 
         .card {
             background: var(--card);
-            border: 1px solid #1f2832;
+            border: 1px solid #e5f2e6;
             border-radius: var(--radius);
             padding: 20px;
             box-shadow: 0 0 20px #00000050;
@@ -72,19 +72,19 @@
 
         th,
         td {
-            border: 1px solid #1e2b36;
+            border: 1px solid #e5f2e6;
             padding: 10px;
             text-align: center;
             font-size: 14px;
         }
 
         th {
-            background: #161f29;
-            color: #a9b9c7;
+            background: #e5f2e6;
+            color: #203c30;
         }
 
         td {
-            color: #d4dee8
+            color: #203c30
         }
 
         /* Password Modal CSS */
@@ -144,9 +144,9 @@
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #2a3442;
-            background: #0f1620;
-            color: #fff;
+            border: 1px solid #e5f2e6;
+            background: #ffffff;
+            color: #203c30;
         }
     </style>
 
@@ -163,12 +163,12 @@
             <div>
                 <label style="display:block; font-size:12px; margin-bottom:5px;">From:</label>
                 <input type="date" name="from" value="{{ $from }}" onchange="this.form.submit()"
-                    style="padding:8px;border-radius:6px;background:#141c22;border:1px solid #1f2832;color:#fff;">
+                    style="padding:8px;border-radius:6px;background:#ffffff;border:1px solid #e5f2e6;color:#203c30;">
             </div>
             <div>
                 <label style="display:block; font-size:12px; margin-bottom:5px;">To:</label>
                 <input type="date" name="to" value="{{ $to }}" onchange="this.form.submit()"
-                    style="padding:8px;border-radius:6px;background:#141c22;border:1px solid #1f2832;color:#fff;">
+                    style="padding:8px;border-radius:6px;background:#ffffff;border:1px solid #e5f2e6;color:#203c30;">
             </div>
 
             <button class="btn btn-copy" type="submit">Filter</button>
@@ -182,10 +182,10 @@
 
         <div style="display:flex;gap:10px;margin-bottom:16px;">
             <button class="btn" id="matchingBtn">Matching Income</button>
-            <button class="btn" id="directBtn" style="background:#333;color:#fff;">Direct Income</button>
-            <button class="btn" id="levelBtn" style="background:#333;color:#fff;">Level Income</button>
-            <button class="btn" id="sponsorBtn" style="background:#333;color:#fff;">Sponsor Binary Bonus</button>
-            <button class="btn" id="rankBtn" style="background:#333;color:#fff;">Rank Reward</button>
+            <button class="btn" id="directBtn" style="background:#e5f2e6;color:#203c30;">Direct Income</button>
+            <button class="btn" id="levelBtn" style="background:#e5f2e6;color:#203c30;">Level Income</button>
+            <button class="btn" id="sponsorBtn" style="background:#e5f2e6;color:#203c30;">Sponsor Binary Bonus</button>
+            <button class="btn" id="rankBtn" style="background:#e5f2e6;color:#203c30;">Rank Reward</button>
         </div>
 
         <div id="matchingTab">

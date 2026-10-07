@@ -64,7 +64,7 @@ function renderTreeNode($node){
 <style>
 /* ===== PAGE ===== */
 body{
-    background:#0b0f14;
+    background:#f0f8ef;
     font-family:Segoe UI, Arial;
 }
  
@@ -130,7 +130,7 @@ body{
 }
 .tree li::before {
     right: 50%;
-    border-right: 1px solid #000;
+    border-right: 1px solid #f0f8ef;
 }
 .tree li::after{ left:50%; }
  
@@ -139,7 +139,7 @@ body{
 .tree li:only-child::after{ display:none; }
 .tree li:first-child::before {
     border: none;
-    border-right: 1px solid #000;
+    border-right: 1px solid #f0f8ef;
 }
 .tree li:last-child::after{ border:none; }
  

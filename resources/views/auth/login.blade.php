@@ -12,9 +12,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px 0;
             box-sizing: border-box;
-            background: radial-gradient(circle at 30% -20%, #1a2a1f 0%, transparent 60%), #06090c;
+            background: radial-gradient(circle at 30% -20%, #e5f2e6 0%, transparent 60%),
+                #f0f8ef;
+            padding: 40px 16px;
             font-family: 'Inter', sans-serif;
         }
 
@@ -23,11 +24,11 @@
             width: 95%;
             max-width: 1100px;
             /* Wider for desktop consistency */
-            background-color: #10171f;
-            border: 1px solid #1b222b;
+            background-color: #ffffff;
+            border: 1px solid #e5f2e6;
             border-radius: 16px;
             padding: 60px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 25px 50px rgba(13, 77, 51, 0.15);
             box-sizing: border-box;
         }
 
@@ -36,13 +37,13 @@
             display: flex;
             align-items: center;
             margin-bottom: 50px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(40, 100, 65, 0.08);
             padding-bottom: 30px;
         }
 
         .login-logo {
-            width: 80px;
-            height: 80px;
+            flex-shrink: 0;
+            padding: 6px;
             background: #fff;
             border-radius: 12px;
             display: flex;
@@ -50,29 +51,36 @@
             align-items: center;
             margin-right: 25px;
             overflow: hidden;
-            box-shadow: 0 0 20px rgba(167, 255, 30, 0.2);
+            box-shadow: 0 0 0 4px rgba(8, 115, 79, 0.10);
         }
 
         .login-logo img {
-            width: 85%;
+            display: block;
+            height: 76px;
+            width: auto;
+            max-width: 100%;
             object-fit: contain;
+        }
+
+        .brand-text {
+            text-align: left;
         }
 
         .brand-text h1 {
             font-size: 32px;
             margin: 0;
             font-weight: 800;
-            color: #fff;
+            color: #203c30;
             letter-spacing: -0.5px;
+            text-align: inherit;
         }
 
         .brand-accent {
-            color: #a7ff1e;
-            /* Neon Green matched to Register form */
+            color: #23845b;
         }
 
         .brand-text p {
-            color: #a0acb3;
+            color: #586d63;
             margin: 5px 0 0 0;
             font-size: 15px;
         }
@@ -97,7 +105,7 @@
         .login-field label {
             font-size: 12px;
             text-transform: uppercase;
-            color: #a0acb3;
+            color: #3d574b;
             margin-bottom: 10px;
             font-weight: 700;
             letter-spacing: 1px;
@@ -108,25 +116,76 @@
             width: 100%;
             padding: 18px;
             border-radius: 8px;
-            border: 1px solid #1b222b;
-            background-color: #0b0e12;
-            color: #fff;
+            border: 1px solid #cddfd3;
+            background-color: #f0f8ef;
+            color: #203c30;
             font-size: 16px;
             transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-sizing: border-box;
         }
 
+        .login-input::placeholder {
+            color: #60776c;
+        }
+
+        .login-input:hover {
+            border-color: #a9cbbb;
+        }
+
         .login-input:focus {
             outline: none;
-            border-color: #a7ff1e;
-            background-color: #0d1218;
-            box-shadow: 0 0 15px rgba(167, 255, 30, 0.1);
+            border-color: #23845b;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(8, 115, 79, 0.15);
+        }
+
+        .login-input.is-invalid {
+            border-color: #b9304b;
+        }
+
+        .field-error {
+            color: #b9304b;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .password-wrap {
+            position: relative;
+        }
+
+        .password-wrap .login-input {
+            padding-right: 84px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            background: #ffffff;
+            color: #3d574b;
+            border: 1px solid #a9cbbb;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .toggle-password:hover {
+            color: #08734f;
+            border-color: #08734f;
+        }
+
+        .hgnl-login-card :focus-visible {
+            outline: 2px solid #218e65;
+            outline-offset: 2px;
         }
 
         .forgot-link {
             align-self: flex-end;
             font-size: 13px;
-            color: #a7ff1e;
+            color: #23845b;
             text-decoration: none;
             margin-top: 10px;
             font-weight: 600;
@@ -146,8 +205,8 @@
         }
 
         .hgnl-btn-primary {
-            background-color: #a7ff1e;
-            color: #000;
+            background: linear-gradient(135deg, #109467, #056344);
+            color: #fff;
             font-weight: 800;
             border: none;
             border-radius: 10px;
@@ -156,19 +215,20 @@
             text-transform: uppercase;
             cursor: pointer;
             transition: 0.3s;
-            box-shadow: 0 10px 20px rgba(167, 255, 30, 0.2);
+            box-shadow: 0 10px 24px rgba(8, 115, 79, 0.25);
+            letter-spacing: .5px;
         }
 
         .hgnl-btn-primary:hover {
-            background-color: #c1ff5e;
+            filter: brightness(1.1);
             transform: translateY(-2px);
         }
 
         .hgnl-btn-secondary {
             background: transparent;
-            color: #a7ff1e;
+            color: #066344;
             font-weight: 700;
-            border: 2px solid #a7ff1e;
+            border: 2px solid #23845b;
             border-radius: 10px;
             padding: 18px;
             font-size: 14px;
@@ -179,9 +239,21 @@
         }
 
         .hgnl-btn-secondary:hover {
-            background: rgba(167, 255, 30, 0.05);
-            border-color: #fff;
+            background: #08734f;
+            border-color: #08734f;
             color: #fff;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hgnl-btn-primary,
+            .hgnl-btn-secondary,
+            .login-input {
+                transition: none;
+            }
+
+            .hgnl-btn-primary:hover {
+                transform: none;
+            }
         }
 
         /* ================= RESPONSIVE ================= */
@@ -197,10 +269,24 @@
             }
 
             .hgnl-login-card {
-                padding: 30px;
+                padding: 32px 22px;
+            }
+
+            .brand-text h1 {
+                font-size: 26px;
             }
 
             .login-header {
+                margin-bottom: 32px;
+                padding-bottom: 24px;
+            }
+
+            .btn-container {
+                margin-top: 16px;
+            }
+
+            .login-header,
+            .brand-text {
                 flex-direction: column;
                 text-align: center;
             }
@@ -216,7 +302,7 @@
 
             <div class="login-header">
                 <div class="login-logo">
-                    <img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading">
+                    <img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Pay logo">
                 </div>
                 <div class="brand-text">
                     <h1>Himalaya <span class="brand-accent">Trading</span></h1>
@@ -232,25 +318,33 @@
                     <div class="login-field">
                         <label for="member_id">Member ID</label>
                         <input id="member_id" type="text" class="login-input @error('member_id') is-invalid @enderror"
-                            name="member_id" value="{{ old('member_id') }}" placeholder="e.g. HGNL10001" required autofocus>
+                            name="member_id" value="{{ old('member_id') }}" placeholder="e.g. HGNL10001"
+                            autocomplete="username" autocapitalize="characters" spellcheck="false" required autofocus
+                            @error('member_id') aria-invalid="true" aria-describedby="member_id-error" @enderror>
 
                         @error('member_id')
-                            <span style="color: #ff5a5a; font-size: 12px; margin-top: 5px;">{{ $message }}</span>
+                            <span class="field-error" id="member_id-error" role="alert">{{ $message }}</span>
                         @enderror
                     </div>
 
                     <div class="login-field">
                         <label for="password">Security Password</label>
-                        <input id="password" type="password" class="login-input @error('password') is-invalid @enderror"
-                            name="password" placeholder="••••••••" required>
+                        <div class="password-wrap">
+                            <input id="password" type="password"
+                                class="login-input @error('password') is-invalid @enderror" name="password"
+                                placeholder="Enter your password" autocomplete="current-password" required
+                                @error('password') aria-invalid="true" aria-describedby="password-error" @enderror>
+                            <button type="button" class="toggle-password" aria-controls="password"
+                                aria-pressed="false">Show</button>
+                        </div>
+
+                        @error('password')
+                            <span class="field-error" id="password-error" role="alert">{{ $message }}</span>
+                        @enderror
 
                         @if (Route::has('password.request'))
                             <a class="forgot-link" href="{{ route('password.request') }}">Forgot Security Key?</a>
                         @endif
-
-                        @error('password')
-                            <span style="color: #ff5a5a; font-size: 12px; margin-top: 5px;">{{ $message }}</span>
-                        @enderror
                     </div>
 
                     <div class="login-field full-width">
@@ -268,4 +362,16 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('.toggle-password').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var input = document.getElementById(btn.getAttribute('aria-controls'));
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                btn.textContent = show ? 'Hide' : 'Show';
+                btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+            });
+        });
+    </script>
 @endsection

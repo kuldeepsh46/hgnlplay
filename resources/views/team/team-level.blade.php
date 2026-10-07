@@ -22,7 +22,7 @@ body{
   font-size:22px;
 }
 .user-info{
-  background:#141c22;
+  background:#ffffff;
   padding:8px 14px;
   border-radius:999px;
   color:var(--accent);
@@ -32,7 +32,7 @@ body{
 /* ===== LEVEL CARD ===== */
 .level-card{
   background:var(--card);
-  border:1px solid #1f28324d;
+  border:1px solid #e5f2e64d;
   border-radius:16px;
   padding:20px;
   margin-bottom:24px;
@@ -69,14 +69,14 @@ body{
 }
 
 .table th{
-  background:#161f29;
-  color:#a9b9c7;
+  background:#e5f2e6;
+  color:#203c30;
   font-weight:600;
   text-align:left;
 }
 
 .table td{
-  color:#e9eef3;
+  color:#203c30;
 }
 
 .table td:first-child,
@@ -87,7 +87,7 @@ body{
 }
 
 .table tr:hover{
-  background:#141c26;
+  background:#ffffff;
 }
 
 /* ===== EMPTY STATE ===== */

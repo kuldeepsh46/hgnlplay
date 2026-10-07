@@ -43,7 +43,7 @@
 
 
         .user-info {
-            background: #141c22;
+            background: #ffffff;
             padding: 8px 14px;
             border-radius: 999px;
             color: var(--accent);
@@ -53,7 +53,7 @@
         /* Cards / form */
         .card {
             background: var(--card);
-            border: 1px solid #1f2832;
+            border: 1px solid #e5f2e6;
             border-radius: var(--radius);
             padding: 24px;
             margin-bottom: 24px;
@@ -75,9 +75,9 @@
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #1f2832;
-            background: #141c22;
-            color: #fff;
+            border: 1px solid #e5f2e6;
+            background: #ffffff;
+            color: #203c30;
         }
 
         .grid {
@@ -107,7 +107,7 @@
         }
 
         .alert-success {
-            background: #a7ff1e;
+            background: #23845b;
             color: #000;
         }
 
@@ -120,7 +120,7 @@
 
         th,
         td {
-            border: 1px solid #1e2b36;
+            border: 1px solid #e5f2e6;
             padding: 10px;
             text-align: center;
             font-size: 14px;
@@ -128,12 +128,12 @@
         }
 
         th {
-            background: #161f29;
-            color: #a9b9c7;
+            background: #e5f2e6;
+            color: #203c30;
         }
 
         td {
-            color: #d4dee8;
+            color: #203c30;
         }
 
 
@@ -229,9 +229,9 @@
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #2a3442;
-            background: #0f1620;
-            color: #fff;
+            border: 1px solid #e5f2e6;
+            background: #ffffff;
+            color: #203c30;
         }
 
         /* Responsive */
@@ -311,7 +311,7 @@
 
         .gateway-card .subtitle {
             font-size: 11px;
-            color: #64748b;
+            color: #586d63;
             margin-top: 1px;
         }
 
@@ -447,7 +447,7 @@
                     <div class="grid">
                         <div>
                             <label id="amount-label">Request Amount (INR)</label>
-                            <input type="number" name="amount" required min="1" step="0.01"
+                            <input type="number" name="amount" required min="1" step="0.01" value="{{ old('amount', request('amount')) }}"
                                 placeholder="Enter amount">
                         </div>
                         <div>
@@ -492,7 +492,7 @@
                                 style="color: #2563eb; font-weight: 800; font-size: 14px; letter-spacing: 1px;">UPI
                                 GATEWAY</span>
                             <p id="qr-sub-text"
-                                style="margin: 2px 0 0 0; font-size: 10px; color: #718096; font-weight: 600;">SCAN & PAY
+                                style="margin: 2px 0 0 0; font-size: 10px; color: #586d63; font-weight: 600;">SCAN & PAY
                                 SECURELY</p>
                         </div>
                     </div>
@@ -574,7 +574,7 @@
                 <button type="submit" class="btn btn-copy" style="width:100%;">Update Password</button>
             </form>
             @if (session('success'))
-                <p style="color:#a7ff1e; text-align:center;">{{ session('success') }}</p>
+                <p style="color:#23845b; text-align:center;">{{ session('success') }}</p>
             @endif
             @if (session('error'))
                 <p style="color:#ff5555; text-align:center;">{{ session('error') }}</p>

@@ -3,8 +3,8 @@
 <style>
     /* Main Container Styling */
     .qr-main-container {
-        background: linear-gradient(145deg, #161f29, #0f1620);
-        border: 1px solid #1f2832;
+        background: linear-gradient(145deg, #e5f2e6, #ffffff);
+        border: 1px solid #e5f2e6;
         border-radius: 20px;
         padding: 60px 20px;
         display: flex;
@@ -124,14 +124,14 @@
         position: absolute;
         top: 30px;
         right: 40px;
-        color: #fff;
+        color: #203c30;
         font-size: 50px;
         cursor: pointer;
         line-height: 1;
     }
 
     .modal-caption {
-        color: #fff;
+        color: #203c30;
         margin-top: 20px;
         font-size: 18px;
         font-weight: 600;
@@ -151,7 +151,7 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="card"
-                    style="background: var(--card); border: 1px solid #1f2832; border-radius: var(--radius); padding: 20px;">
+                    style="background: var(--card); border: 1px solid #e5f2e6; border-radius: var(--radius); padding: 20px;">
                     <h3 style="color: var(--accent); margin-top: 0;">USDT QR Scanner</h3>
                     <p style="color: var(--muted); font-size: 14px;">Upload the QR code that users will see on their fund
                         request page.</p>
@@ -169,7 +169,7 @@
 
                         {{-- <div class="form-group" style="margin-bottom: 16px;">
                             <label style="display: block; margin-bottom: 8px; color: var(--muted); font-size: 14px;">Current Scanner Image</label>
-                            <div style="margin-top: 10px; text-align: center; background: #0f1620; padding: 15px; border-radius: 12px; border: 1px solid #1f2832;">
+                            <div style="margin-top: 10px; text-align: center; background: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e5f2e6;">
                                 @if (isset($settings) && $settings->qr_scanner_img)
                                     <img src="{{ asset($settings->qr_scanner_img) }}" alt="QR Scanner"
                                         style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--accent);">
@@ -220,7 +220,7 @@
                                 style="display: block; margin-bottom: 8px; color: var(--muted); font-size: 14px;">Select New
                                 QR Image</label>
                             <input type="file" name="qr_image" id="qr_image" accept="image/*" required
-                                style="width: 100%; padding: 10px; background: #0f1620; border: 1px solid #2a3442; border-radius: 8px; color: #fff;">
+                                style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid #e5f2e6; border-radius: 8px; color: #203c30;">
                         </div>
 
                         <button type="submit" class="send-btn"

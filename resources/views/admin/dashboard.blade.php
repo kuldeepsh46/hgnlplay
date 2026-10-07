@@ -9,14 +9,14 @@
 
     <style>
         :root {
-            --bg: #0b0e12;
-            --card: #10171f;
-            --sidebar: #0f141b;
-            --accent: #a7ff1e;
-            --accent2: #2ee6a6;
-            --border: #1b222b;
-            --text: #e9eef3;
-            --muted: #a0acb3;
+            --bg: #f0f8ef;
+            --card: #ffffff;
+            --sidebar: #ffffff;
+            --accent: #23845b;
+            --accent2: #218c78;
+            --border: #cddfd3;
+            --text: #203c30;
+            --muted: #52695f;
             --radius: 12px;
         }
 
@@ -37,7 +37,7 @@
         .sidebar {
             width: 250px;
             background: var(--sidebar);
-            border-right: 1px solid #12181f;
+            border-right: 1px solid #ffffff;
             display: flex;
             flex-direction: column;
             transition: .3s ease;
@@ -54,7 +54,7 @@
             font-size: 18px;
             color: var(--accent);
             padding: 18px 0;
-            border-bottom: 1px solid #1b2330;
+            border-bottom: 1px solid #e5f2e6;
         }
 
         .sidebar ul {
@@ -77,8 +77,8 @@
 
         .sidebar ul li:hover,
         .sidebar ul li.active {
-            background: #141c26;
-            color: #fff;
+            background: #ffffff;
+            color: #203c30;
             border-left: 4px solid var(--accent);
         }
 
@@ -103,7 +103,7 @@
             display: grid;
             place-items: center;
             cursor: pointer;
-            box-shadow: 0 0 10px #a7ff1e66;
+            box-shadow: 0 0 10px #23845b66;
         }
 
         /* Main */
@@ -125,7 +125,7 @@
         }
 
         .user-info {
-            background: #141c22;
+            background: #ffffff;
             padding: 8px 14px;
             border-radius: 999px;
             display: flex;
@@ -138,7 +138,7 @@
         /* Cards */
         .card {
             background: var(--card);
-            border: 1px solid #1f2832;
+            border: 1px solid #e5f2e6;
             border-radius: var(--radius);
             padding: 20px;
             box-shadow: 0 0 20px #00000050;
@@ -152,8 +152,8 @@
         }
 
         .stat {
-            background: #131a23;
-            border: 1px solid #1f2832;
+            background: #ffffff;
+            border: 1px solid #e5f2e6;
             border-radius: var(--radius);
             padding: 18px;
             text-align: center;
@@ -177,7 +177,7 @@
             content: "";
             position: absolute;
             inset: -30px;
-            background: radial-gradient(600px 300px at 80% 0%, #a7ff1e0d, transparent 70%);
+            background: radial-gradient(600px 300px at 80% 0%, #23845b0d, transparent 70%);
             filter: blur(4px);
             z-index: 0;
         }
@@ -206,6 +206,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
 </head>
 
 <body>

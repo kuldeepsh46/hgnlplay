@@ -4,7 +4,7 @@
     <style>
         .card {
             background: var(--card);
-            border: 1px solid #1f2832;
+            border: 1px solid #e5f2e6;
             border-radius: var(--radius);
             padding: 24px;
             margin-bottom: 24px;
@@ -21,9 +21,9 @@
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #1f2832;
-            background: #141c22;
-            color: #fff;
+            border: 1px solid #e5f2e6;
+            background: #ffffff;
+            color: #203c30;
         }
 
         .btn {
@@ -53,7 +53,7 @@
 
         .alert-error {
             background: #ff4a4a;
-            color: #fff;
+            color: #203c30;
         }
 
         .table {
@@ -64,7 +64,7 @@
 
         th,
         td {
-            border: 1px solid #1e2b36;
+            border: 1px solid #e5f2e6;
             padding: 10px;
             text-align: center;
             font-size: 14px;
@@ -72,12 +72,12 @@
         }
 
         th {
-            background: #161f29;
-            color: #a9b9c7;
+            background: #e5f2e6;
+            color: #203c30;
         }
 
         td {
-            color: #d4dee8;
+            color: #203c30;
         }
 
         h2 {
@@ -168,9 +168,9 @@
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #2a3442;
-            background: #0f1620;
-            color: #fff;
+            border: 1px solid #e5f2e6;
+            background: #ffffff;
+            color: #203c30;
         }
 
         #member_status {
@@ -189,7 +189,7 @@
     <div class="header">
         <h1> Member Topup</h1>
         <div class="user-info"
-            style="background:#141c22;padding:8px 14px;border-radius:999px;color:var(--accent);font-weight:600;">
+            style="background:#ffffff;padding:8px 14px;border-radius:999px;color:var(--accent);font-weight:600;">
             👤 {{ $user->username ?? $user->name }}
         </div>
     </div>
@@ -207,7 +207,7 @@
         <p style="font-size:16px;color:var(--accent);font-weight:600;">
             EMI Completed: {{ $user->investment_count }}/16
         </p>
-        <div style="background:#141c22;border-radius:8px;overflow:hidden;margin-top:10px;">
+        <div style="background:#ffffff;border-radius:8px;overflow:hidden;margin-top:10px;">
             <div
                 style="width:{{ ($user->investment_count / 16) * 100 }}%;background:#3f7871;padding:6px 0;color:#fff;text-align:center;">
                 {{ round(($user->investment_count / 16) * 100) }}% Complete
@@ -332,19 +332,45 @@
                 <div id="priceBreakdown" style="margin-top:10px;font-size:14px;color:var(--accent);font-weight:600;"></div>
             </div>
             <div class="form-group">
-                <label>Payment By</label>
-                <select name="payment_by" required>
+                <label for="paymentBySelect">Payment By</label>
+                <select name="payment_by" id="paymentBySelect" required>
                     <option value="Wallet">Wallet</option>
                     <option value="Online">Online</option>
+                    <option value="Repurchase Wallet" disabled>
+                        Repurchase Wallet — ₹{{ number_format($wallet->repurchase_balance ?? 0, 2) }} (Repurchase Package only)
+                    </option>
                 </select>
+                <div id="repurchaseHint" style="margin-top:6px;font-size:13px;color:var(--muted);">
+                    Repurchase Wallet balance can only be used for the Repurchase Package.
+                </div>
             </div>
             <button type="submit" class="btn" id="topupSubmitBtn" style="width:100%">Submit Payment</button>
+            <script>
+                // Repurchase Wallet is only selectable when a Repurchase Package is chosen
+                (function () {
+                    var pkg = document.getElementById('packageSelect');
+                    var pay = document.getElementById('paymentBySelect');
+                    var repOpt = pay.querySelector('option[value="Repurchase Wallet"]');
+                    function sync() {
+                        var opt = pkg.options[pkg.selectedIndex];
+                        var isRep = !!opt && /REPURCHASE/i.test(opt.textContent);
+                        repOpt.disabled = !isRep;
+                        if (!isRep && pay.value === 'Repurchase Wallet') pay.value = 'Wallet';
+                    }
+                    pkg.addEventListener('change', sync);
+                    sync();
+                })();
+            </script>
         </form>
     </div>
 
     <div class="card">
         <h2>Your Wallet Balance</h2>
         <p style="font-size:20px;color:var(--accent);font-weight:700;">₹{{ number_format($wallet->balance ?? 0, 2) }}</p>
+        <p style="margin:6px 0 0;">
+            Repurchase Wallet: <strong>₹{{ number_format($wallet->repurchase_balance ?? 0, 2) }}</strong>
+            <a href="{{ route('repurchase.wallet') }}" style="margin-left:8px;">View statement</a>
+        </p>
     </div>
 
     <div class="card table-res">

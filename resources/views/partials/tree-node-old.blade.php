@@ -4,7 +4,7 @@
 
 <style>
 body{
-    background:radial-gradient(circle at top,#121820,#05070a);
+    background:radial-gradient(circle at top,#ffffff,#f0f8ef);
     font-family:Segoe UI,Arial;
 }
 .card{
@@ -37,7 +37,7 @@ body{
 }
 .red{color:red}
 .green{color:green}
-.black{color:#999}
+.black{color:#586d63}
 .graph{
     height:30px;
 }

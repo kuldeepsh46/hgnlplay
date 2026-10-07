@@ -92,9 +92,9 @@
         width: 100%;
         padding: 10px;
         border-radius: 8px;
-        border: 1px solid #2a3442;
-        background: #0f1620;
-        color: #fff;
+        border: 1px solid #e5f2e6;
+        background: #ffffff;
+        color: #203c30;
     }
     </style>
     <!-- Password Change Modal -->
@@ -117,7 +117,7 @@
                 <button type="submit" class="btn btn-copy" style="width:100%;">Update Password</button>
             </form>
             @if (session('success'))
-            <p style="color:#a7ff1e; text-align:center;">{{ session('success') }}</p>
+            <p style="color:#23845b; text-align:center;">{{ session('success') }}</p>
             @endif
             @if (session('error'))
             <p style="color:#ff5555; text-align:center;">{{ session('error') }}</p>
@@ -129,5 +129,5 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-    
+
 @endsection

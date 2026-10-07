@@ -4,30 +4,30 @@
 <style>
 .sbb .card {
     background: var(--card);
-    border: 1px solid #1f2832;
+    border: 1px solid #e5f2e6;
     border-radius: var(--radius);
     padding: 20px;
     margin-bottom: 24px;
 }
 .sbb .filter-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 10px; }
-.sbb .filter-form label { display: block; font-size: 12px; margin-bottom: 5px; color: #a9b9c7; }
+.sbb .filter-form label { display: block; font-size: 12px; margin-bottom: 5px; color: #203c30; }
 .sbb .filter-form input {
-    padding: 8px; border-radius: 6px; background: #141c22; border: 1px solid #1f2832; color: #fff;
+    padding: 8px; border-radius: 6px; background: #ffffff; border: 1px solid #e5f2e6; color: #203c30;
 }
 .sbb .btn { padding: 9px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; }
 .sbb .btn-primary { background: var(--accent); color: #fff; }
-.sbb .btn-dark { background: #333; color: #fff; }
+.sbb .btn-dark { background: #e5f2e6; color: #fff; }
 .sbb .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
-.sbb .stat { background: #141c22; border: 1px solid #1f2832; border-radius: 10px; padding: 14px; }
-.sbb .stat p { margin: 0; font-size: 12px; color: #a9b9c7; }
+.sbb .stat { background: #ffffff; border: 1px solid #e5f2e6; border-radius: 10px; padding: 14px; }
+.sbb .stat p { margin: 0; font-size: 12px; color: #203c30; }
 .sbb .stat h3 { margin: 6px 0 0; font-size: 20px; }
 .sbb .table-wrap { overflow-x: auto; }
 .sbb table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.sbb th, .sbb td { border: 1px solid #1e2b36; padding: 10px; text-align: center; font-size: 14px; white-space: nowrap; }
-.sbb th { background: #161f29; color: #a9b9c7; }
-.sbb td { color: #d4dee8; }
-.sbb td small { display: block; color: #8899a8; }
-.sbb .muted { color: #8899a8; font-size: 13px; margin: 0 0 12px; }
+.sbb th, .sbb td { border: 1px solid #e5f2e6; padding: 10px; text-align: center; font-size: 14px; white-space: nowrap; }
+.sbb th { background: #e5f2e6; color: #203c30; }
+.sbb td { color: #203c30; }
+.sbb td small { display: block; color: #586d63; }
+.sbb .muted { color: #586d63; font-size: 13px; margin: 0 0 12px; }
 </style>
 
 <div class="sbb">

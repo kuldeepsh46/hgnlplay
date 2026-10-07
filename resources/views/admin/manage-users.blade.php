@@ -12,7 +12,7 @@
         }
 
         .user-info {
-            background: #141c22;
+            background: #ffffff;
             padding: 8px 14px;
             border-radius: 999px;
             color: var(--accent);
@@ -21,7 +21,7 @@
 
         .card {
             background: var(--card);
-            border: 1px solid #1f2832;
+            border: 1px solid #e5f2e6;
             border-radius: var(--radius);
             padding: 20px;
             box-shadow: 0 0 20px #00000050;
@@ -40,19 +40,19 @@
 
         th,
         td {
-            border: 1px solid #1e2b36;
+            border: 1px solid #e5f2e6;
             padding: 10px;
             text-align: center;
             font-size: 14px;
         }
 
         th {
-            background: #161f29;
-            color: #a9b9c7;
+            background: #e5f2e6;
+            color: #203c30;
         }
 
         td {
-            color: #d4dee8;
+            color: #203c30;
         }
 
         .btn {
@@ -98,7 +98,7 @@
         .pagination a,
         .pagination span {
             padding: 6px 12px;
-            border: 1px solid #1f2832;
+            border: 1px solid #e5f2e6;
             border-radius: 6px;
             color: var(--text);
             text-decoration: none;
@@ -165,9 +165,9 @@
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #2a3442;
-            background: #0f1620;
-            color: #fff;
+            border: 1px solid #e5f2e6;
+            background: #ffffff;
+            color: #203c30;
         }
 
         /* ===============================
@@ -216,7 +216,7 @@
             <h2>All Users</h2>
 
             <input type="text" id="userSearch" placeholder="Search Username, Email or Mobile..."
-                style="padding:8px 12px;border-radius:6px;border:1px solid #2a3442;background:#0f1620;color:#fff;width:280px;">
+                style="padding:8px 12px;border-radius:6px;border:1px solid #e5f2e6;background:#ffffff;color:#203c30;width:280px;">
         </div>
         {{-- {{dd($users)}} --}}
         <div class="table-wrap">
@@ -281,7 +281,7 @@
                                         {{ $totalEmisPaid }} / {{ $totalEmisSupposedToPay }}
                                     </span>
 
-                                    <div style="font-size: 10px; color: #888;">
+                                    <div style="font-size: 10px; color: #586d63;">
                                         {{ $totalEmisPaid < $totalEmisSupposedToPay ? 'Pending Payments' : 'Up to Date' }}
                                     </div>
                                 @else
@@ -370,7 +370,7 @@
                 <button type="submit" class="btn btn-copy" style="width:100%;">Update Password</button>
             </form>
             @if (session('success'))
-                <p style="color:#a7ff1e; text-align:center;">{{ session('success') }}</p>
+                <p style="color:#23845b; text-align:center;">{{ session('success') }}</p>
             @endif
             @if (session('error'))
                 <p style="color:#ff5555; text-align:center;">{{ session('error') }}</p>

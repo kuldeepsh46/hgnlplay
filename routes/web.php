@@ -120,6 +120,8 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/emi', [EMIController::class, 'index'])->name('emi.index');
+    Route::get('/payments/due', [\App\Http\Controllers\PaymentDueController::class, 'index'])->name('payments.due');
+    Route::get('/repurchase-wallet', [\App\Http\Controllers\RepurchaseWalletController::class, 'index'])->name('repurchase.wallet');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export/{type}', [ReportController::class, 'export'])->name('reports.export');
@@ -173,7 +175,7 @@ Route::post('/reverse-all-user', [ManageUsersRolesController::class, 'reverseAll
 // The Panic Button
 Route::post('/panic-nuke', [ManageUsersRolesController::class, 'systemPanic'])->name('admin.panic');
 
-// New admin dashboard (preview — the current one at /dashboard is unchanged)
+// Admin dashboard — /dashboard redirects admins here
 Route::get('/admin/dashboard-new', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])
     ->middleware(['auth'])
     ->name('admin.dashboard.new');

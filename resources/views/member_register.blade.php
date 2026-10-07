@@ -19,7 +19,7 @@
         padding: 40px 0;
         box-sizing: border-box;
         @if(!Auth::check())
-            background: radial-gradient(circle at 30% -20%, #1a2a1f 0%, transparent 60%), #06090c;
+            background: radial-gradient(circle at 30% -20%, #e5f2e6 0%, transparent 60%), #f0f8ef;
             min-height: 100vh;
         @endif
     }
@@ -28,8 +28,8 @@
     .hgnl-card-wide {
         width: 95%; 
         max-width: 1400px; 
-        background-color: #10171f;
-        border: 1px solid #1b222b;
+        background-color: #ffffff;
+        border: 1px solid #e5f2e6;
         border-radius: 16px;
         padding: 50px;
         box-shadow: 0 20px 40px rgba(0,0,0,0.5);
@@ -39,9 +39,9 @@
         font-size: 28px;
         margin-top: 0;
         margin-bottom: 40px;
-        border-left: 5px solid #a7ff1e;
+        border-left: 5px solid #23845b;
         padding-left: 20px;
-        color: #fff;
+        color: #203c30;
     }
 
     /* ================= 3-COLUMN GRID ================= */
@@ -63,7 +63,7 @@
     .hgnl-field label {
         font-size: 12px;
         text-transform: uppercase;
-        color: #a0acb3;
+        color: #586d63;
         margin-bottom: 10px;
         font-weight: 700;
         letter-spacing: 1px;
@@ -74,28 +74,28 @@
         width: 100%;
         padding: 16px;
         border-radius: 8px;
-        border: 1px solid #1b222b;
-        background-color: #0b0e12;
-        color: #fff;
+        border: 1px solid #e5f2e6;
+        background-color: #f0f8ef;
+        color: #203c30;
         font-size: 15px;
         transition: 0.3s;
     }
 
     .hgnl-input:focus {
         outline: none;
-        border-color: #a7ff1e;
-        background-color: #0d1218;
+        border-color: #23845b;
+        background-color: #ffffff;
     }
 
     .hgnl-input[readonly] {
-        color: #e84e6d;
+        color: #b64f70;
         font-weight: bold;
-        background-color: #12181f;
+        background-color: #ffffff;
     }
 
     /* ================= ACTION BUTTON ================= */
     .hgnl-btn {
-        background-color: #a7ff1e;
+        background-color: #23845b;
         color: #000;
         font-weight: 800;
         border: none;
@@ -130,15 +130,15 @@
     .timer-circle {
         font-size: 64px;
         font-weight: 900;
-        color: #a7ff1e;
+        color: #23845b;
         margin: 25px 0;
         text-shadow: 0 0 20px rgba(167, 255, 30, 0.4);
     }
     .manual-link {
-        color: #a7ff1e;
+        color: #23845b;
         text-decoration: none;
         font-weight: bold;
-        border-bottom: 1px dashed #a7ff1e;
+        border-bottom: 1px dashed #23845b;
     }
 
     /* ================= RESPONSIVE ================= */
@@ -168,11 +168,11 @@
             {{-- 10 SECOND COUNTDOWN FOR GUESTS ONLY --}}
             <div class="success-status-box">
                 <h2 style="border:none; padding:0; margin-bottom:15px;">Registration Successful!</h2>
-                <p style="color: #a0acb3; font-size: 18px;">{{ session('success') }}</p>
+                <p style="color: #586d63; font-size: 18px;">{{ session('success') }}</p>
                 
                 <div class="timer-circle" id="countdown-val">6</div>
                 
-                <p style="color: #888;">
+                <p style="color: #586d63;">
                     Redirecting to login in <span id="sec-text">6</span> seconds...<br><br>
                     <a href="{{ route('login') }}" class="manual-link">Go to Login Now</a>
                 </p>
@@ -198,14 +198,14 @@
 
             {{-- Logged in Success Message --}}
             @if(session('success'))
-                <div style="background: rgba(167, 255, 30, 0.15); border: 1px solid #a7ff1e; color: #a7ff1e; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-weight: 600;">
+                <div style="background: rgba(167, 255, 30, 0.15); border: 1px solid #23845b; color: #23845b; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-weight: 600;">
                     ✅ {{ session('success') }}
                 </div>
             @endif
 
             {{-- Error Handling --}}
             @if ($errors->any())
-                <div style="background: rgba(232, 78, 109, 0.15); border: 1px solid #e84e6d; color: #e84e6d; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                <div style="background: rgba(232, 78, 109, 0.15); border: 1px solid #b64f70; color: #b64f70; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
                     <ul style="margin:0; padding-left:18px; font-size:14px;">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -290,8 +290,8 @@
                         <button type="submit" class="hgnl-btn">Complete Registration</button>
                         
                         @if(!Auth::check())
-                            <p style="text-align: center; color: #a0acb3; margin-top: 20px;">
-                                Already registered? <a href="{{ route('login') }}" style="color: #a7ff1e; text-decoration: none; font-weight: bold;">Login here</a>
+                            <p style="text-align: center; color: #586d63; margin-top: 20px;">
+                                Already registered? <a href="{{ route('login') }}" style="color: #23845b; text-decoration: none; font-weight: bold;">Login here</a>
                             </p>
                         @endif
                     </div>

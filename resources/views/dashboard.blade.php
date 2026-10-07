@@ -11,20 +11,20 @@
            because this business is literally a live network.
         ========================================= */
         :root {
-            --ink: #060811;
-            --ink-2: #0a0d17;
-            --glass: rgba(255, 255, 255, .035);
-            --glass-strong: rgba(255, 255, 255, .06);
-            --line: rgba(255, 255, 255, .09);
-            --line-soft: rgba(255, 255, 255, .05);
-            --text: #f6f7fb;
-            --text-muted: #9298ab;
-            --text-dim: #575e72;
-            --gold: #f0bd5a;
-            --gold-2: #ffd98a;
-            --teal: #35e0c9;
-            --teal-2: #7cf2e2;
-            --coral: #ff6f6f;
+            --ink: #f0f8ef;
+            --ink-2: #ffffff;
+            --glass: rgba(40, 100, 65, .035);
+            --glass-strong: rgba(40, 100, 65, .06);
+            --line: rgba(40, 100, 65, .09);
+            --line-soft: rgba(40, 100, 65, .05);
+            --text: #203c30;
+            --text-muted: #52695f;
+            --text-dim: #52695f;
+            --gold: #9a651b;
+            --gold-2: #9a651b;
+            --teal: #187f72;
+            --teal-2: #187f72;
+            --coral: #be5151;
             --radius: 22px;
             --radius-sm: 12px;
             --font-display: 'Manrope', 'Inter', sans-serif;
@@ -63,7 +63,7 @@
             position: fixed;
             inset: 0;
             z-index: -2;
-            background-image: radial-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px);
+            background-image: radial-gradient(rgba(40, 100, 65, .05) 1px, transparent 1px);
             background-size: 26px 26px;
             mask-image: radial-gradient(circle at 50% 0%, black, transparent 75%);
             pointer-events: none;
@@ -315,7 +315,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .07), transparent 60%);
+            background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgba(40, 100, 65, .07), transparent 60%);
             opacity: 0;
             transition: opacity .35s ease;
             pointer-events: none;
@@ -326,7 +326,7 @@
         }
 
         .glass:hover {
-            border-color: rgba(255, 255, 255, .16);
+            border-color: rgba(40, 100, 65, .16);
             box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
         }
 
@@ -506,7 +506,7 @@
         }
 
         .tile {
-            background: rgba(255, 255, 255, .025);
+            background: rgba(40, 100, 65, .025);
             border: 1px solid var(--line-soft);
             border-radius: var(--radius-sm);
             padding: 16px;
@@ -515,7 +515,7 @@
 
         .tile:hover {
             transform: translateY(-3px);
-            background: rgba(255, 255, 255, .05);
+            background: rgba(40, 100, 65, .05);
         }
 
         .tile .tile-icon {
@@ -629,7 +629,7 @@
 
         .ring-track {
             fill: none;
-            stroke: rgba(255, 255, 255, .07);
+            stroke: rgba(40, 100, 65, .07);
         }
 
         .ring-fill {
@@ -794,7 +794,7 @@
             padding: 12px;
             border-radius: var(--radius-sm);
             border: 1px solid transparent;
-            background: rgba(255, 255, 255, .02);
+            background: rgba(40, 100, 65, .02);
             cursor: pointer;
             text-align: left;
             width: 100%;
@@ -804,7 +804,7 @@
 
         .lb-row:hover,
         .lb-row:focus-visible {
-            background: rgba(255, 255, 255, .06);
+            background: rgba(40, 100, 65, .06);
             border-color: var(--line);
             transform: translateX(3px);
         }
@@ -814,7 +814,7 @@
             height: 46px;
             border-radius: 50%;
             flex-shrink: 0;
-            background: conic-gradient(var(--teal) calc(var(--pct) * 1%), rgba(255, 255, 255, .08) 0);
+            background: conic-gradient(var(--teal) calc(var(--pct) * 1%), rgba(40, 100, 65, .08) 0);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -824,7 +824,7 @@
             width: 34px;
             height: 34px;
             border-radius: 50%;
-            background: #0d1119;
+            background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -895,7 +895,7 @@
         }
 
         table.data-table tbody tr:hover {
-            background: rgba(255, 255, 255, .04);
+            background: rgba(40, 100, 65, .04);
         }
 
         canvas.chart-surface {
@@ -1015,7 +1015,7 @@
         }
 
         .modal-box {
-            background: linear-gradient(180deg, #141826, #0e121c);
+            background: linear-gradient(180deg, #ffffff, #ffffff);
             border: 1px solid var(--line);
             border-radius: var(--radius);
             width: 92%;
@@ -1387,9 +1387,9 @@
                     </div>
                 </div>
                 <div class="ring-legend">
-                    <span><i style="background:#35e0c9;"></i> Tier 1 · {{ $progress->tier_1_count ?? 0 }}/3</span>
-                    <span><i style="background:#f0bd5a;"></i> Tier 2 · {{ $progress->tier_2_count ?? 0 }}/9</span>
-                    <span><i style="background:#ff6f6f;"></i> Tier 3 · {{ $progress->tier_3_count ?? 0 }}/27</span>
+                    <span><i style="background:#187f72;"></i> Tier 1 · {{ $progress->tier_1_count ?? 0 }}/3</span>
+                    <span><i style="background:#9a651b;"></i> Tier 2 · {{ $progress->tier_2_count ?? 0 }}/9</span>
+                    <span><i style="background:#be5151;"></i> Tier 3 · {{ $progress->tier_3_count ?? 0 }}/27</span>
                 </div>
             </div>
 
@@ -1441,6 +1441,11 @@
                         <p class="tile-label">Topup Wallet</p>
                         <p class="tile-value mono">₹{{ number_format($walletBalance ?? 0, 2) }}</p>
                     </div>
+                    <a class="tile" href="{{ route('repurchase.wallet') }}" style="text-decoration:none;color:inherit;">
+                        <div class="tile-icon"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i></div>
+                        <p class="tile-label">Repurchase Wallet</p>
+                        <p class="tile-value mono">₹{{ number_format($repurchaseBalance ?? 0, 2) }}</p>
+                    </a>
                 </div>
             </div>
         </div>
@@ -1473,7 +1478,7 @@
                     <p style="margin:16px 0 8px; font-size:13px; color:var(--text-muted);">
                         Next: <b style="color:var(--text);">{{ $rankProgress['next']['name'] }}</b> — {{ number_format($rankProgress['to_next']) }} more pair{{ $rankProgress['to_next'] == 1 ? '' : 's' }} to earn ₹{{ number_format($rankProgress['next']['reward']) }}
                     </p>
-                    <div style="height:8px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden;">
+                    <div style="height:8px; border-radius:4px; background:rgba(40, 100, 65, .08); overflow:hidden;">
                         <div style="height:100%; width:{{ round($rankProgress['next_pct'], 1) }}%; background:linear-gradient(90deg,#35e0c9,#f0bd5a); border-radius:4px;"></div>
                     </div>
                 @else

@@ -3,7 +3,7 @@
 @section('main')
 
 <style>
-body{background:#0b0e12;font-family:Inter,sans-serif}
+body{background:#f0f8ef;font-family:Inter,sans-serif}
 .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 0 20px rgba(0,0,0,.4)}
 .tree-scroll{overflow-x:auto}
 .tree-table{border-collapse:collapse;margin:auto}

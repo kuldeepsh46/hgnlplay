@@ -8,7 +8,7 @@
   }
 .card {
     background: var(--card);
-    border: 1px solid #1f2832;
+    border: 1px solid #e5f2e6;
     border-radius: var(--radius);
     padding: 20px;
     margin-bottom: 24px;
@@ -45,7 +45,7 @@ table {
 
 th,
 td {
-    border: 1px solid #1e2b36;
+    border: 1px solid #e5f2e6;
     padding: 10px;
     text-align: center;
     font-size: 14px;
@@ -53,21 +53,21 @@ td {
 }
 
 th {
-    background: #161f29;
-    color: #a9b9c7;
+    background: #e5f2e6;
+    color: #203c30;
 }
 
 td {
-    color: #d4dee8
+    color: #203c30
 }
 
 input {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #2a3442;
-    background: #0f1620;
-    color: #fff;
+    border: 1px solid #e5f2e6;
+    background: #ffffff;
+    color: #203c30;
 }
 
 .alert {
@@ -77,13 +77,13 @@ input {
 }
 
 .alert-success {
-    background: #a7ff1e;
+    background: #23845b;
     color: #000;
 }
 
 .alert-error {
     background: #ff5555;
-    color: #fff;
+    color: #203c30;
 }
 
 /* ===== Password Modal ===== */
@@ -143,9 +143,9 @@ input {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #2a3442;
-    background: #0f1620;
-    color: #fff;
+    border: 1px solid #e5f2e6;
+    background: #ffffff;
+    color: #203c30;
 }
 </style>
 
@@ -200,7 +200,7 @@ input {
                     <td>{{ $i+1 }}</td>
                     <td>₹{{ number_format($w->amount,2) }}</td>
                     <td style="color:#ff5555;">₹{{ number_format($w->tax_amount,2) }}</td>
-                    <td style="color:#a7ff1e;">₹{{ number_format($w->net_amount,2) }}</td>
+                    <td style="color:#23845b;">₹{{ number_format($w->net_amount,2) }}</td>
                     <td style="color:{{ $w->status == 'completed' ? '#a7ff1e' : '#ffcc00' }}">
                         {{ ucfirst($w->status) }}
                     </td>
@@ -237,7 +237,7 @@ input {
             <button type="submit" class="btn btn-copy" style="width:100%;">Update Password</button>
         </form>
         @if (session('success'))
-        <p style="color:#a7ff1e; text-align:center;">{{ session('success') }}</p>
+        <p style="color:#23845b; text-align:center;">{{ session('success') }}</p>
         @endif
         @if (session('error'))
         <p style="color:#ff5555; text-align:center;">{{ session('error') }}</p>

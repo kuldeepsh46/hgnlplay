@@ -12,16 +12,16 @@
    :root {
         --bg: #f9f9f9;
         --card: #f8f8f8;
-        --muted: #393939;
-        --text: #2e2e2f;
-        --text-dim: #575757;
-        --accent: #3f5193;
+        --muted: #52695f;
+        --text: #52695f;
+        --text-dim: #52695f;
+        --accent: #596ca4;
         /* neon lime */
         --accent-2: #293b8f;
         /* teal-green */
-        --accent-3: #12d1ff;
+        --accent-3: #327f9e;
         /* cyan for subtle touches */
-        --border: #e6e6e6;
+        --border: #cddfd3;
         --ring: 0 0 0 8px #3f51b51a,, 0 0 60px 10px #3f51b51a inset;
         --radius: 14px;
         --shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 4px 14px rgba(0, 0, 0, .35);
@@ -120,7 +120,7 @@
     }
 
      .btn-primary {
-        background: linear-gradient(90deg, var(--accent), #3f5193);
+        background: linear-gradient(90deg, var(--accent), #596ca4);
         color: #ffffff;
         box-shadow: var(--ring);
         position: relative;
@@ -129,28 +129,28 @@
 
     .btn-primary:hover {
         transform: translateY(-1px);
-        box-shadow: 0 0 0 10px #a7ff1e1f, var(--ring)
+        box-shadow: 0 0 0 10px #23845b1f, var(--ring)
     }
 
     .btn-ghost {
-        border-color: #2a323b;
-        color: #dce7f0;
-        background: #131922
+        border-color: #e5f2e6;
+        color: #203c30;
+        background: #ffffff
     }
 
     .btn-ghost:hover {
         border-color: #3a4450;
-        background: #171f2a
+        background: #e5f2e6
     }
 
     .btn-outline {
         border-color: #93ff1e33;
-        color: #ffffffff;
-        background: #10171e;
+        color: #203c30ff;
+        background: #ffffff;
     }
 
     .btn-outline:hover {
-        background: #131e26;
+        background: #ffffff;
         border-color: #93ff1e66
     }
 
@@ -170,7 +170,7 @@
 
   .burger span {
     height: 3px;
-    background: #000000;
+    background: #f0f8ef;
     border-radius: 99px;
 }
  .f-brand .logo img {
@@ -198,7 +198,7 @@
     top: 72px;
     width: 100%;
     background: #fffffffa;
-    border-top: 1px solid #121a22;
+    border-top: 1px solid #ffffff;
     z-index: 99999;
 }
 
@@ -213,11 +213,11 @@
     }
 
     .mobile-menu li {
-        border: 1px solid #1a2230;
+        border: 1px solid #e5f2e6;
         border-radius: 10px;
         padding: 12px;
         margin: 8px 0;
-        background: #0f151d
+        background: #ffffff
     }
 
     .mobile-menu .nav-cta {
@@ -246,8 +246,8 @@
         left: 0;
         top: 72px;
         width: 100%;
-        background: #0c1117;
-        border-top: 1px solid #121a22;
+        background: #ffffff;
+        border-top: 1px solid #ffffff;
         z-index: 99999;
     }
 
@@ -294,11 +294,11 @@
         width: 52px;
         height: 52px;
         border-radius: 14px;
-        background: conic-gradient(from 140deg, #2ee6a6, #a7ff1e, #12d1ff, #2ee6a6)
+        background: conic-gradient(from 140deg, #218c78, #23845b, #327f9e, #218c78)
     }
 
     .f-brand p {
-        color: #97a8b4
+        color: #586d63
     }
 
     .f-col h5 {
@@ -332,16 +332,16 @@
         border-radius: 8px;
         display: grid;
         place-items: center;
-        border: 1px solid #273342;
-        background: #0f1620;
-        color: #b7c5d1
+        border: 1px solid #e5f2e6;
+        background: #ffffff;
+        color: #203c30
     }
 
     .copy {
-        border-top: 1px solid #131a24;
+        border-top: 1px solid #ffffff;
         margin-top: 24px;
         padding-top: 14px;
-        color: #8ea0ae;
+        color: #586d63;
         font-size: 14px;
         display: flex;
         justify-content: space-between;
@@ -361,7 +361,7 @@
         width: 35px;
         height: 35px;
         border-radius: 999px;
-        border: 1px solid #2a3543;
+        border: 1px solid #e5f2e6;
         display: grid;
         place-items: center;
         background: #ffffff;
@@ -495,7 +495,7 @@
       margin-bottom: 10px;
     }
     p, li {
-      color: #b9c3cb;
+      color: #203c30;
       font-size: 16px;
     }
         p, li {
@@ -514,12 +514,12 @@
     }
     .updated {
       font-size: 14px;
-      color: #8b9aa5;
+      color: #586d63;
       margin-bottom: 30px;
     }
     .info-box  {
     background: #ffffff;
-    border: 1px solid #1b222b;
+    border: 1px solid #e5f2e6;
     padding: 20px;
     border-radius: 12px;
     margin-top: 30px;
@@ -527,6 +527,7 @@
 }
    
     </style>
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
 </head>
 
 <body>

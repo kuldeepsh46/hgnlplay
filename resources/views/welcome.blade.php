@@ -12,44 +12,23 @@
     :root {
         --bg: #f9f9f9;
         --card: #f8f8f8;
-        --muted: #393939;
-        --text: #2e2e2f;
-        --text-dim: #575757;
-        --accent: #3f5193;
+        --muted: #52695f;
+        --text: #52695f;
+        --text-dim: #52695f;
+        --accent: #596ca4;
         /* neon lime */
         --accent-2: #293b8f;
         /* teal-green */
-        --accent-3: #12d1ff;
+        --accent-3: #327f9e;
         /* cyan for subtle touches */
-        --border: #e6e6e6;
-        --ring: 0 0 0 8px #3f51b51a,, 0 0 60px 10px #3f51b51a inset;
+        --border: #cddfd3;
+        --ring: 0 0 0 8px #3f51b51a;
         --radius: 14px;
-        --shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 4px 14px rgba(0, 0, 0, .35);
+        --shadow: 0 10px 30px rgba(20, 30, 60, .08), 0 2px 8px rgba(20, 30, 60, .06);
     }
 
     * {
         box-sizing: border-box
-    }
-
-    /* ===== Our Products (homepage) ===== */
-    .home-products { padding: 70px 0; background: #fff; text-align: center; }
-    .home-products .hp-eyebrow { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #2f6b1e; margin-bottom: 8px; }
-    .home-products .hp-title { margin: 0 0 34px; font-size: 32px; color: var(--text); }
-    .home-products .hp-title span { color: #2f6b1e; }
-    .home-products .hp-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; }
-    .home-products .hp-card { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
-    .home-products .hp-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; background: #f3f5f2; border: 1px solid var(--border); box-shadow: 0 6px 18px rgba(0, 0, 0, .08); transition: transform .2s, box-shadow .2s; }
-    .home-products .hp-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
-    .home-products .hp-card:hover .hp-img { transform: translateY(-4px); box-shadow: 0 12px 26px rgba(0, 0, 0, .14); }
-    .home-products .hp-wa { margin-top: -4px; font-size: 12px; font-weight: 600; color: #1f8f4e; }
-    .home-products .hp-card:hover .hp-wa { text-decoration: underline; }
-    .home-products .hp-name { background: #345C01; color: #fff; padding: 6px 12px; border-radius: 5px; font-size: 13px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
-    @media (max-width: 560px) {
-        .home-products { padding: 48px 0; }
-        .home-products .hp-title { font-size: 24px; }
-        .home-products .hp-grid { gap: 14px; }
-        .home-products .hp-card { width: calc(50% - 7px); }
-        .home-products .hp-name { font-size: 11px; padding: 5px 8px; }
     }
 
     @media (max-width: 520px) {
@@ -114,9 +93,13 @@
     }
 
     header {
-        background: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: rgba(255, 255, 255, .96);
+        backdrop-filter: saturate(160%) blur(8px);
+        border-bottom: 1px solid var(--border);
         padding: 6px 0px;
-
     }
 
     .logo img {
@@ -173,7 +156,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(90deg, var(--accent), #3f5193);
+        background: linear-gradient(90deg, var(--accent), #596ca4);
         color: #ffffff;
         box-shadow: var(--ring);
         position: relative;
@@ -182,29 +165,29 @@
 
     .btn-primary:hover {
         transform: translateY(-1px);
-        box-shadow: 0 0 0 10px #a7ff1e1f, var(--ring)
+        box-shadow: 0 0 0 10px #23845b1f, var(--ring)
     }
 
     .btn-ghost {
-        border-color: #2a323b;
-        color: #dce7f0;
-        background: #131922
+        border-color: #e5f2e6;
+        color: #203c30;
+        background: #ffffff
     }
 
     .btn-ghost:hover {
         border-color: #3a4450;
-        background: #171f2a
+        background: #e5f2e6
     }
 
     .btn-outline {
         border-color: #93ff1e33;
-        color: #ffffffff;
-        background: #10171e;
+        color: #203c30ff;
+        background: #ffffff;
     }
 
     .btn-outline:hover {
-        background: #131e26;
-        border-color: #3f5193;
+        background: #ffffff;
+        border-color: #596ca4;
     }
 
     .nav-cta {
@@ -216,14 +199,40 @@
     .burger {
         display: none;
         flex-direction: column;
-        gap: 4px;
-        width: 28px;
+        justify-content: center;
+        gap: 5px;
+        width: 44px;
+        height: 44px;
+        padding: 10px 8px;
+        background: transparent;
+        border: 0;
+        border-radius: 10px;
         cursor: pointer
+    }
+
+    .burger:hover {
+        background: #e3f3e9
+    }
+
+    .burger span {
+        transition: transform .25s, opacity .25s
+    }
+
+    .burger[aria-expanded="true"] span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg)
+    }
+
+    .burger[aria-expanded="true"] span:nth-child(2) {
+        opacity: 0
+    }
+
+    .burger[aria-expanded="true"] span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg)
     }
 
   .burger span {
     height: 3px;
-    background: #000000;
+    background: #142e25;
     border-radius: 99px;
 }
 
@@ -233,8 +242,9 @@
     left: 0;
     top: 72px;
     width: 100%;
-    background: #fffffffa;
-    border-top: 1px solid #121a22;
+    background: #fff;
+    box-shadow: 0 16px 30px rgba(20, 30, 60, .12);
+    border-top: 1px solid var(--border);
     z-index: 99999;
 }
 
@@ -256,9 +266,29 @@
 }
 
     .mobile-menu .nav-cta {
-        padding: 12px;
+        display: flex;
+        padding: 0 12px 18px;
         gap: 8px
     }
+
+    .mobile-menu .nav-cta .btn {
+        flex: 1;
+        justify-content: center
+    }
+
+    .mobile-menu li a {
+        display: block
+    }
+
+    /* The mobile menu is a <nav> too, so undo the desktop-only nav rules */
+    nav.mobile-menu ul {
+        display: block
+    }
+
+    nav.mobile-menu .btn-primary {
+        color: #fff !important
+    }
+
 
     /* ---------- Hero ---------- */
     .hero {
@@ -278,9 +308,9 @@
         display: inline-flex;
         gap: 8px;
         align-items: center;
-        color: #a6ffc4;
-        background: #0d1913;
-        border: 1px solid #1a3326;
+        color: #203c30;
+        background: #ffffff;
+        border: 1px solid #e5f2e6;
         padding: 6px 10px;
         border-radius: 999px;
         font-size: 13px
@@ -291,7 +321,7 @@
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: radial-gradient(circle at 30% 30%, #a7ff1e, #2ee6a6)
+        background: radial-gradient(circle at 30% 30%, #23845b, #218c78)
     }
 
     .hero h2 {
@@ -321,8 +351,8 @@
 
     .illustration {
         position: relative;
-        background: radial-gradient(120% 100% at 60% 40%, #1b2330 0%, #131a22 55%, #0e141c 100%);
-        border: 1px solid #1e2834;
+        background: radial-gradient(120% 100% at 60% 40%, #e5f2e6 0%, #ffffff 55%, #ffffff 100%);
+        border: 1px solid #e5f2e6;
         border-radius: 22px;
         padding: 26px;
         box-shadow: var(--shadow)
@@ -333,7 +363,7 @@
         inset: -30px;
         border-radius: 26px;
         background: radial-gradient(600px 300px at 70% 20%, #bfff2d1c, transparent 60%),
-            radial-gradient(420px 260px at 20% 90%, #12d1ff18, transparent 60%);
+            radial-gradient(420px 260px at 20% 90%, #327f9e18, transparent 60%);
         pointer-events: none;
         filter: blur(6px)
     }
@@ -343,11 +373,11 @@
         width: 100%;
         aspect-ratio: 16/11;
         border-radius: 16px;
-        border: 1px solid #2a3542;
+        border: 1px solid #e5f2e6;
         background:
-            radial-gradient(120px 60px at 25% 30%, #1e2b39 0%, transparent 70%),
-            radial-gradient(90px 50px at 42% 58%, #1b2937 0%, transparent 70%),
-            linear-gradient(180deg, #0f1720, #0a0f16);
+            radial-gradient(120px 60px at 25% 30%, #e5f2e6 0%, transparent 70%),
+            radial-gradient(90px 50px at 42% 58%, #e5f2e6 0%, transparent 70%),
+            linear-gradient(180deg, #ffffff, #f0f8ef);
         position: relative;
         overflow: hidden
     }
@@ -358,10 +388,10 @@
         inset: auto 14px 14px auto;
         padding: 6px 10px;
         border-radius: 999px;
-        border: 1px solid #2a3340;
-        color: #8da3b5;
+        border: 1px solid #e5f2e6;
+        color: #586d63;
         font-size: 12px;
-        background: #0f1620
+        background: #ffffff
     }
 
     .chart-line {
@@ -371,16 +401,16 @@
         top: 18px;
         height: 58%;
         background:
-            radial-gradient(circle at 30% 70%, #a7ff1e 3px, transparent 4px) 0 18px/48px 22px repeat,
-            linear-gradient(120deg, #2ee6a6, #a7ff1e 50%, #12d1ff);
+            radial-gradient(circle at 30% 70%, #23845b 3px, transparent 4px) 0 18px/48px 22px repeat,
+            linear-gradient(120deg, #218c78, #23845b 50%, #327f9e);
         -webkit-mask:
-            linear-gradient(#000 0 0) top/100% 2px no-repeat,
-            linear-gradient(#000 0 0) bottom/100% 2px no-repeat,
-            repeating-linear-gradient(transparent 0 18px, #000 18px 20px);
+            linear-gradient(#f0f8ef 0 0) top/100% 2px no-repeat,
+            linear-gradient(#f0f8ef 0 0) bottom/100% 2px no-repeat,
+            repeating-linear-gradient(transparent 0 18px, #f0f8ef 18px 20px);
         mask:
-            linear-gradient(#000 0 0) top/100% 2px no-repeat,
-            linear-gradient(#000 0 0) bottom/100% 2px no-repeat,
-            repeating-linear-gradient(transparent 0 18px, #000 18px 20px);
+            linear-gradient(#f0f8ef 0 0) top/100% 2px no-repeat,
+            linear-gradient(#f0f8ef 0 0) bottom/100% 2px no-repeat,
+            repeating-linear-gradient(transparent 0 18px, #f0f8ef 18px 20px);
         border-radius: 8px;
         opacity: .85;
         filter: drop-shadow(0 0 12px #bfff2d55)
@@ -392,8 +422,8 @@
         width: 12px;
         height: 12px;
         rotate: 45deg;
-        background: radial-gradient(#a7ff1e, #76ff00 45%, transparent 46%);
-        filter: drop-shadow(0 0 12px #a7ff1e88)
+        background: radial-gradient(#23845b, #76ff00 45%, transparent 46%);
+        filter: drop-shadow(0 0 12px #23845b88)
     }
 
     .star.s1 {
@@ -436,10 +466,10 @@
 
     /* ---------- About ---------- */
     .about {
-        background: radial-gradient(900px 380px at 20% 20%, #0f1d19 0%, transparent 60%),
-            radial-gradient(900px 380px at 90% 0%, #0f1626 0%, transparent 60%);
-        border-top: 1px solid #0e151d;
-        border-bottom: 1px solid #0e151d;
+        background: radial-gradient(900px 380px at 20% 20%, #ffffff 0%, transparent 60%),
+            radial-gradient(900px 380px at 90% 0%, #ffffff 0%, transparent 60%);
+        border-top: 1px solid #ffffff;
+        border-bottom: 1px solid #ffffff;
         display: none;
     }
 
@@ -451,8 +481,8 @@
     }
 
     .about-card {
-        border: 1px solid #1d2632;
-        background: linear-gradient(180deg, #101823 0%, #0b1118 100%);
+        border: 1px solid #e5f2e6;
+        background: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
         border-radius: 20px;
         padding: 24px;
         box-shadow: var(--shadow)
@@ -464,10 +494,10 @@
 
     /* Dummy image block */
     .about-illus {
-        border: 1px solid #243142;
+        border: 1px solid #e5f2e6;
         border-radius: 18px;
         padding: 16px;
-        background: #0f1620
+        background: #ffffff
     }
 
     .about-illus .screen {
@@ -507,7 +537,7 @@
     border-radius: 50%;
     display: grid;
     place-items: center;
-    background: radial-gradient(circle at 30% 30%, #14201a0a, #0f181200);
+    background: radial-gradient(circle at 30% 30%, #ffffff0a, #ffffff00);
     border: 1px solid #bdbdbd;
     box-shadow: 0 0 0 8px #6b6c6810;
 }
@@ -591,11 +621,11 @@
         width: 52px;
         height: 52px;
         border-radius: 14px;
-        background: conic-gradient(from 140deg, #2ee6a6, #a7ff1e, #12d1ff, #2ee6a6)
+        background: conic-gradient(from 140deg, #218c78, #23845b, #327f9e, #218c78)
     }
 
     .f-brand p {
-        color: #97a8b4
+        color: #586d63
     }
 
     .f-col h5 {
@@ -630,16 +660,16 @@
         border-radius: 8px;
         display: grid;
         place-items: center;
-        border: 1px solid #273342;
-        background: #0f1620;
-        color: #b7c5d1
+        border: 1px solid #e5f2e6;
+        background: #ffffff;
+        color: #203c30
     }
 
     .copy {
-        border-top: 1px solid #131a24;
+        border-top: 1px solid var(--border);
         margin-top: 24px;
         padding-top: 14px;
-        color: #8ea0ae;
+        color: #586d63;
         font-size: 14px;
         display: flex;
         justify-content: space-between;
@@ -656,27 +686,96 @@
         position: fixed;
         right: 16px;
         bottom: 16px;
-        width: 35px;
-        height: 35px;
+        width: 44px;
+        height: 44px;
         border-radius: 999px;
-        border: 1px solid #2a3543;
+        border: 0;
         display: grid;
         place-items: center;
-        background: #ffffff;
-        box-shadow: 0 12px 28px #00000050;
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(41, 59, 143, .35);
         cursor: pointer;
         z-index: 40;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .25s ease, transform .2s ease, background .2s
+    }
+
+    .float-btn.visible {
+        opacity: 1;
+        pointer-events: auto
     }
 
     .float-btn:hover {
-        border-color: #3a4758;
+        background: var(--accent-2);
         transform: translateY(-2px)
     }
 
     .float-btn svg {
         width: 22px;
-        height: 22px;
-        stroke: #c7d7e3
+        height: 22px
+    }
+
+    /* ---------- Accessibility ---------- */
+    .skip-link {
+        position: absolute;
+        left: 12px;
+        top: -60px;
+        z-index: 100000;
+        background: var(--accent);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 700;
+        transition: top .15s
+    }
+
+    .skip-link:focus {
+        top: 12px
+    }
+
+    :focus-visible {
+        outline: 3px solid #3f5193;
+        outline-offset: 3px;
+        border-radius: 4px
+    }
+
+    .why-choose-dark :focus-visible,
+    footer :focus-visible {
+        outline-color: #9fb0ff
+    }
+
+    main:focus {
+        outline: none
+    }
+
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 90px
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto
+        }
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important
+        }
+
+        .reveal {
+            opacity: 1;
+            transform: none
+        }
+    }
+
+    .cta-action {
+        text-align: right
     }
 
     /* ---------- Animations ---------- */
@@ -1095,7 +1194,7 @@
         width: 26px;
         height: 26px;
         background: var(--accent);
-        color: #ffffff;
+        color: #203c30;
         border-radius: 50%;
         display: grid;
         place-items: center;
@@ -1446,7 +1545,7 @@ padding-top: 20px;
             width: 23px;
             height: 23px;
             background: var(--accent);
-            color: #ffffff;
+            color: #203c30;
             border-radius: 50%;
 
             font-size: 15px;
@@ -1566,7 +1665,7 @@ padding-top: 20px;
 .team-role {
     font-size: 13px;
     text-transform: uppercase;
-    color: #777;
+    color: #586d63;
     letter-spacing: 1px;
 }
 
@@ -1612,61 +1711,196 @@ padding-top: 20px;
         padding-top:0px;
     }
 }
-.desktop-pdf {
-    display: block;
+.pdf-container {
+    margin-top: 40px;
 }
 
-.mobile-pdf {
-    display: none;
-    text-align: center;
-    padding-top:20px; 
+.pdf-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.pdf-head h3 {
+    margin: 0;
+}
+
+.pdf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .pdf-btn {
-    display: inline-block;
-    padding: 14px 30px;
-    background: #1d3c88;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 26px;
+    background: #08734f;
+    border: 2px solid #08734f;
     color: #fff;
     text-decoration: none;
     border-radius: 8px;
     font-weight: 600;
+    transition: background .2s, color .2s;
 }
 
-/* Mobile */
+.pdf-btn:hover {
+    background: #056344;
+}
+
+.pdf-btn-outline {
+    background: #fff;
+    color: #066344;
+}
+
+.pdf-btn-outline:hover {
+    background: #08734f;
+    color: #fff;
+}
+
+.pdf-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.pdf-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 16px;
+    padding: 18px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+}
+
+.pdf-card__icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: #fbe9ed;
+    color: #b9304b;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+
+.pdf-card__body {
+    flex: 1 1 160px;
+    min-width: 0;
+}
+
+.pdf-card__body h4 {
+    margin: 0 0 2px;
+    font-size: 17px;
+}
+
+.pdf-card__body p {
+    margin: 0;
+    font-size: 14px;
+    color: #586d63;
+}
+
+.pdf-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: #e3f3e9;
+}
+
+.pdf-tabs [role="tab"] {
+    padding: 9px 18px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #3d574b;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pdf-tabs [role="tab"][aria-selected="true"] {
+    background: #fff;
+    color: #08734f;
+    box-shadow: 0 1px 3px rgba(13, 77, 51, .15);
+}
+
+.desktop-pdf iframe {
+    display: block;
+    width: 100%;
+    height: 820px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #f3f4f6;
+    box-shadow: var(--shadow);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Phones can't show PDFs inline reliably, so they get the buttons only */
 @media (max-width: 768px) {
     .desktop-pdf {
         display: none;
     }
 
-    .mobile-pdf {
-        display: block;
+    .pdf-cards {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pdf-actions,
+    .pdf-btn {
+        width: 100%;
+    }
+
+    .pdf-btn {
+        flex: 1;
     }
 }
-
-.pdf-container {
-    padding-top:20px;
-}
     </style>
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
 </head>
 
 <body>
+
+    <a class="skip-link" href="#home">Skip to main content</a>
 
     <!-- Header -->
     <header>
         <div class="container nav">
             <div class="brand">
                 <div class="logo">
-                   <a href="/#home" ><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading"></a>
+                   <a href="/#home"><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading – home"></a>
                 </div>
                 <!-- <h1>Himalaya <span class="brand-green">Trading</span></h1> -->
             </div>
 
-            <nav>
+            <nav aria-label="Main">
                 <ul>
                     <li><a href="/#home">Home</a></li>
                     <li><a href="/#about">About Us</a></li>
                     <li><a href="/#plan">Business Plan</a></li>
-                                   <li><a href="/#teams">Team</a></li>
                     <li><a href="/#our-products">Products / Services</a></li>
                 </ul>
             </nav>
@@ -1676,40 +1910,44 @@ padding-top: 20px;
                 <a class="btn btn-primary" href="/#contact">Contact Us</a>
             </div>
 
-            <div class="burger" id="burger" aria-label="Open Menu" aria-expanded="false">
+            <button type="button" class="burger" id="burger" aria-label="Open menu" aria-expanded="false"
+                aria-controls="mobileMenu">
                 <span></span><span></span><span></span>
-            </div>
+            </button>
         </div>
 
         <!-- Mobile menu -->
-        <div class="mobile-menu" id="mobileMenu">
+        <nav class="mobile-menu" id="mobileMenu" aria-label="Mobile">
             <ul class="container">
                 <li><a href="/#home" class="m-link">Home</a></li>
                 <li><a href="/#about" class="m-link">About Us</a></li>
                 <li><a href="/#plan" class="m-link">Business Plan</a></li>
                 <li><a href="/#our-products" class="m-link">Products / Services</a></li>
-                <div class="container nav-cta mobile-sec" style="padding-bottom:18px">
-                    <a class="btn btn-ghost" href="/login">Log in</a>
-                    <a class="btn btn-primary" href="/#contact">Contact Us</a>
-                </div>
             </ul>
-            <div class="container nav-cta destop-view" style="padding-bottom:18px">
-                <a class="btn btn-ghost" href="/login">Log in</a>
-                <a class="btn btn-primary" href="/#contact">Contact Us</a>
+            <div class="container nav-cta mobile-sec">
+                <a class="btn btn-ghost m-link" href="/login">Log in</a>
+                <a class="btn btn-primary m-link" href="/#contact">Contact Us</a>
             </div>
-        </div>
+        </nav>
     </header>
 
 
 
 
-    <section class="hero-banner">
+    <main id="home" tabindex="-1">
+    <section class="hero-banner hero-banner--custom">
+        <div class="hero-stage">
+            <div class="hero-artwork">
+                <img src="{{ asset('images/banners/himalaya-catalog-v3.jpg') }}"
+                    alt="Catalog of Himalaya Trading electronics, home appliances, HimGlow personal care, and Pay Wellness Syrup"
+                    width="1672" height="941" fetchpriority="high" decoding="async">
+            </div>
         <div class="container hero-grid">
 
             <!-- LEFT CONTENT -->
             <div class="hero-content">
                 <span class="hero-eyebrow">
-                    ✔ Power Your Business With Us
+                    <span aria-hidden="true">✔</span> Power Your Business With Us
                 </span>
 
                 <h1>
@@ -1727,30 +1965,11 @@ padding-top: 20px;
                 </div>
             </div>
 
-            <!-- RIGHT IMAGE COLLAGE -->
-            <div class="hero-images">
-                <img class="img-main"
-                    {{-- src="/storage/fb.avif" --}}
-                    src="{{ asset('assets/images/fb.avif') }}"
-                    alt="Business team">
-
-                <img class="img-top"
-                    src="https://img.freepik.com/free-photo/business-people-working-team-office_23-2148817065.jpg"
-                    alt="Entrepreneur working">
-
-                <img class="img-bottom"
-                    src="https://img.freepik.com/free-photo/young-businesswoman-working-office_23-2148888852.jpg"
-                    alt="Professional training">
-
-                <div class="hero-badge">
-                    <span>Trusted Growth</span>
-                </div>
-            </div>
-
+        </div>
         </div>
 
         <!-- MARQUEE -->
-        <div class="hero-marquee">
+        <div class="hero-marquee" aria-hidden="true">
             <div class="marquee-track">
                 <span>Network Marketing</span>
                 <span>Entrepreneurship</span>
@@ -1852,16 +2071,28 @@ padding-top: 20px;
     @endphp
     <section class="home-products" id="our-products">
         <div class="container">
-            <span class="hp-eyebrow">OUR PRODUCTS</span>
-            <h2 class="hp-title">Products by <span>Himalaya Trading</span></h2>
+            <div class="hp-heading">
+                <span class="hp-eyebrow"><span class="hp-spark" aria-hidden="true">✦</span> THE HIMALAYA COLLECTION</span>
+                <h2 class="hp-title">Everyday essentials.<br><span>Extraordinary possibilities.</span></h2>
+                <p class="hp-intro">Explore products by Himalaya Trading — from your daily care routine to your home.</p>
+                <span class="hp-hint"><span aria-hidden="true">↗</span> Find your favourite. Enquire directly on WhatsApp.</span>
+            </div>
             <div class="hp-grid">
                 @foreach ($homeProducts as $p)
-                    <a class="hp-card" href="https://wa.me/919805032635?text={{ rawurlencode("Hi, I'm interested in " . $p['name']) }}" target="_blank" rel="noopener" title="Enquire on WhatsApp">
+                    <a class="hp-card" href="https://wa.me/919805032635?text={{ rawurlencode("Hi, I'm interested in " . $p['name']) }}" target="_blank" rel="noopener" aria-label="Enquire about {{ $p['name'] }} on WhatsApp (opens in a new tab)">
                         <div class="hp-img">
-                            <img src="{{ asset('images/products/' . $p['img']) }}" alt="{{ $p['name'] }}" loading="lazy">
+                            <span class="hp-number" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            <img src="{{ asset('images/products/' . $p['img']) }}" alt="{{ $p['name'] }}" loading="lazy" width="400" height="400">
+                            <span class="hp-image-arrow" aria-hidden="true">↗</span>
                         </div>
-                        <span class="hp-name">{{ $p['name'] }}</span>
-                        <span class="hp-wa">💬 Enquire on WhatsApp</span>
+                        <div class="hp-details">
+                            <span class="hp-card-label">HIMALAYA TRADING</span>
+                            <h3 class="hp-name">{{ $p['name'] }}</h3>
+                            <span class="hp-wa">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-8 8 8.8 8.8 0 0 1-3.5-.7L4 20l1.2-4.5a8.8 8.8 0 0 1-.7-3.5 8 8 0 0 1 8-8 8 8 0 0 1 7.5 7.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8.5c.2 3 2 4.8 5 5l1-1.5-2-1-.8.8a5 5 0 0 1-1.5-1.5l.8-.8-1-2-1.5 1Z" fill="currentColor"/></svg>
+                                Enquire on WhatsApp <span class="hp-cta-arrow" aria-hidden="true">↗</span>
+                            </span>
+                        </div>
                     </a>
                 @endforeach
             </div>
@@ -1935,7 +2166,7 @@ padding-top: 20px;
                 </div>
 
                 <div class="about-illus reveal">
-                    <img src="https://himjantrading.com/HIMJAN/images/trade/trade.png" alt="">
+                    <img src="https://himjantrading.com/HIMJAN/images/trade/trade.png" alt="" loading="lazy">
                     <!-- Dummy art block; replace with your illustration -->
                     <!-- <div class="screen">DUMMY ILLUSTRATION</div> -->
                 </div>
@@ -2115,13 +2346,13 @@ padding-top: 20px;
             <h2 class="testi-title">Testimonials</h2>
 
             <div class="testimonial-wrapper">
-                <button class="nav-btn prev">‹</button>
+                <button type="button" class="nav-btn prev" aria-label="Previous testimonial"><span aria-hidden="true">‹</span></button>
 
-                <div class="testimonial-viewport">
+                <div class="testimonial-viewport" aria-live="off">
                     <div class="testimonial-track">
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/men/32.jpg">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Rajesh Kumar</h4>
                             <span>Independent Associate</span>
                             <p>
@@ -2131,7 +2362,7 @@ padding-top: 20px;
                         </div>
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/women/44.jpg">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Neha Sharma</h4>
                             <span>Entrepreneur</span>
                             <p>
@@ -2141,7 +2372,7 @@ padding-top: 20px;
                         </div>
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/men/56.jpg">
+                            <img src="https://randomuser.me/api/portraits/men/56.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Amit Verma</h4>
                             <span>Team Leader</span>
                             <p>
@@ -2151,7 +2382,7 @@ padding-top: 20px;
                         </div>
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/women/65.jpg">
+                            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Pooja Mehta</h4>
                             <span>Business Associate</span>
                             <p>
@@ -2161,7 +2392,7 @@ padding-top: 20px;
                         </div>
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/men/78.jpg">
+                            <img src="https://randomuser.me/api/portraits/men/78.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Sandeep Singh</h4>
                             <span>Network Builder</span>
                             <p>
@@ -2171,7 +2402,7 @@ padding-top: 20px;
                         </div>
 
                         <div class="testimonial-card">
-                            <img src="https://randomuser.me/api/portraits/women/81.jpg">
+                            <img src="https://randomuser.me/api/portraits/women/81.jpg" alt="" loading="lazy" width="80" height="80">
                             <h4>Anjali Gupta</h4>
                             <span>Associate Partner</span>
                             <p>
@@ -2183,7 +2414,7 @@ padding-top: 20px;
                     </div>
                 </div>
 
-                <button class="nav-btn next">›</button>
+                <button type="button" class="nav-btn next" aria-label="Next testimonial"><span aria-hidden="true">›</span></button>
             </div>
 
         </div>
@@ -2244,33 +2475,92 @@ padding-top: 20px;
                     <p>Scale up and become leader.</p>
                 </div>
             </div>
-<div class="pdf-container  container"  id="plan">
+            <!-- Business plan documents: cards with Open/Download on every screen, tabbed viewer on desktop -->
+            @php
+                $planDocs = [
+                    ['id' => 'presentation', 'title' => 'Business Presentation', 'desc' => 'Company overview, plan and income details · 20 pages', 'file' => 'assets/finalppt.pdf'],
+                    ['id' => 'booklet', 'title' => 'Booklet', 'desc' => 'Quick-read business booklet · 4 pages', 'file' => 'assets/booklet.pdf'],
+                ];
+            @endphp
+            <div class="pdf-container" id="plan">
+                <div class="pdf-head">
+                    <div>
+                        <div class="title-eyebrow">Business Plan</div>
+                        <h3>Our Business Plan</h3>
+                    </div>
+                </div>
 
-    <!-- Desktop View -->
-    <div class="desktop-pdf">
-    {{-- <iframe 
-        src="{{ asset('assets/HGNLPAY.pdf') }}"
-        width="100%"
-        height="800"
-        style="border:none;border-radius:10px; background-color:#fff;">
-    </iframe> --}}
-</div>
+                <div class="pdf-cards">
+                    @foreach ($planDocs as $doc)
+                        <div class="pdf-card">
+                            <div class="pdf-card__icon" aria-hidden="true">PDF</div>
+                            <div class="pdf-card__body">
+                                <h4>{{ $doc['title'] }}</h4>
+                                <p>{{ $doc['desc'] }}</p>
+                            </div>
+                            <div class="pdf-actions">
+                                <a href="{{ asset($doc['file']) }}" target="_blank" rel="noopener" class="pdf-btn">
+                                    Open <span class="sr-only">{{ $doc['title'] }} (opens in a new tab)</span>
+                                </a>
+                                <a href="{{ asset($doc['file']) }}" download class="pdf-btn pdf-btn-outline">
+                                    Download <span class="sr-only">{{ $doc['title'] }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
 
-<div class="mobile-pdf">
-    <a href="{{ asset('assets/HGNLPAY.pdf') }}" target="_blank" class="pdf-btn">
-        Open PDF
-    </a>
-</div>
-
-</div>
+                <div class="desktop-pdf">
+                    <div class="pdf-tabs" role="tablist" aria-label="Business plan documents">
+                        @foreach ($planDocs as $k => $doc)
+                            <button type="button" role="tab" id="pdf-tab-{{ $doc['id'] }}" aria-controls="pdf-viewer"
+                                aria-selected="{{ $k === 0 ? 'true' : 'false' }}" tabindex="{{ $k === 0 ? '0' : '-1' }}"
+                                data-src="{{ asset($doc['file']) }}#view=FitH" data-title="{{ $doc['title'] }} (PDF)">
+                                {{ $doc['title'] }}
+                            </button>
+                        @endforeach
+                    </div>
+                    <div id="pdf-viewer" role="tabpanel" aria-labelledby="pdf-tab-{{ $planDocs[0]['id'] }}">
+                        <iframe src="{{ asset($planDocs[0]['file']) }}#view=FitH" title="{{ $planDocs[0]['title'] }} (PDF)"
+                            loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+            <script>
+                (function () {
+                    var tabs = Array.prototype.slice.call(document.querySelectorAll('.pdf-tabs [role="tab"]'));
+                    var panel = document.getElementById('pdf-viewer');
+                    var frame = panel.querySelector('iframe');
+                    function select(tab, focus) {
+                        tabs.forEach(function (t) {
+                            var on = t === tab;
+                            t.setAttribute('aria-selected', on ? 'true' : 'false');
+                            t.tabIndex = on ? 0 : -1;
+                        });
+                        panel.setAttribute('aria-labelledby', tab.id);
+                        frame.title = tab.dataset.title;
+                        if (frame.getAttribute('src') !== tab.dataset.src) frame.setAttribute('src', tab.dataset.src);
+                        if (focus) tab.focus();
+                    }
+                    tabs.forEach(function (tab, i) {
+                        tab.addEventListener('click', function () { select(tab); });
+                        tab.addEventListener('keydown', function (e) {
+                            var next = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : null;
+                            if (next === null) return;
+                            e.preventDefault();
+                            select(tabs[(next + tabs.length) % tabs.length], true);
+                        });
+                    });
+                })();
+            </script>
             <!-- CTA band -->
             <div class="cta-band reveal" style="margin-top:34px">
                 <div class="inner">
                     <div class="note">
                         Join <b>Himalaya Trading</b> and build a successful business and a secure future.
                     </div>
-                    <div style="text-align:right">
-                        <a href="/login" class="btn btn-primary">Contact Us</a>
+                    <div class="cta-action">
+                        <a href="#contact" class="btn btn-primary">Contact Us</a>
                     </div>
                 </div>
             </div>
@@ -2278,12 +2568,14 @@ padding-top: 20px;
         </div>
     </section>
 
+    </main>
+
     <!-- Footer -->
-    <footer id="products">
+    <footer>
         <div class="container footer-top">
             <div class="f-brand">
                 <div class="logo">
-                   <a href="/#home" ><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading"></a>
+                   <a href="/#home"><img src="{{ asset('assets/images/logo.png') }}" alt="Himalaya Trading – home" loading="lazy"></a>
                 </div>
                 <!-- <h4 style="margin:12px 0 8px">Himalaya <span class="brand-green">Trading</span></h4> -->
                 <p>
@@ -2302,7 +2594,7 @@ padding-top: 20px;
                 <ul>
                     <li><a href="/privacy-policy">Privacy Policy</a></li>
                     <li><a href="/terms-conditions">Terms & Conditions</a></li>
-                    <li><a href="/#plan">Contact Us</a></li>
+                    <li><a href="/#contact">Contact Us</a></li>
                 </ul>
             </div>
 
@@ -2320,20 +2612,20 @@ padding-top: 20px;
                 <ul>
                     
                     <li><a href="mailto:info@hgnl.co.in">info@hgnl.co.in</a></li>
-                    <li><a href="tel:+91 62307 14902">+91 62307 14902</a></li>
+                    <li><a href="tel:+916230714902">+91 62307 14902</a></li>
                 </ul>
             </div>
         </div>
 
         <div class="container copy">
             <div>Himalaya <span class="brand-green">Trading</span> © 2026. All Rights Reserved.</div>
-            <div><a href="#home">Back to top ↑</a></div>
+            <div><a href="#home">Back to top <span aria-hidden="true">↑</span></a></div>
         </div>
     </footer>
 
     <!-- Floating button (scroll to top) -->
     <button class="float-btn" id="toTop" aria-label="Back to top">
-        <svg viewBox="0 0 24 24" fill="none">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
             <path d="M12 5l-7 7m7-7l7 7m-7-7v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round" />
         </svg>
@@ -2345,23 +2637,35 @@ padding-top: 20px;
     const mobileMenu = document.getElementById('mobileMenu');
     const links = document.querySelectorAll('.m-link');
 
-    burger.addEventListener('click', () => {
-        const open = mobileMenu.classList.toggle('open');
+    function setMenu(open) {
+        mobileMenu.classList.toggle('open', open);
         burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    }
+    burger.addEventListener('click', () => setMenu(!mobileMenu.classList.contains('open')));
+    links.forEach(l => l.addEventListener('click', () => setMenu(false)));
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && mobileMenu.classList.contains('open')) {
+            setMenu(false);
+            burger.focus();
+        }
     });
-    links.forEach(l => l.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // Scroll to top
     const toTop = document.getElementById('toTop');
     toTop.addEventListener('click', () => window.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior: reduceMotion ? 'auto' : 'smooth'
     }));
-    window.addEventListener('scroll', () => {
-        toTop.style.opacity = window.scrollY > 400 ? '1' : '0.0';
-        toTop.style.pointerEvents = window.scrollY > 400 ? 'auto' : 'none';
-    });
-    toTop.style.transition = 'opacity .25s ease';
+    function syncToTop() {
+        const show = window.scrollY > 400;
+        toTop.classList.toggle('visible', show);
+        toTop.tabIndex = show ? 0 : -1;
+    }
+    window.addEventListener('scroll', syncToTop, { passive: true });
+    syncToTop();
 
     // Reveal-on-scroll animations
     const IO = new IntersectionObserver((entries) => {
@@ -2374,11 +2678,27 @@ padding-top: 20px;
     }, {
         threshold: .2
     });
-    document.querySelectorAll('.reveal').forEach(el => IO.observe(el));
+    document.querySelectorAll('.reveal').forEach(el => reduceMotion ? el.classList.add('show') : IO.observe(el));
     </script>
 
     <script>
-    document.querySelectorAll('.faq-question').forEach(btn => {
+    const faqButtons = document.querySelectorAll('.faq-question');
+    function syncFaq() {
+        faqButtons.forEach(b => {
+            const open = b.closest('.faq-item').classList.contains('active');
+            b.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+    }
+    faqButtons.forEach((btn, i) => {
+        const answer = btn.nextElementSibling;
+        answer.id = 'faq-answer-' + i;
+        btn.id = 'faq-question-' + i;
+        btn.type = 'button';
+        btn.setAttribute('aria-controls', answer.id);
+        answer.setAttribute('role', 'region');
+        answer.setAttribute('aria-labelledby', btn.id);
+        btn.querySelector('.faq-icon')?.setAttribute('aria-hidden', 'true');
+
         btn.addEventListener('click', () => {
             const item = btn.closest('.faq-item');
 
@@ -2387,8 +2707,10 @@ padding-top: 20px;
             });
 
             item.classList.toggle('active');
+            syncFaq();
         });
     });
+    syncFaq();
     </script>
     <script>
     const track = document.querySelector('.testimonial-track');
@@ -2413,8 +2735,13 @@ padding-top: 20px;
 
         const visible = visibleCards();
 
-        const firstClones = cards.slice(0, visible).map(c => c.cloneNode(true));
-        const lastClones = cards.slice(-visible).map(c => c.cloneNode(true));
+        const clone = c => {
+            const n = c.cloneNode(true);
+            n.setAttribute('aria-hidden', 'true');
+            return n;
+        };
+        const firstClones = cards.slice(0, visible).map(clone);
+        const lastClones = cards.slice(-visible).map(clone);
 
         lastClones.reverse().forEach(c => track.prepend(c));
         firstClones.forEach(c => track.appendChild(c));
@@ -2461,8 +2788,10 @@ padding-top: 20px;
     document.querySelector('.next').onclick = () => move(1);
     document.querySelector('.prev').onclick = () => move(-1);
 
-    /* AUTOPLAY */
+    /* AUTOPLAY (skipped for users who prefer reduced motion) */
     function startAuto() {
+        if (reduceMotion) return;
+        clearInterval(auto);
         auto = setInterval(() => move(1), 5000);
     }
 
@@ -2473,6 +2802,8 @@ padding-top: 20px;
     /* Pause on hover */
     wrapper.addEventListener('mouseenter', stopAuto);
     wrapper.addEventListener('mouseleave', startAuto);
+    wrapper.addEventListener('focusin', stopAuto);
+    wrapper.addEventListener('focusout', startAuto);
 
     /* Resize */
     window.addEventListener('resize', () => {
@@ -2490,6 +2821,24 @@ padding-top: 20px;
     </script>
 
 
+
+
+    <script>
+    (() => {
+        const section = document.querySelector('.home-products');
+        if (!section || !('IntersectionObserver' in window) ||
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('hp-entered');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        section.querySelectorAll('.hp-heading, .hp-card').forEach(element => observer.observe(element));
+    })();
+    </script>
 
 </body>
 

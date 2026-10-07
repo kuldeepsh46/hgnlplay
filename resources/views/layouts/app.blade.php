@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,11 +7,13 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <meta name="theme-color" content="#f0f8ef">
+
+    <title>@hasSection('title')@yield('title') - @endif{{ config('app.name', 'HGNL Pay') }}</title>
 
     <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -23,40 +25,48 @@
         crossorigin="anonymous"></script> 
   <style>
     :root{
-      --bg:#0b0e12;
-      --card:#0f141b;
-      --muted:#8b9aa5;
-      --text:#e9eef3;
-      --accent:#3f7871;
-      --accent-2:#3f7871;
-      --border:#1b222b;
+      --bg:#f0f8ef;
+      --card:#ffffff;
+      --muted:#52695f;
+      --text:#203c30;
+      --accent:#287b62;
+      --accent-2:#287b62;
+      --accent-text:#08734f;
+      --focus:#218e65;
+      --border:#cddfd3;
       --radius:14px;
-      --shadow:0 10px 30px rgba(0,0,0,.45);
+      --shadow:0 10px 30px rgba(13,77,51,.12);
     }
-    *{box-sizing:border-box;
-    margin:0px;
-    padding:0px;
-    }
+    *{box-sizing:border-box}
     body{
       margin:0;
       font-family:"Inter",-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      background:radial-gradient(900px 600px at 30% -10%,#0f1a12 0%,transparent 70%),var(--bg);
+      background:radial-gradient(900px 600px at 30% -10%,#ffffff 0%,transparent 70%),var(--bg);
       color:var(--text);
-    
+      line-height:1.5;
+      -webkit-font-smoothing:antialiased;
       overflow-x:hidden !important;
+    }
+    :focus-visible{
+      outline:2px solid var(--focus);
+      outline-offset:2px;
+    }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.01ms !important;
+        transition-duration:.01ms !important;
+        scroll-behavior:auto !important;
+      }
     }
 .custom-row label {
     text-align: start !important;
-    font-size: 20px !important;
-    color: #fff !important;
+    font-size: 16px !important;
+    color: #203c30 !important;
 }
-.input-custom select{
-        padding: 20px;
-    font-size: 20px;
-}
+.input-custom select,
 .input-custom input {
-    padding: 20px;
-    font-size: 20px;
+    padding: 12px 14px;
+    font-size: 16px;
 }
 
 .check-box-custom {
@@ -65,8 +75,8 @@
 }
    .common-section  .container {
     width: 63%;
-    background: linear-gradient(180deg, #0f1620, #0b1117);
-    border: 1px solid #1f2832;
+    background: #ffffff;
+    border: 1px solid #e5f2e6;
     border-radius: 20px;
     padding: 35px;
 }
@@ -74,8 +84,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background: radial-gradient(900px 600px at 30% -10%, #0f1a12 0%, transparent 70%), var(--bg);
+    min-height: 100vh;
+    padding: 24px 16px;
+    background: radial-gradient(900px 600px at 30% -10%, #ffffff 0%, transparent 70%), var(--bg);
 }
 .reg-section{
   height: 100%  !important;
@@ -83,8 +94,8 @@
   padding-bottom:50px;
 }
     .login-container{
-      background:linear-gradient(180deg,#0f1620,#0b1117);
-      border:1px solid #1f2832;
+      background:#ffffff;
+      border:1px solid #e5f2e6;
       border-radius:20px;
       padding:40px 35px;
       width:100%;
@@ -98,14 +109,14 @@
       position:absolute;
       inset:-40px;
       background:radial-gradient(circle at 50% 0%,#bfff2d22,transparent 60%),
-                 radial-gradient(circle at 0% 80%,#12d1ff1b,transparent 60%);
+                 radial-gradient(circle at 0% 80%,#327f9e1b,transparent 60%);
       filter:blur(8px);
       z-index:-1;
     }
     .logo{
       width:56px;height:56px;margin:0 auto 14px;border-radius:50%;
    
-      display:grid;place-items:center;font-weight:900;color:#000;box-shadow:0 0 0 3px #0f141b;
+      display:grid;place-items:center;font-weight:900;color:#000;box-shadow:0 0 0 3px #cddfd3;
     }
     h1{
       font-size:24px;
@@ -113,7 +124,7 @@
       text-align:center;
     }
     p.subtitle{
-      color:#b2bec7;
+      color:#203c30;
       margin-bottom:30px;
       font-size:14px;
     }
@@ -126,49 +137,51 @@
     display: block;
     font-weight: 600;
     margin-bottom: 6px;
-    color: #b9c6cf;
-    font-size: 22px;
+    color: #203c30;
+    font-size: 16px;
 }
     input{
       width:100%;
       padding:12px 14px;
       border-radius:10px;
-      border:1px solid #24303f;
-      background:#0f1620;
-      color:#fff;
+      border:1px solid #cddfd3;
+      background:#ffffff;
+      color:#203c30;
       font-size:15px;
       transition:border .25s;
     }
+    input::placeholder{color:#6b7782}
     input:focus{
       outline:none;
-      border-color:#a7ff1e;
-      box-shadow:0 0 10px #a7ff1e33;
+      border-color:var(--accent-text);
+      box-shadow:0 0 0 3px rgba(8,115,79,.15);
     }
     .btn {
     width: 100%;
     padding: 12px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(90deg,var(--accent),#3f7871);
+    background: linear-gradient(90deg,var(--accent),#287b62);
     color: #ffffffff;
     font-weight: 700;
     font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 0 0 6px #a7ff1e15;
+    box-shadow: 0 0 0 6px rgba(35,132,91,.08);
     transition: all .25s;
-    font-size: 25px;
-    padding: 10px;
+    font-size: 18px;
+    padding: 12px;
 }
     .btn:hover{
       transform:translateY(-1px);
-      box-shadow:0 0 0 8px #a7ff1e25;
+      filter:brightness(1.1);
+      box-shadow:0 0 0 8px rgba(35,132,91,.15);
     }
     .extra-links{
       margin-top:20px;
       font-size:14px;
     }
     .extra-links a{
-      color:var(--accent);
+      color:var(--accent-text);
       text-decoration:none;
     }
     .extra-links a:hover{
@@ -183,12 +196,14 @@
     }
   </style>
 
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
+
 </head>
 <body>
     <div id="app">
         
 
-        <main >
+        <main id="main-content">
             @yield('content')
         </main>
     </div>

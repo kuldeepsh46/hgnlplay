@@ -8,7 +8,7 @@
 /* Layout helpers */
 
 .user-info{
-  background:#141c22;
+  background:#ffffff;
   padding:8px 14px;
   border-radius:999px;
   color:var(--accent);
@@ -30,7 +30,7 @@
 .section-title{
   font-size:15px;
   font-weight:600;
-  color:#fff;
+  color:#203c30;
   background:var(--accent);
   padding:8px 14px;
   border-radius:8px;
@@ -58,11 +58,11 @@
 .form-group input,
 .form-group textarea,
 .form-group select{
-  background:#141c22;
+  background:#ffffff;
   border:1px solid var(--border);
   border-radius:10px;
   padding:10px 12px;
-  color:#fff;
+  color:#203c30;
   font-size:14px;
 }
 .form-group.full{
@@ -147,7 +147,7 @@ textarea{resize:none}
 }
 
 /* Messages */
-.success-msg{color:#a7ff1e;text-align:center;margin-top:10px;}
+.success-msg{color:#23845b;text-align:center;margin-top:10px;}
 .error-msg{color:#ff5555;text-align:center;margin-top:10px;}
 
 /* Responsive */
@@ -160,9 +160,9 @@ textarea{resize:none}
   .form-footer{justify-content:start;}
 }
 input[type="date"] {
-    background-color: #141c22;
-    color: #ffffff;
-    border: 1px solid #1f2832;
+    background-color: #ffffff;
+    color: #203c30;
+    border: 1px solid #e5f2e6;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {

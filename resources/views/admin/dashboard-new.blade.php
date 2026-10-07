@@ -29,7 +29,7 @@
 @endphp
 
 <style>
-    .adn { --ok: #a7ff1e; --ok-soft: rgba(167, 255, 30, .1); --warn: #ffb547; --warn-soft: rgba(255, 181, 71, .12); --bad: #ff5c7a; --bad-soft: rgba(255, 92, 122, .12); --info: #5cc8ff; --info-soft: rgba(92, 200, 255, .12); --line: #1b222b; --card: #10171f; --card2: #0b0e12; --muted: #8b98a5; --text: #e9eef3;
+    .adn { --ok: #23845b; --ok-soft: rgba(167, 255, 30, .1); --warn: #ffb547; --warn-soft: rgba(255, 181, 71, .12); --bad: #ff5c7a; --bad-soft: rgba(255, 92, 122, .12); --info: #5cc8ff; --info-soft: rgba(92, 200, 255, .12); --line: #cddfd3; --card: #ffffff; --card2: #f0f8ef; --muted: #52695f; --text: #203c30;
         color: var(--text); padding: 24px; max-width: 1600px; margin: 0 auto; }
     .adn * { box-sizing: border-box; }
     .adn a { color: inherit; }
@@ -99,9 +99,9 @@
     .adn-table-wrap { overflow-x: auto; margin: 0 -4px; }
     .adn table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .adn th { text-align: left; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; font-weight: 700; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-    .adn td { padding: 10px 6px; border-bottom: 1px solid #151c24; vertical-align: middle; white-space: nowrap; }
+    .adn td { padding: 10px 6px; border-bottom: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; }
     .adn tr:last-child td { border-bottom: 0; }
-    .adn tbody tr:hover { background: #131b24; }
+    .adn tbody tr:hover { background: #ffffff; }
     .adn .num-cell { text-align: right; font-variant-numeric: tabular-nums; }
     .adn .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--muted); }
     .adn .wrap { white-space: normal; min-width: 150px; max-width: 260px; color: var(--muted); font-size: 12px; line-height: 1.4; }
@@ -116,17 +116,17 @@
     .adn .pill.warn { background: var(--warn-soft); color: var(--warn); }
     .adn .pill.bad { background: var(--bad-soft); color: var(--bad); }
     .adn .pill.info { background: var(--info-soft); color: var(--info); }
-    .adn .pill.mute { background: #1b222b; color: var(--muted); }
+    .adn .pill.mute { background: #e5f2e6; color: var(--muted); }
     .adn .actions { display: flex; gap: 6px; justify-content: flex-end; }
     .adn .actions form { margin: 0; }
     .adn .empty { padding: 26px 10px; text-align: center; color: var(--muted); font-size: 13px; }
-    .adn .bar { height: 6px; border-radius: 3px; background: #1b222b; overflow: hidden; min-width: 60px; }
+    .adn .bar { height: 6px; border-radius: 3px; background: #e5f2e6; overflow: hidden; min-width: 60px; }
     .adn .bar i { display: block; height: 100%; background: var(--ok); border-radius: 3px; }
 
     /* Tabs */
     .adn-tabs { display: flex; gap: 4px; background: var(--card2); padding: 4px; border-radius: 10px; border: 1px solid var(--line); }
     .adn-tabs button { background: none; border: 0; color: var(--muted); padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: 7px; cursor: pointer; }
-    .adn-tabs button.on { background: #1b222b; color: var(--text); }
+    .adn-tabs button.on { background: #e5f2e6; color: var(--text); }
     .adn [data-tab-panel] { display: none; } .adn [data-tab-panel].on { display: block; }
 
     /* Misc */
@@ -139,7 +139,7 @@
     .adn-stat { background: var(--card2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
     .adn-stat b { display: block; font-size: 20px; }
     .adn-stat span { font-size: 12px; color: var(--muted); }
-    .adn-list-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #151c24; font-size: 13px; }
+    .adn-list-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #ffffff; font-size: 13px; }
     .adn-list-row:last-child { border-bottom: 0; }
     .adn-legend { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
     .adn-legend div { display: flex; align-items: center; gap: 8px; font-size: 12px; }
@@ -157,7 +157,7 @@
 
     /* Heatmap */
     .adn-heat { display: grid; grid-template-columns: 38px repeat(24, minmax(14px, 1fr)); gap: 3px; font-size: 10px; color: var(--muted); min-width: 520px; }
-    .adn-heat .c { aspect-ratio: 1; border-radius: 3px; background: #151c24; }
+    .adn-heat .c { aspect-ratio: 1; border-radius: 3px; background: #ffffff; }
     .adn-heat .h { text-align: center; }
     .adn-heat .d { display: flex; align-items: center; }
 

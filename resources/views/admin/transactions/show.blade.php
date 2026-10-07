@@ -19,7 +19,7 @@
             <h2>What happened</h2>
             <dl class="kv">
                 <dt>Amount</dt><dd><strong>{{ $isDebit ? '−' : '+' }}₹{{ number_format($txn->amount, 2) }}</strong> <span class="pill {{ $isDebit ? 'debit' : 'credit' }}">{{ $isDebit ? 'Debit (money out of wallet)' : 'Credit (money into wallet)' }}</span></dd>
-                <dt>Type</dt><dd><span class="pill type">{{ $typeLabel }}</span> <small style="color:#8899a8;">{{ $txn->bonus_type ?: 'no type saved' }}</small></dd>
+                <dt>Type</dt><dd><span class="pill type">{{ $typeLabel }}</span> <small style="color:#586d63;">{{ $txn->bonus_type ?: 'no type saved' }}</small></dd>
                 <dt>When</dt><dd>{{ $fmt($txn->created_at) }}</dd>
                 <dt>Why (remarks)</dt><dd>{{ $txn->remarks ?: '—' }}</dd>
                 <dt>Raw type field</dt><dd>{{ $txn->type }}</dd>
@@ -32,10 +32,10 @@
             <h2>Whose wallet</h2>
             @if ($member)
                 <dl class="kv">
-                    <dt>Member</dt><dd>{{ $member->member_id }} · {{ $member->name }} @if ($member->username)<small style="color:#8899a8;">({{ $member->username }})</small>@endif</dd>
+                    <dt>Member</dt><dd>{{ $member->member_id }} · {{ $member->name }} @if ($member->username)<small style="color:#586d63;">({{ $member->username }})</small>@endif</dd>
                     <dt>Email / mobile</dt><dd>{{ $member->email }} @if ($member->mobile) · {{ $member->mobile }} @endif</dd>
                     <dt>Sponsor</dt><dd>{{ $sponsor ? $sponsor->member_id . ' · ' . $sponsor->name : '—' }}</dd>
-                    <dt>Placed under</dt><dd>{{ $placement ? $placement->member_id . ' · ' . $placement->name : '—' }} @if ($member->position)<small style="color:#8899a8;">({{ $member->position }})</small>@endif</dd>
+                    <dt>Placed under</dt><dd>{{ $placement ? $placement->member_id . ' · ' . $placement->name : '—' }} @if ($member->position)<small style="color:#586d63;">({{ $member->position }})</small>@endif</dd>
                     <dt>Joined</dt><dd>{{ $fmt($member->created_at) }}</dd>
                     <dt>Wallet balance now</dt><dd>₹{{ number_format($walletBalance ?? 0, 2) }}</dd>
                 </dl>

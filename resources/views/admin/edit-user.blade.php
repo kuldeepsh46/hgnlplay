@@ -13,7 +13,7 @@ body {
 }
 .card {
     background: var(--card);
-    border: 1px solid #1f2832;
+    border: 1px solid #e5f2e6;
     border-radius: var(--radius);
     padding: 20px;
     box-shadow: 0 0 20px #00000050;
@@ -37,9 +37,9 @@ select {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #1f2832;
-    background: #141c22;
-    color: #fff;
+    border: 1px solid #e5f2e6;
+    background: #ffffff;
+    color: #203c30;
 }
 
 .btn {
@@ -56,7 +56,7 @@ select {
 }
 
 .btn-back {
-    background: #444;
+    background: #e5f2e6;
     color: #fff;
     margin-left: 8px;
 }
@@ -68,13 +68,13 @@ select {
 }
 
 .alert-success {
-    background: #a7ff1e;
+    background: #23845b;
     color: #000;
 }
 
 .alert-error {
     background: #ff4a4a;
-    color: #fff;
+    color: #203c30;
 }
 </style>
 
@@ -111,6 +111,13 @@ select {
         <div class="form-group">
             <label>Wallet Balance (₹)</label>
             <input type="number" name="balance" value="{{ $wallet->balance ?? 0 }}" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="repurchase_balance">Repurchase Wallet Balance (₹)</label>
+            <input type="number" id="repurchase_balance" value="{{ $wallet->repurchase_balance ?? 0 }}" readonly
+                aria-describedby="repurchase_balance_help">
+            <small id="repurchase_balance_help">Read-only. Filled automatically with 10% of every earning.</small>
         </div>
 
         <button class="btn btn-save" type="submit">💾 Save Changes</button>

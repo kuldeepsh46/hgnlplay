@@ -10,11 +10,11 @@
 
 /* Card Container */
 .card {
-    background: linear-gradient(145deg, #0b1220, #020617);
+    background: linear-gradient(145deg, #ffffff, #ffffff);
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 12px 40px rgba(0,0,0,0.55);
-    color: #e5e7eb;
+    color: #203c30;
 }
 
 /* Heading */
@@ -22,7 +22,7 @@
     font-size: 22px;
     font-weight: 600;
     margin-bottom: 24px;
-    color: #f8fafc;
+    color: #203c30;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -36,7 +36,7 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 12px;
-    color: #e5e7eb;
+    color: #203c30;
 }
 
 .table thead th {
@@ -45,13 +45,13 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    color: #94a3b8;
+    color: #586d63;
     background: transparent;
     text-align: left;
 }
 
 .table tbody tr {
-    background: linear-gradient(145deg, #020617, #020617);
+    background: linear-gradient(145deg, #ffffff, #ffffff);
     border-radius: 14px;
     transition: all 0.25s ease;
 }
@@ -163,7 +163,7 @@
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
-        color: #94a3b8;
+        color: #586d63;
         letter-spacing: 0.4px;
     }
 

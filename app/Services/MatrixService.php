@@ -356,25 +356,6 @@ class MatrixService
                         ]);
                     }
 
-                    $walletUpdated = DB::table('wallets')->where('user_id', $receiver->id)->increment('balance', $amount);
-
-                    Log::info('Wallet increment attempted', [
-                        'receiver_user_id' => $receiver->id,
-                        'receiver_member_id' => $receiver->member_id ?? null,
-                        'amount' => $amount,
-                        'wallet_update_result' => $walletUpdated,
-                    ]);
-
-                    if (!$walletUpdated) {
-                        Log::error('Wallet update failed after wallet create/check', [
-                            'receiver_user_id' => $receiver->id,
-                            'receiver_member_id' => $receiver->member_id ?? null,
-                            'amount' => $amount,
-                        ]);
-
-                        throw new \Exception("Wallet not found or not updated for user ID {$receiver->id}");
-                    }
-
                     $payerText = $payer ? ' | Paid By: ' . ($payer->member_id ?? $payer->id) : '';
 
                     /**
@@ -384,16 +365,12 @@ class MatrixService
                     $remarks = "Level Income (Tier {$tier})" . ' | Product User: ' . ($topupUser->member_id ?? $topupUser->id) . ' | Product User ID: ' . $topupUser->id . ' | Receiver: ' . ($receiver->member_id ?? $receiver->id) . ' | Receiver ID: ' . $receiver->id . " | Topup Rank: {$topupUserRank}" . $payerText;
 
                     /**
-                     * INSERT TRANSACTION
+                     * CREDIT WALLETS (90% main / 10% Repurchase Wallet) + INSERT TRANSACTION
                      */
-                    DB::table('transactions')->insert([
-                        'user_id' => $receiver->id,
-                        'amount' => $amount,
+                    WalletService::creditEarning($receiver->id, (float) $amount, [
                         'type' => 'credit',
                         'bonus_type' => BonusType::LevelIncome->value,
                         'remarks' => $remarks,
-                        'created_at' => now(),
-                        'updated_at' => now(),
                     ]);
 
                     Log::info('Level income transaction inserted', [

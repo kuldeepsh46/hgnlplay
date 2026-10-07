@@ -17,7 +17,7 @@
 .pagination li a, 
 .pagination li span {
     background: var(--card-bg) !important;
-    border: 1px solid #233145 !important;
+    border: 1px solid #e5f2e6 !important;
     color: var(--text-dim) !important;
     padding: 10px 18px;
     border-radius: 8px;
@@ -38,7 +38,7 @@
 /* Hover State */
 .pagination li a:hover {
     border-color: var(--neon-green) !important;
-    color: #fff !important;
+    color: #203c30 !important;
 }
 
 /* Fix Giant Arrows (Laravel SVG fix) */
@@ -54,8 +54,8 @@ nav div.hidden {
     :root {
         --neon-green: #00ffa3;
         --neon-red: #ff2e55;
-        --panel-bg: #0b111b;
-        --card-bg: #151f2e;
+        --panel-bg: #ffffff;
+        --card-bg: #e5f2e6;
         --border-glow: rgba(0, 255, 163, 0.1);
     }
 
@@ -68,8 +68,8 @@ nav div.hidden {
 
     /* --- TOP COMMAND BAR --- */
     .command-center {
-        background: linear-gradient(180deg, #151f2e 0%, #0b111b 100%);
-        border: 1px solid #233145;
+        background: linear-gradient(180deg, #e5f2e6 0%, #ffffff 100%);
+        border: 1px solid #e5f2e6;
         border-radius: 20px;
         padding: 30px;
         box-shadow: 0 20px 50px rgba(0,0,0,0.5);
@@ -86,8 +86,8 @@ nav div.hidden {
 
     .search-hex {
         display: flex;
-        background: #070c14;
-        border: 1px solid #233145;
+        background: #f0f8ef;
+        border: 1px solid #e5f2e6;
         border-radius: 12px;
         padding: 5px;
         transition: 0.3s;
@@ -101,7 +101,7 @@ nav div.hidden {
     .search-hex input {
         background: transparent;
         border: none;
-        color: #fff;
+        color: #203c30;
         padding: 12px 20px;
         flex: 1;
         outline: none;
@@ -117,7 +117,7 @@ nav div.hidden {
 
     .data-hex {
         background: var(--card-bg);
-        border: 1px solid #233145;
+        border: 1px solid #e5f2e6;
         padding: 20px;
         border-radius: 15px;
         position: relative;
@@ -129,21 +129,21 @@ nav div.hidden {
         transform: translateY(-5px);
     }
 
-    .hex-label { color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 800; }
-    .hex-value { color: #fff; font-size: 20px; font-weight: 900; display: block; margin-top: 5px; }
+    .hex-label { color: #586d63; font-size: 11px; text-transform: uppercase; font-weight: 800; }
+    .hex-value { color: #203c30; font-size: 20px; font-weight: 900; display: block; margin-top: 5px; }
 
     /* --- TAB NAVIGATION (Modern Underline) --- */
     .tab-nav {
         display: flex;
         gap: 30px;
         margin-bottom: 25px;
-        border-bottom: 1px solid #233145;
+        border-bottom: 1px solid #e5f2e6;
     }
 
     .tab-btn {
         background: none;
         border: none;
-        color: #64748b;
+        color: #586d63;
         padding: 15px 5px;
         font-weight: 700;
         cursor: pointer;
@@ -169,8 +169,8 @@ nav div.hidden {
 
     /* --- DATA TABLE --- */
     .table-container {
-        background: #0b111b;
-        border: 1px solid #233145;
+        background: #ffffff;
+        border: 1px solid #e5f2e6;
         border-radius: 15px;
         overflow: hidden;
     }
@@ -181,8 +181,8 @@ nav div.hidden {
     }
 
     .cyber-table th {
-        background: #151f2e;
-        color: #64748b;
+        background: #e5f2e6;
+        color: #586d63;
         text-align: left;
         padding: 20px;
         font-size: 12px;
@@ -191,8 +191,8 @@ nav div.hidden {
 
     .cyber-table td {
         padding: 20px;
-        border-bottom: 1px solid #1a2433;
-        color: #cbd5e1;
+        border-bottom: 1px solid #e5f2e6;
+        color: #203c30;
         font-size: 14px;
     }
 
@@ -245,7 +245,7 @@ nav div.hidden {
     
     <div class="command-center">
         <div class="header-tag">System Core // Admin Privileges Active</div>
-        <h2 style="color: #fff; margin-bottom: 25px; font-weight: 900;">SUPERADMIN POWER PANEL</h2>
+        <h2 style="color: #203c30; margin-bottom: 25px; font-weight: 900;">SUPERADMIN POWER PANEL</h2>
 
         <form action="{{ route('admin.manage.role.index') }}" method="GET" class="search-hex">
             <input type="text" name="search" placeholder="SYSTEM_RECORDS_SEARCH: ENTER MEMBER_ID..." value="{{ request('search') }}">
@@ -311,8 +311,8 @@ nav div.hidden {
                     <tr onclick="window.location.href='?search={{ $order->user_id }}'" style="cursor: pointer;">
                         <td><span class="id-tag">{{ $order->user_id }}</span></td>
                         <td><span style="opacity: 0.6; font-size: 11px;">[ PACKAGE_TOPUP ]</span></td>
-                        <td style="font-weight: 900; color: #fff;">₹{{ number_format($order->amount) }}</td>
-                        <td style="color: #64748b; font-size: 12px;">{{ \Carbon\Carbon::parse($order->created_at)->diffForHumans() }}</td>
+                        <td style="font-weight: 900; color: #203c30;">₹{{ number_format($order->amount) }}</td>
+                        <td style="color: #586d63; font-size: 12px;">{{ \Carbon\Carbon::parse($order->created_at)->diffForHumans() }}</td>
                         <td>
                             <form action="{{ route('admin.delete.package') }}" method="POST">
                                 @csrf <input type="hidden" name="order_id" value="{{ $order->id }}">

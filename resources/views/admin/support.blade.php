@@ -22,7 +22,7 @@ body {
 
 .card {
     background: var(--card);
-    border: 1px solid #1f2832;
+    border: 1px solid #e5f2e6;
     border-radius: var(--radius);
     padding: 20px;
     margin-bottom: 24px;
@@ -61,19 +61,19 @@ table {
 
 th,
 td {
-    border: 1px solid #1e2b36;
+    border: 1px solid #e5f2e6;
     padding: 10px;
     text-align: center;
     font-size: 14px;
 }
 
 th {
-    background: #161f29;
-    color: #a9b9c7;
+    background: #e5f2e6;
+    color: #203c30;
 }
 
 td {
-    color: #d4dee8;
+    color: #203c30;
 }
 
 .btn-view {
@@ -123,10 +123,10 @@ td {
 textarea {
     width: 100%;
     height: 100px;
-    background: #141c22;
-    border: 1px solid #1f2832;
+    background: #ffffff;
+    border: 1px solid #e5f2e6;
     border-radius: 8px;
-    color: #fff;
+    color: #203c30;
     padding: 8px;
     margin-top: 6px;
 }
@@ -199,9 +199,9 @@ button.send-btn {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #2a3442;
-    background: #0f1620;
-    color: #fff;
+    border: 1px solid #e5f2e6;
+    background: #ffffff;
+    color: #203c30;
 }
 </style>
 
@@ -243,7 +243,7 @@ button.send-btn {
             <button type="submit" class="btn-view" style="width:100%;">Update Password</button>
         </form>
         @if (session('success'))
-        <p style="color:#a7ff1e; text-align:center;">{{ session('success') }}</p>
+        <p style="color:#23845b; text-align:center;">{{ session('success') }}</p>
         @endif
         @if (session('error'))
         <p style="color:#ff5555; text-align:center;">{{ session('error') }}</p>
@@ -308,7 +308,7 @@ document.getElementById('logout-link').addEventListener('click', function(e) {
         </div>
         <p><strong>Subject:</strong> <span id="modalSubject"></span></p>
         <p><strong>Message:</strong></p>
-        <p id="modalMessage" style="background:#141c22;padding:10px;border-radius:6px;"></p>
+        <p id="modalMessage" style="background:#ffffff;padding:10px;border-radius:6px;"></p>
         <form id="replyForm" method="POST">
             @csrf
             <label>Response by Admin</label>

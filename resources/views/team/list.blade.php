@@ -4,47 +4,12 @@
 
     <style>
         :root {
-            --bg: #0b0e12;
-            --card: #10171f;
-            --sidebar: #0f141b;
-            --accent: #a7ff1e;
-            --text: #e9eef3;
-            --muted: #a0acb3;
-        }
-
-        body {
-            margin: 0;
-            font-family: "Inter", sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: var(--sidebar);
-            border-right: 1px solid #12181f;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .sidebar ul li {
-            padding: 14px 18px;
-            color: var(--muted);
-            cursor: pointer;
-        }
-
-        .sidebar ul li:hover,
-        .sidebar ul li.active {
-            background: #141c26;
-            color: #fff;
+            --bg: #f0f8ef;
+            --card: #ffffff;
+            --sidebar: #ffffff;
+            --accent: #23845b;
+            --text: #203c30;
+            --muted: #52695f;
         }
 
         .main {
@@ -60,7 +25,7 @@
         }
 
         .user-info {
-            background: #141c22;
+            background: #ffffff;
             padding: 8px 14px;
             border-radius: 999px;
             color: var(--accent);
@@ -68,8 +33,8 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(40, 100, 65, 0.02);
+            border: 1px solid rgba(40, 100, 65, 0.05);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
@@ -84,23 +49,23 @@
 
         th,
         td {
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(40, 100, 65, 0.1);
             padding: 10px;
             text-align: left;
             font-size: 14px;
         }
 
         th {
-            background: #161f29;
-            color: #a9b9c7;
+            background: #e5f2e6;
+            color: #203c30;
         }
 
         td {
-            color: #d4dee8;
+            color: #203c30;
         }
 
         tr:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(40, 100, 65, 0.04);
         }
 
         /* Container for the filter sections */
@@ -129,7 +94,7 @@
             transition: all 0.3s ease;
             font-size: 14px;
             font-weight: 600;
-            color: #64748b;
+            color: #586d63;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
         }
 
@@ -313,7 +278,7 @@
                                     {{ $totalEmisPaid }} / {{ $totalEmisSupposedToPay }}
                                 </span>
 
-                                <div style="font-size: 10px; color: #888;">
+                                <div style="font-size: 10px; color: #586d63;">
                                     {{ $totalEmisPaid < $totalEmisSupposedToPay ? 'Pending Payments' : 'Up to Date' }}
                                 </div>
                             @else
@@ -335,7 +300,7 @@
                             @if (($member->investment_count ?? 0) === 0)
                                 <span style="color:#ff3b3b;">Pending</span>
                             @elseif(($member->investment_count ?? 0) === 1)
-                                <span style="color:#888;">Active 1st</span>
+                                <span style="color:#586d63;">Active 1st</span>
                             @elseif(($member->investment_count ?? 0) === 2)
                                 <span style="color:orange;">Active 2nd</span>
                             @else
