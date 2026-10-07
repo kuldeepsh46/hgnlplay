@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\BonusType;
+use App\Services\WalletService;
 use App\Services\RankRewardService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -106,22 +107,17 @@ class DistributeRankRewards extends Command
                 return false;
             }
 
-            DB::table('wallets')->updateOrInsert(['user_id' => $userId], ['updated_at' => now()]);
-            DB::table('wallets')->where('user_id', $userId)->increment('balance', $rank['reward']);
 
             $remarks = 'Rank Reward - Level ' . $rank['level'] . ' ' . $rank['name'] . ' achieved by ' . $memberId
                 . ': ' . number_format($rank['step']) . ' new pairs × ₹' . RankRewardService::REWARD_PER_PAIR
                 . ' | Needs ' . number_format($rank['cumulative']) . ' pairs since launch'
                 . ' | Has ' . number_format($c['pairs']) . ' (' . number_format($c['lifetime']) . ' lifetime - ' . number_format($c['at_launch']) . ' at launch; Left ' . number_format($c['left']) . ' · Right ' . number_format($c['right']) . ' active)';
 
-            $transactionId = DB::table('transactions')->insertGetId([
-                'user_id' => $userId,
+            // 90% main wallet / 10% Repurchase Wallet
+            $transactionId = WalletService::creditEarning($userId, (float) $rank['reward'], [
                 'type' => 'credit',
                 'bonus_type' => BonusType::RankReward->value,
-                'amount' => $rank['reward'],
                 'remarks' => $remarks,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
 
             DB::table('rank_reward_payouts')

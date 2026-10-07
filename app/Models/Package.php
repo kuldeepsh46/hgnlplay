@@ -25,6 +25,12 @@ class Package extends Model
         return strtoupper(trim((string) $package->name)) === 'STARTER PACKAGE';
     }
 
+    // The only package the Repurchase Wallet can pay for
+    public static function isRepurchase($package): bool
+    {
+        return str_contains(strtoupper((string) $package->name), 'REPURCHASE');
+    }
+
     // "8" for a package, "1:first" / "1:repeat" for a Starter part
     public static function classKey($packageId, $part = null): string
     {

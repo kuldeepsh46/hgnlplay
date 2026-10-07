@@ -21,6 +21,7 @@ enum BonusType: string
     case commission = 'commission';
     case reward = 'reward';
     case other = 'other';
+    case RepurchasePackage = 'repurchase_package';
 
     /**
      * Every bonus type that counts as pair / matching income.

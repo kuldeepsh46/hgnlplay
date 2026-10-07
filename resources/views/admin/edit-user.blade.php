@@ -113,6 +113,13 @@ select {
             <input type="number" name="balance" value="{{ $wallet->balance ?? 0 }}" step="0.01">
         </div>
 
+        <div class="form-group">
+            <label for="repurchase_balance">Repurchase Wallet Balance (₹)</label>
+            <input type="number" id="repurchase_balance" value="{{ $wallet->repurchase_balance ?? 0 }}" readonly
+                aria-describedby="repurchase_balance_help">
+            <small id="repurchase_balance_help">Read-only. Filled automatically with 10% of every earning.</small>
+        </div>
+
         <button class="btn btn-save" type="submit">💾 Save Changes</button>
         <a href="{{ route('admin.users') }}" class="btn btn-back">← Back</a>
     </form>

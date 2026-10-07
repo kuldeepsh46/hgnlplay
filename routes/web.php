@@ -121,6 +121,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/emi', [EMIController::class, 'index'])->name('emi.index');
     Route::get('/payments/due', [\App\Http\Controllers\PaymentDueController::class, 'index'])->name('payments.due');
+    Route::get('/repurchase-wallet', [\App\Http\Controllers\RepurchaseWalletController::class, 'index'])->name('repurchase.wallet');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export/{type}', [ReportController::class, 'export'])->name('reports.export');

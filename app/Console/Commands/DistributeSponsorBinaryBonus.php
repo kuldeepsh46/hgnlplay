@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\BonusType;
+use App\Services\WalletService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -99,8 +100,6 @@ class DistributeSponsorBinaryBonus extends Command
                     return false;
                 }
 
-                DB::table('wallets')->updateOrInsert(['user_id' => $sponsor->id], ['updated_at' => now()]);
-                DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $bonus);
 
                 $earnerCode = $earner->member_id ?: ('#' . $earner->id);
 
@@ -109,14 +108,11 @@ class DistributeSponsorBinaryBonus extends Command
                     . ' | Pair income earned ₹' . number_format($binaryIncome, 2)
                     . ' | Daily cap ₹' . number_format(self::DAILY_BINARY_CAP, 2);
 
-                $transactionId = DB::table('transactions')->insertGetId([
-                    'user_id' => $sponsor->id,
+                // 90% main wallet / 10% Repurchase Wallet
+                $transactionId = WalletService::creditEarning($sponsor->id, (float) $bonus, [
                     'type' => 'credit',
                     'bonus_type' => BonusType::SponsorBinaryBonus->value,
-                    'amount' => $bonus,
                     'remarks' => $remarks,
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ]);
 
                 DB::table('sponsor_binary_bonus_payouts')

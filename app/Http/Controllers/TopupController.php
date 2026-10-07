@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use App\Enums\BonusType;
+use App\Services\WalletService;
 class TopupController extends Controller
 {
     public function index()
@@ -19,7 +20,7 @@ class TopupController extends Controller
         // ✅ User’s wallet-done topups (new table below)
         $walletTransactions = DB::table('orders')
             ->where('from_user_id', $user->id)
-            ->where('payment_by', 'Wallet')
+            ->whereIn('payment_by', ['Wallet', 'Repurchase Wallet'])
             ->orderByDesc('id')
             ->paginate(5, ['*'], 'wallet_page');
 
@@ -45,6 +46,12 @@ class TopupController extends Controller
 
         if (!$package) {
             return back()->with('error', 'Package not found.');
+        }
+
+        // Repurchase Wallet money can only buy the Repurchase Package
+        $payWithRepurchaseWallet = $r->payment_by === 'Repurchase Wallet';
+        if ($payWithRepurchaseWallet && !\App\Models\Package::isRepurchase($package)) {
+            return back()->withInput()->with('error', 'The Repurchase Wallet can only be used to buy the Repurchase Package.');
         }
 
         // Prevent duplicate/double-click submissions for the same user from
@@ -117,44 +124,53 @@ class TopupController extends Controller
         */
                 $wallet = DB::table('wallets')->where('user_id', $currentUser->id)->lockForUpdate()->first();
 
-                if (!$wallet || $wallet->balance < $finalAmount) {
+                if ($payWithRepurchaseWallet) {
+                    if (!$wallet || (float) ($wallet->repurchase_balance ?? 0) < $finalAmount) {
+                        DB::rollBack();
+                        return back()->with('error', "Insufficient Repurchase Wallet balance. Need ₹{$finalAmount} to buy this package.");
+                    }
+                } elseif (!$wallet || $wallet->balance < $finalAmount) {
                     DB::rollBack();
                     return back()->with('error', "Insufficient wallet balance. Need ₹{$finalAmount} to perform this top-up.");
                 }
 
-                /*
-        |--------------------------------------------------------------------------
-        | Deduct Wallet Balance
-        |--------------------------------------------------------------------------
-        */
-                DB::table('wallets')
-                    ->where('user_id', $currentUser->id)
-                    ->update([
-                        'balance' => $wallet->balance - $finalAmount,
+                // Main wallet: deduct + record the debit. (Repurchase Wallet
+                // purchases are deducted below, once the order id is known.)
+                if (!$payWithRepurchaseWallet) {
+                    /*
+            |--------------------------------------------------------------------------
+            | Deduct Wallet Balance
+            |--------------------------------------------------------------------------
+            */
+                    DB::table('wallets')
+                        ->where('user_id', $currentUser->id)
+                        ->update([
+                            'balance' => $wallet->balance - $finalAmount,
+                            'updated_at' => now(),
+                        ]);
+
+                    /*
+            |--------------------------------------------------------------------------
+            | Record Debit Transaction
+            |--------------------------------------------------------------------------
+            */
+                    DB::table('transactions')->insert([
+                        'user_id' => $currentUser->id,
+                        'type' => 'Debit',
+                        'amount' => $finalAmount,
+                        'bonus_type' => BonusType::EmiPayment->value,
+                        'remarks' => 'EMI payment for ' . $receiver->username . " ({$memberId})",
+                        'created_at' => now(),
                         'updated_at' => now(),
                     ]);
-
-                /*
-        |--------------------------------------------------------------------------
-        | Record Debit Transaction
-        |--------------------------------------------------------------------------
-        */
-                DB::table('transactions')->insert([
-                    'user_id' => $currentUser->id,
-                    'type' => 'Debit',
-                    'amount' => $finalAmount,
-                    'bonus_type' => BonusType::EmiPayment->value,
-                    'remarks' => 'EMI payment for ' . $receiver->username . " ({$memberId})",
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                }
 
                 /*
         |--------------------------------------------------------------------------
         | Record Order
         |--------------------------------------------------------------------------
         */
-                DB::table('orders')->insert([
+                $orderId = DB::table('orders')->insertGetId([
                     'user_id' => $receiver->id,
                     'from_user_id' => $currentUser->id,
                     'package_id' => $package->id,
@@ -164,6 +180,20 @@ class TopupController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+
+                if ($payWithRepurchaseWallet) {
+                    $paid = WalletService::debitRepurchase(
+                        $currentUser->id,
+                        (float) $finalAmount,
+                        $orderId,
+                        $package->name . ' for ' . $receiver->username . " ({$memberId})"
+                    );
+
+                    if (!$paid) {
+                        DB::rollBack();
+                        return back()->with('error', "Insufficient Repurchase Wallet balance. Need ₹{$finalAmount} to buy this package.");
+                    }
+                }
 
                 /*
         |--------------------------------------------------------------------------
@@ -458,20 +488,15 @@ class TopupController extends Controller
     | Credit Wallet
     |--------------------------------------------------------------------------
     */
-        DB::table('wallets')->where('user_id', $sponsor->id)->increment('balance', $pairBonus);
-
         $receiverId = $sponsor->member_id ?? $sponsor->id;
 
         $remarks = 'Pair Completion Bonus - ' . $packageType . ': Credited ₹' . number_format($pairBonus, 2) . ' to ' . $receiverId . ' | Matched Volume ₹' . number_format($matchedVolumeForRemarks, 2);
 
-        DB::table('transactions')->insert([
-            'user_id' => $sponsor->id,
+        // 90% main wallet / 10% Repurchase Wallet
+        WalletService::creditEarning($sponsor->id, $pairBonus, [
             'type' => 'credit',
             'bonus_type' => $bonusType,
-            'amount' => $pairBonus,
             'remarks' => $remarks,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
     }
 
@@ -909,19 +934,11 @@ class TopupController extends Controller
     private function distributeCommissionDBOpr($targetUserId, $commissionAmount, $remarks, $fromUser, $totalAmount, $lvl = null)
     {
         DB::transaction(function () use ($targetUserId, $commissionAmount, $remarks, $fromUser, $totalAmount) {
-            // 1. Update/Insert Wallet
-            DB::table('wallets')->updateOrInsert(['user_id' => $targetUserId], ['updated_at' => now()]);
-
-            DB::table('wallets')->where('user_id', $targetUserId)->increment('balance', $commissionAmount);
-            $bonusType = BonusType::DirectIncome->value;
-            // 2. Insert Transaction Record
-            DB::table('transactions')->insert([
-                'user_id' => $targetUserId,
+            // Credit wallets (90% main / 10% Repurchase Wallet) + transaction record
+            WalletService::creditEarning($targetUserId, $commissionAmount, [
                 'type' => 'Credit',
-                'bonus_type' => $bonusType,
-                'amount' => $commissionAmount,
+                'bonus_type' => BonusType::DirectIncome->value,
                 'remarks' => $remarks . ' (₹' . number_format($totalAmount) . ')',
-                'created_at' => now(),
             ]);
         });
     }
@@ -930,18 +947,11 @@ class TopupController extends Controller
     {
         $rewardAmount = 5000; // or calculate dynamically
 
-        // Credit reward to wallet
-        DB::table('wallets')->where('user_id', $user->id)->increment('balance', $rewardAmount);
-        $bonusType = BonusType::RewardAfterFullEmi->value;
-
-        // Record credit transaction
-        DB::table('transactions')->insert([
-            'user_id' => $user->id,
+        // Credit reward (90% main / 10% Repurchase Wallet) + transaction record
+        WalletService::creditEarning($user->id, $rewardAmount, [
             'type' => 'Credit',
-            'bonus_type' => $bonusType,
-            'amount' => $rewardAmount,
+            'bonus_type' => BonusType::RewardAfterFullEmi->value,
             'remarks' => 'Reward for completing all 16 EMIs',
-            'created_at' => now(),
         ]);
 
         // Update EMI status

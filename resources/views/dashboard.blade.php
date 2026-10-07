@@ -1441,6 +1441,11 @@
                         <p class="tile-label">Topup Wallet</p>
                         <p class="tile-value mono">₹{{ number_format($walletBalance ?? 0, 2) }}</p>
                     </div>
+                    <a class="tile" href="{{ route('repurchase.wallet') }}" style="text-decoration:none;color:inherit;">
+                        <div class="tile-icon"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i></div>
+                        <p class="tile-label">Repurchase Wallet</p>
+                        <p class="tile-value mono">₹{{ number_format($repurchaseBalance ?? 0, 2) }}</p>
+                    </a>
                 </div>
             </div>
         </div>

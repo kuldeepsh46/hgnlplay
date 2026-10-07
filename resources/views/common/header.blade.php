@@ -79,6 +79,12 @@
                     </a>
                 </li>
 
+                <li class="{{ Request::routeIs('repurchase.wallet') ? 'active' : '' }}">
+                    <a href="{{ route('repurchase.wallet') }}" {{ $current(Request::routeIs('repurchase.wallet')) }}>
+                        <span class="nav-icon" aria-hidden="true">🛍️</span> <span>Repurchase Wallet</span>
+                    </a>
+                </li>
+
                 <li class="{{ Request::routeIs('payments.due') ? 'active' : '' }}">
                     <a href="{{ route('payments.due') }}" {{ $current(Request::routeIs('payments.due')) }}>
                         <span class="nav-icon" aria-hidden="true">🧾</span> <span>Payment Dues</span>

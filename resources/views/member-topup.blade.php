@@ -332,19 +332,45 @@
                 <div id="priceBreakdown" style="margin-top:10px;font-size:14px;color:var(--accent);font-weight:600;"></div>
             </div>
             <div class="form-group">
-                <label>Payment By</label>
-                <select name="payment_by" required>
+                <label for="paymentBySelect">Payment By</label>
+                <select name="payment_by" id="paymentBySelect" required>
                     <option value="Wallet">Wallet</option>
                     <option value="Online">Online</option>
+                    <option value="Repurchase Wallet" disabled>
+                        Repurchase Wallet — ₹{{ number_format($wallet->repurchase_balance ?? 0, 2) }} (Repurchase Package only)
+                    </option>
                 </select>
+                <div id="repurchaseHint" style="margin-top:6px;font-size:13px;color:var(--muted);">
+                    Repurchase Wallet balance can only be used for the Repurchase Package.
+                </div>
             </div>
             <button type="submit" class="btn" id="topupSubmitBtn" style="width:100%">Submit Payment</button>
+            <script>
+                // Repurchase Wallet is only selectable when a Repurchase Package is chosen
+                (function () {
+                    var pkg = document.getElementById('packageSelect');
+                    var pay = document.getElementById('paymentBySelect');
+                    var repOpt = pay.querySelector('option[value="Repurchase Wallet"]');
+                    function sync() {
+                        var opt = pkg.options[pkg.selectedIndex];
+                        var isRep = !!opt && /REPURCHASE/i.test(opt.textContent);
+                        repOpt.disabled = !isRep;
+                        if (!isRep && pay.value === 'Repurchase Wallet') pay.value = 'Wallet';
+                    }
+                    pkg.addEventListener('change', sync);
+                    sync();
+                })();
+            </script>
         </form>
     </div>
 
     <div class="card">
         <h2>Your Wallet Balance</h2>
         <p style="font-size:20px;color:var(--accent);font-weight:700;">₹{{ number_format($wallet->balance ?? 0, 2) }}</p>
+        <p style="margin:6px 0 0;">
+            Repurchase Wallet: <strong>₹{{ number_format($wallet->repurchase_balance ?? 0, 2) }}</strong>
+            <a href="{{ route('repurchase.wallet') }}" style="margin-left:8px;">View statement</a>
+        </p>
     </div>
 
     <div class="card table-res">
