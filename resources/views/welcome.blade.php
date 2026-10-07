@@ -2478,8 +2478,8 @@ padding-top: 20px;
             <!-- Business plan documents: cards with Open/Download on every screen, tabbed viewer on desktop -->
             @php
                 $planDocs = [
-                    ['id' => 'presentation', 'title' => 'Business Presentation', 'desc' => 'Company overview, plan and income details · 20 pages', 'file' => 'assets/docs/himalaya-pay-presentation.pdf'],
-                    ['id' => 'booklet', 'title' => 'Booklet', 'desc' => 'Quick-read business booklet · 4 pages', 'file' => 'assets/docs/himalaya-pay-booklet.pdf'],
+                    ['id' => 'presentation', 'title' => 'Business Presentation', 'desc' => 'Company overview, plan and income details · 20 pages', 'file' => 'assets/finalppt.pdf'],
+                    ['id' => 'booklet', 'title' => 'Booklet', 'desc' => 'Quick-read business booklet · 4 pages', 'file' => 'assets/booklet.pdf'],
                 ];
             @endphp
             <div class="pdf-container" id="plan">
