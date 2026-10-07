@@ -1762,6 +1762,81 @@ padding-top: 20px;
     color: #fff;
 }
 
+.pdf-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.pdf-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 16px;
+    padding: 18px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+}
+
+.pdf-card__icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: #fbe9ed;
+    color: #b9304b;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+
+.pdf-card__body {
+    flex: 1 1 160px;
+    min-width: 0;
+}
+
+.pdf-card__body h4 {
+    margin: 0 0 2px;
+    font-size: 17px;
+}
+
+.pdf-card__body p {
+    margin: 0;
+    font-size: 14px;
+    color: #586d63;
+}
+
+.pdf-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: #e3f3e9;
+}
+
+.pdf-tabs [role="tab"] {
+    padding: 9px 18px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #3d574b;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pdf-tabs [role="tab"][aria-selected="true"] {
+    background: #fff;
+    color: #08734f;
+    box-shadow: 0 1px 3px rgba(13, 77, 51, .15);
+}
+
 .desktop-pdf iframe {
     display: block;
     width: 100%;
@@ -1788,6 +1863,10 @@ padding-top: 20px;
 @media (max-width: 768px) {
     .desktop-pdf {
         display: none;
+    }
+
+    .pdf-cards {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .pdf-actions,
@@ -2396,28 +2475,84 @@ padding-top: 20px;
                     <p>Scale up and become leader.</p>
                 </div>
             </div>
-            <!-- Business plan PDF: buttons on every screen, inline viewer on desktop -->
+            <!-- Business plan documents: cards with Open/Download on every screen, tabbed viewer on desktop -->
+            @php
+                $planDocs = [
+                    ['id' => 'presentation', 'title' => 'Business Presentation', 'desc' => 'Company overview, plan and income details · 20 pages', 'file' => 'assets/docs/himalaya-pay-presentation.pdf'],
+                    ['id' => 'booklet', 'title' => 'Booklet', 'desc' => 'Quick-read business booklet · 4 pages', 'file' => 'assets/docs/himalaya-pay-booklet.pdf'],
+                ];
+            @endphp
             <div class="pdf-container" id="plan">
                 <div class="pdf-head">
                     <div>
                         <div class="title-eyebrow">Business Plan</div>
                         <h3>Our Business Plan</h3>
                     </div>
-                    <div class="pdf-actions">
-                        <a href="{{ asset('assets/HGNLPAY.pdf') }}" target="_blank" rel="noopener" class="pdf-btn">
-                            Open PDF <span class="sr-only">(opens in a new tab)</span>
-                        </a>
-                        <a href="{{ asset('assets/HGNLPAY.pdf') }}" download class="pdf-btn pdf-btn-outline">
-                            Download
-                        </a>
-                    </div>
+                </div>
+
+                <div class="pdf-cards">
+                    @foreach ($planDocs as $doc)
+                        <div class="pdf-card">
+                            <div class="pdf-card__icon" aria-hidden="true">PDF</div>
+                            <div class="pdf-card__body">
+                                <h4>{{ $doc['title'] }}</h4>
+                                <p>{{ $doc['desc'] }}</p>
+                            </div>
+                            <div class="pdf-actions">
+                                <a href="{{ asset($doc['file']) }}" target="_blank" rel="noopener" class="pdf-btn">
+                                    Open <span class="sr-only">{{ $doc['title'] }} (opens in a new tab)</span>
+                                </a>
+                                <a href="{{ asset($doc['file']) }}" download class="pdf-btn pdf-btn-outline">
+                                    Download <span class="sr-only">{{ $doc['title'] }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
 
                 <div class="desktop-pdf">
-                    <iframe src="{{ asset('assets/HGNLPAY.pdf') }}#view=FitH" title="Himalaya Trading business plan (PDF)"
-                        loading="lazy"></iframe>
+                    <div class="pdf-tabs" role="tablist" aria-label="Business plan documents">
+                        @foreach ($planDocs as $k => $doc)
+                            <button type="button" role="tab" id="pdf-tab-{{ $doc['id'] }}" aria-controls="pdf-viewer"
+                                aria-selected="{{ $k === 0 ? 'true' : 'false' }}" tabindex="{{ $k === 0 ? '0' : '-1' }}"
+                                data-src="{{ asset($doc['file']) }}#view=FitH" data-title="{{ $doc['title'] }} (PDF)">
+                                {{ $doc['title'] }}
+                            </button>
+                        @endforeach
+                    </div>
+                    <div id="pdf-viewer" role="tabpanel" aria-labelledby="pdf-tab-{{ $planDocs[0]['id'] }}">
+                        <iframe src="{{ asset($planDocs[0]['file']) }}#view=FitH" title="{{ $planDocs[0]['title'] }} (PDF)"
+                            loading="lazy"></iframe>
+                    </div>
                 </div>
             </div>
+            <script>
+                (function () {
+                    var tabs = Array.prototype.slice.call(document.querySelectorAll('.pdf-tabs [role="tab"]'));
+                    var panel = document.getElementById('pdf-viewer');
+                    var frame = panel.querySelector('iframe');
+                    function select(tab, focus) {
+                        tabs.forEach(function (t) {
+                            var on = t === tab;
+                            t.setAttribute('aria-selected', on ? 'true' : 'false');
+                            t.tabIndex = on ? 0 : -1;
+                        });
+                        panel.setAttribute('aria-labelledby', tab.id);
+                        frame.title = tab.dataset.title;
+                        if (frame.getAttribute('src') !== tab.dataset.src) frame.setAttribute('src', tab.dataset.src);
+                        if (focus) tab.focus();
+                    }
+                    tabs.forEach(function (tab, i) {
+                        tab.addEventListener('click', function () { select(tab); });
+                        tab.addEventListener('keydown', function (e) {
+                            var next = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : null;
+                            if (next === null) return;
+                            e.preventDefault();
+                            select(tabs[(next + tabs.length) % tabs.length], true);
+                        });
+                    });
+                })();
+            </script>
             <!-- CTA band -->
             <div class="cta-band reveal" style="margin-top:34px">
                 <div class="inner">
