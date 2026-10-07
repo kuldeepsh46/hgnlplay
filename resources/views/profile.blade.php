@@ -138,7 +138,7 @@
 .card-title {
     font-size: 22px;
     margin-bottom: 20px;
-    color:#fff;
+    color:#203c30;
 }
 
 /* Grid */
@@ -149,8 +149,8 @@
 }
 
 .profile-item {
-    background: #0f1620;
-    border: 1px solid #2a3442;
+    background: #ffffff;
+    border: 1px solid #e5f2e6;
     border-radius: 10px;
     padding: 14px;
 }
@@ -250,14 +250,14 @@
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #2a3442;
-    background: #0f1620;
-    color: #fff;
+    border: 1px solid #e5f2e6;
+    background: #ffffff;
+    color: #203c30;
 }
 
 /* Messages */
 .success-msg {
-    color: #a7ff1e;
+    color: #23845b;
     text-align: center;
     margin-top: 10px;
 }

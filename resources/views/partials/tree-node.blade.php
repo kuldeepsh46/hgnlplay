@@ -6,7 +6,7 @@
 
     <style>
         body {
-            background: #0b0f14;
+            background: #f0f8ef;
             font-family: Segoe UI, Arial;
             margin: 0;
         }
@@ -156,7 +156,7 @@
                                            ✅ ONLY NEW CSS (EMPTY LEAF USER – NOTHING ELSE TOUCHED)
                                         ===================================================== */
         .tree li.leaf .node span:empty {
-            color: #999;
+            color: #586d63;
             /* different look */
             font-style: italic;
             font-size: 11px;
@@ -436,7 +436,7 @@
     //             return '
 //                 <div style="padding: 20px 0; opacity: 0.3;">
 //                     <img src="'.asset('storage/y1.png').'" style="width:40px;"><br>
-//                     <span style="font-size: 10px; color: #999;">EMPTY</span>
+//                     <span style="font-size: 10px; color: #586d63;">EMPTY</span>
 //                 </div>';
     //         }
 
@@ -461,7 +461,7 @@
 //     <div style="width: 100%; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto;">
 
 //         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
-//             <div style="background: #444; color: #fff; padding: 15px; border-radius: 8px; min-width: 200px; flex: 1;">
+//             <div style="background: #e5f2e6; color: #203c30; padding: 15px; border-radius: 8px; min-width: 200px; flex: 1;">
 //                 <div style="font-size: 12px;">Left IDs : 2</div>
 //                 <div style="font-size: 12px;">Left Business : 2000.00</div>
 //                 <div style="font-size: 12px; font-weight: bold;">Left New Business : 2000.00</div>
@@ -471,7 +471,7 @@
 //                 <input type="text" placeholder="ID Search" style="padding: 8px 20px; border-radius: 20px; border: 1px solid #ddd; width: 100%; max-width: 180px;">
 //             </div>
 
-//             <div style="background: #444; color: #fff; padding: 15px; border-radius: 8px; min-width: 200px; flex: 1; text-align: right;">
+//             <div style="background: #e5f2e6; color: #203c30; padding: 15px; border-radius: 8px; min-width: 200px; flex: 1; text-align: right;">
 //                 <div style="font-size: 12px;">Right IDs : 2</div>
 //                 <div style="font-size: 12px;">Right Business : 1000.00</div>
 //                 <div style="font-size: 12px; font-weight: bold;">Right New Business : 1000.00</div>
@@ -523,7 +523,7 @@
                 <img src="' .
                     asset('assets/images/y1.png') .
                     '" style="width:40px;"><br>
-                <span style="font-size: 10px; color: #999; font-weight: bold;">EMPTY</span>
+                <span style="font-size: 10px; color: #586d63; font-weight: bold;">EMPTY</span>
             </div>';
             }
 
@@ -566,10 +566,10 @@
         $html =
             '
     <div style="width: 100%; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow-x: auto;">
-        
+
         <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;">
-            
-           <div style="background: #2d3436; color: #ffffff; padding: 20px; border-radius: 12px; min-width: 240px; flex: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-left: 5px solid #00cec9;">
+
+           <div style="background: #e5f2e6; color: #203c30; padding: 20px; border-radius: 12px; min-width: 240px; flex: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-left: 5px solid #00cec9;">
     <div style="font-size: 12px; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px;">Left Side Summary</div>
     <div style="font-size: 14px; margin-bottom: 4px;">Contributors: <span style="font-weight:bold; color: #00cec9;">' .
         ($node['total_contributors_left'] ?? 0) .
@@ -584,18 +584,18 @@
         number_format($node['total_renewal_left'] ?? 0, 2) .
     '</span></div>
 </div>
-            
-            
 
-    
+
+
+
 <div style="flex: 1; display: flex; align-items: center; justify-content: center; min-width: 200px;">
     <form id="searchForm" action="' .
             route('team.tree') .
             '" method="GET" style="width: 100%; max-width: 250px;">
-        <input type="text" 
-               name="user_id" 
+        <input type="text"
+               name="user_id"
                id="searchInput"
-               placeholder="Search User ID..." 
+               placeholder="Search User ID..."
                style="padding: 12px 20px; border-radius: 50px; border: 2px solid #dfe6e9; width: 100%; font-size: 14px; outline: none; transition: all 0.3s;"
                value="' .
             request('user_id') .
@@ -604,7 +604,7 @@
                autocomplete="off">
     </form>
 </div>
-            <div style="background: #2d3436; color: #ffffff; padding: 20px; border-radius: 12px; min-width: 240px; flex: 1; text-align: right; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-right: 5px solid #ff7675;">
+            <div style="background: #e5f2e6; color: #203c30; padding: 20px; border-radius: 12px; min-width: 240px; flex: 1; text-align: right; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-right: 5px solid #ff7675;">
     <div style="font-size: 12px; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px;">Right Side Summary</div>
     <div style="font-size: 14px; margin-bottom: 4px;">Contributors: <span style="font-weight:bold; color: #ff7675;">' .
         ($node['total_contributors_right'] ?? 0) .

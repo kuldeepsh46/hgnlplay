@@ -6,7 +6,7 @@
 
 .card {
     background: var(--card);
-    border: 1px solid #1f2832;
+    border: 1px solid #e5f2e6;
     border-radius: var(--radius);
     padding: 24px;
     margin-bottom: 24px;
@@ -28,9 +28,9 @@ textarea {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #1f2832;
-    background: #141c22;
-    color: #fff;
+    border: 1px solid #e5f2e6;
+    background: #ffffff;
+    color: #203c30;
 }
 
 .btn {
@@ -65,19 +65,19 @@ textarea {
 }
 
 th, td {
-    border: 1px solid #1e2b36;
+    border: 1px solid #e5f2e6;
     padding: 10px;
     text-align: center;
     font-size: 14px;
     white-space: nowrap;
 }
 th {
-    background: #161f29;
-    color: #a9b9c7;
+    background: #e5f2e6;
+    color: #203c30;
 }
 
 td {
-    color: #d4dee8;
+    color: #203c30;
 }
 
 .view-btn {
@@ -149,9 +149,9 @@ td {
 .pagination li a,
 .pagination li span {
     padding: 8px 12px;
-    border: 1px solid #1f2832;
+    border: 1px solid #e5f2e6;
     border-radius: 6px;
-    background: #141c22;
+    background: #ffffff;
     color: var(--accent);
     text-decoration: none;
     font-weight: 600;
@@ -226,16 +226,16 @@ td {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #2a3442;
-    background: #0f1620;
-    color: #fff;
+    border: 1px solid #e5f2e6;
+    background: #ffffff;
+    color: #203c30;
 }
 </style>
 
 <div class="header" style="display:flex;justify-content:space-between;align-items:center;">
     <h1> Mail Box</h1>
     <div class="user-info"
-        style="background:#141c22;padding:8px 14px;border-radius:999px;color:var(--accent);font-weight:600;">
+        style="background:#ffffff;padding:8px 14px;border-radius:999px;color:var(--accent);font-weight:600;">
         👤 {{ $user->username ?? $user->name }}
     </div>
 </div>
@@ -311,7 +311,7 @@ td {
             <button type="submit" class="btn btn-copy" style="width:100%;">Update Password</button>
         </form>
         @if (session('success'))
-        <p style="color:#a7ff1e; text-align:center;">{{ session('success') }}</p>
+        <p style="color:#23845b; text-align:center;">{{ session('success') }}</p>
         @endif
         @if (session('error'))
         <p style="color:#ff5555; text-align:center;">{{ session('error') }}</p>

@@ -22,7 +22,7 @@ body{
   font-size:22px;
 }
 .user-info{
-  background:#141c22;
+  background:#ffffff;
   padding:8px 14px;
   border-radius:999px;
   color:var(--accent);
@@ -60,7 +60,7 @@ body{
   width:34px;
   height:34px;
   border-radius:50%;
-  background:#1b2531;
+  background:#e5f2e6;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -104,11 +104,11 @@ body{
   white-space:nowrap;
 }
 .position.left{
-  background:#1f3a1a;
-  color:#a7ff1e;
+  background:#e5f2e6;
+  color:#23845b;
 }
 .position.right{
-  background:#183041;
+  background:#e5f2e6;
   color:#5fd2ff;
 }
 
@@ -221,7 +221,7 @@ body{
 .filter-btn {
     padding: 8px 16px;
     border: none;
-    background: #1f2832;
+    background: #e5f2e6;
     color: #fff;
     border-radius: 6px;
     cursor: pointer;

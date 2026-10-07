@@ -13,17 +13,17 @@
 
 <style>
 :root {
-    --bg:#0b0e12;
-    --card:#10171f;
-    --sidebar:#0f141b;
-    --accent:#3f7871;
-    --accent2:#3f7871;
-    --accent-strong:#4f958c;
-    --accent-text:#6cc3b7;   /* accent tuned for text on dark surfaces (AA contrast) */
-    --border:#1b222b;
-    --text:#e9eef3;
-    --muted:#a0acb3;
-    --focus:#8fd8cd;
+    --bg:#f0f8ef;
+    --card:#ffffff;
+    --sidebar:#ffffff;
+    --accent:#287b62;
+    --accent2:#287b62;
+    --accent-strong:#08734f;
+    --accent-text:#08734f;   /* accent tuned for text on light surfaces (AA contrast) */
+    --border:#cddfd3;
+    --text:#203c30;
+    --muted:#52695f;
+    --focus:#218e65;
     --radius:12px;
 }
 
@@ -56,7 +56,7 @@ h2{
     left:12px;
     top:-60px;
     z-index:2000;
-    background:#3f7871;
+    background:#08734f;
     color:#fff;
     padding:10px 16px;
     border-radius:8px;
@@ -87,13 +87,13 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 }
 
 /* Thin, theme-matched scrollbars */
-*{scrollbar-width:thin;scrollbar-color:#2a3542 transparent}
+*{scrollbar-width:thin;scrollbar-color:#a9cbbb transparent}
 ::-webkit-scrollbar{width:8px;height:8px}
-::-webkit-scrollbar-thumb{background:#2a3542;border-radius:8px}
+::-webkit-scrollbar-thumb{background:#a9cbbb;border-radius:8px}
 ::-webkit-scrollbar-track{background:transparent}
 
 /* ===== SHARED BITS ===== */
-div#passwordModal h2{color:#fff}
+div#passwordModal h2{color:var(--text)}
 nav[aria-label="Pagination Navigation"] > div:first-child{padding-top:20px}
 .modal-content p{line-height:1.6;text-align:center}
 
@@ -117,7 +117,7 @@ button{font-family:inherit}
     width:250px;
     flex-shrink:0;
     background:var(--sidebar);
-    border-right:1px solid #12181f;
+    border-right:1px solid var(--border);
     display:flex;
     flex-direction:column;
     position:relative;
@@ -153,15 +153,22 @@ button{font-family:inherit}
     cursor:pointer;
     transition:background .2s, color .2s, border-color .2s;
 }
-.sidebar-nav > ul > li > a:hover,
-.sidebar-nav .team-menu:hover,
-.sidebar-nav .logout-item button:hover,
-.sidebar-nav > ul > li.active > a,
-.sidebar-nav > ul > li.active > .team-menu{
-    background:#141c26;
-    color:#fff;
+/* "body" prefix keeps these ahead of the generic li rules in light-green-theme.css */
+body .sidebar-nav > ul > li > a:hover,
+body .sidebar-nav .team-menu:hover,
+body .sidebar-nav .logout-item button:hover,
+body .sidebar-nav > ul > li.team-item.active > .team-menu{
+    background:#e3f3e9;
+    color:#123c2a;
     border-left-color:var(--accent-strong);
 }
+body .sidebar-nav > ul > li.active > a{
+    background:#08734f;
+    color:#fff;
+    border-left-color:#63dba0;
+}
+body .sidebar ul li:hover,
+body .sidebar ul li.active{background:transparent}
 .sidebar-nav :focus-visible{outline-offset:-2px}
 
 .nav-icon{
@@ -176,7 +183,7 @@ button{font-family:inherit}
     border-top:1px solid var(--border);
 }
 .logout-item form{margin:0}
-.sidebar-nav .logout-item button:hover{color:#ff8a9f;border-left-color:#e84e6d}
+body .sidebar-nav .logout-item button:hover{color:#b9304b;background:#fbe9ed;border-left-color:#b9304b}
 
 /* Accordion groups */
 .team-item{list-style:none}
@@ -209,8 +216,8 @@ button{font-family:inherit}
 }
 .submenu li a:hover,
 .submenu li a.active{
-    color:#fff;
-    background:#141c26;
+    color:#123c2a;
+    background:#e3f3e9;
     border-left-color:var(--accent-strong);
 }
 
@@ -230,7 +237,7 @@ button{font-family:inherit}
     border-radius:8px;
 }
 .logo h1{font-size:20px}
-.logo h1 span{color:#e84e6d}
+.logo h1 span{color:#b64f70}
 
 /* ===== MAIN CONTENT ===== */
 main.main{
@@ -245,7 +252,7 @@ main.main:focus{outline:none}
 #sidebarOverlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.55);
+    background:rgba(20,46,37,0.45);
     display:none;
     z-index:1150;
 }
@@ -253,7 +260,7 @@ main.main:focus{outline:none}
 .mobile-header{display:none}
 
 .toggle-btn{
-    background:#3f7871;
+    background:#08734f;
     color:#fff;
     width:44px;
     height:44px;
@@ -263,7 +270,7 @@ main.main:focus{outline:none}
     place-items:center;
     font-size:20px;
     cursor:pointer;
-    box-shadow:0 0 0 4px rgba(63,120,113,.25);
+    box-shadow:0 0 0 4px rgba(8,115,79,.18);
     transition:background .2s;
 }
 .toggle-btn:hover{background:var(--accent-strong)}
@@ -285,7 +292,7 @@ main.main:focus{outline:none}
         justify-content:space-between;
         padding:8px 14px;
         border-bottom:1px solid var(--border);
-        box-shadow:0 6px 20px -12px rgba(0,0,0,.8);
+        box-shadow:0 6px 20px -12px rgba(13,77,51,.35);
     }
     .mobile-header .logo{padding:0;max-width:60%}
     .mobile-header .logo img{height:54px;width:auto}
@@ -302,7 +309,7 @@ main.main:focus{outline:none}
     #sidebarOverlay{top:72px}
     .sidebar.open{
         left:0;
-        box-shadow:12px 0 40px rgba(0,0,0,.6);
+        box-shadow:12px 0 40px rgba(13,77,51,.25);
     }
     .sidebar.open ~ #sidebarOverlay{display:block}
     body.sidebar-open{overflow:hidden}
@@ -326,7 +333,7 @@ main.main:focus{outline:none}
 
 /* ===== FORMS ===== */
 input[type="date"]::-webkit-calendar-picker-indicator{
-    filter:invert(1);
+    filter:none;
     cursor:pointer;
 }
 
@@ -342,13 +349,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 .header h1{margin:0;font-size:22px}
 
 .user-info{
-    background:#141c22;
+    background:#ffffff;
     padding:8px 14px;
     border-radius:999px;
     display:flex;
     align-items:center;
     gap:8px;
-    color:#e84e6d !important;
+    color:#b64f70 !important;
     font-weight:600;
 }
 
@@ -367,6 +374,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
 </head>
 
 <body>

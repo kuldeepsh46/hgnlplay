@@ -6,21 +6,21 @@
 <style>
     /* ... Copy the exact same <style> block from above ... */
     .hgnl-page-container { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 40px 0; box-sizing: border-box; }
-    .hgnl-card-wide { width: 95%; max-width: 1400px; background-color: #10171f; border: 1px solid #1b222b; border-radius: 16px; padding: 50px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-    .hgnl-card-wide h2 { font-size: 28px; margin-top: 0; margin-bottom: 40px; border-left: 5px solid #a7ff1e; padding-left: 20px; color: #fff; }
+    .hgnl-card-wide { width: 95%; max-width: 1400px; background-color: #ffffff; border: 1px solid #e5f2e6; border-radius: 16px; padding: 50px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .hgnl-card-wide h2 { font-size: 28px; margin-top: 0; margin-bottom: 40px; border-left: 5px solid #23845b; padding-left: 20px; color: #203c30; }
     .hgnl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
     .hgnl-field { display: flex; flex-direction: column; }
     .hgnl-field.full-row { grid-column: span 3; }
-    .hgnl-field label { font-size: 12px; text-transform: uppercase; color: #a0acb3; margin-bottom: 10px; font-weight: 700; letter-spacing: 1px; }
-    .hgnl-input { width: 100%; padding: 16px; border-radius: 8px; border: 1px solid #1b222b; background-color: #0b0e12; color: #fff; font-size: 15px; transition: 0.3s; }
-    .hgnl-input:focus { outline: none; border-color: #a7ff1e; background-color: #0d1218; }
-    .hgnl-btn { background-color: #a7ff1e; color: #000; font-weight: 800; border: none; border-radius: 10px; padding: 20px; font-size: 16px; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+    .hgnl-field label { font-size: 12px; text-transform: uppercase; color: #586d63; margin-bottom: 10px; font-weight: 700; letter-spacing: 1px; }
+    .hgnl-input { width: 100%; padding: 16px; border-radius: 8px; border: 1px solid #e5f2e6; background-color: #f0f8ef; color: #203c30; font-size: 15px; transition: 0.3s; }
+    .hgnl-input:focus { outline: none; border-color: #23845b; background-color: #ffffff; }
+    .hgnl-btn { background-color: #23845b; color: #000; font-weight: 800; border: none; border-radius: 10px; padding: 20px; font-size: 16px; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 20px; }
     .hgnl-btn:hover { background-color: #c1ff5e; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(167, 255, 30, 0.2); }
     .hgnl-inline { display: flex; gap: 10px; }
     .hgnl-inline .hgnl-input { flex: 1 1 auto; min-width: 70px; }
     .hgnl-inline .hgnl-type { flex: 0 0 100px; width: 100px; padding-left: 12px; padding-right: 8px; }
-    .hgnl-hint { color: #6c7a85; font-size: 12px; margin-top: 8px; }
-    .hgnl-errors { background: rgba(232, 78, 109, 0.1); border: 1px solid #e84e6d; color: #e84e6d; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+    .hgnl-hint { color: #586d63; font-size: 12px; margin-top: 8px; }
+    .hgnl-errors { background: rgba(232, 78, 109, 0.1); border: 1px solid #b64f70; color: #b64f70; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
     .hgnl-pair-head {
         display: flex;
         justify-content: space-between;
@@ -37,11 +37,11 @@
         align-items: center;
         gap: 14px;
         font-size: 13px;
-        color: #6c7a85;
+        color: #586d63;
     }
 
     .hgnl-pair-count {
-        color: #a7ff1e;
+        color: #23845b;
         font-weight: 700;
     }
 
@@ -49,7 +49,7 @@
         background: none;
         border: none;
         padding: 0;
-        color: #a0acb3;
+        color: #586d63;
         font-size: 13px;
         cursor: pointer;
         text-decoration: underline;
@@ -73,10 +73,10 @@
         gap: 14px;
         padding: 16px 18px;
         margin: 0;
-        border: 1px solid #1b222b;
+        border: 1px solid #e5f2e6;
         border-radius: 12px;
-        background-color: #0b0e12;
-        color: #fff;
+        background-color: #f0f8ef;
+        color: #203c30;
         text-transform: none;
         letter-spacing: 0;
         font-weight: 500;
@@ -86,7 +86,7 @@
 
     .hgnl-field .hgnl-pair-card:hover {
         border-color: #3a4652;
-        background-color: #0d1218;
+        background-color: #ffffff;
         transform: translateY(-2px);
     }
 
@@ -132,12 +132,12 @@
 
     .hgnl-pair-amt {
         font-size: 12px;
-        color: #6c7a85;
+        color: #586d63;
     }
 
     .hgnl-pair-card input:checked ~ .hgnl-pair-tick {
-        background-color: #a7ff1e;
-        border-color: #a7ff1e;
+        background-color: #23845b;
+        border-color: #23845b;
     }
 
     .hgnl-pair-card input:checked ~ .hgnl-pair-tick svg {
@@ -146,25 +146,25 @@
     }
 
     .hgnl-pair-card input:checked ~ .hgnl-pair-text .hgnl-pair-amt {
-        color: #a7ff1e;
+        color: #23845b;
     }
 
     .hgnl-field .hgnl-pair-card:has(input:checked) {
-        border-color: #a7ff1e;
+        border-color: #23845b;
         background-color: rgba(167, 255, 30, 0.06);
         box-shadow: 0 0 0 1px rgba(167, 255, 30, 0.25), 0 8px 20px rgba(167, 255, 30, 0.08);
     }
 
     .hgnl-pair-card input:focus-visible ~ .hgnl-pair-tick {
-        outline: 2px solid #a7ff1e;
+        outline: 2px solid #23845b;
         outline-offset: 3px;
     }
 
     .hgnl-pair-empty {
         padding: 20px;
-        border: 1px dashed #1b222b;
+        border: 1px dashed #e5f2e6;
         border-radius: 12px;
-        color: #6c7a85;
+        color: #586d63;
         font-size: 13px;
         text-align: center;
     }
@@ -235,7 +235,7 @@
                 <div class="hgnl-field full-row">
                     <button type="submit" class="hgnl-btn">Update Package Details</button>
                     <div style="text-align: center; margin-top: 20px;">
-                        <a href="{{ route('packages.index') }}" style="color: #a0acb3; text-decoration: none; font-size: 14px;">Cancel and Go Back</a>
+                        <a href="{{ route('packages.index') }}" style="color: #586d63; text-decoration: none; font-size: 14px;">Cancel and Go Back</a>
                     </div>
                 </div>
             </div>

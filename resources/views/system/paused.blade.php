@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $offline ? 'Temporarily unavailable' : 'Temporarily paused' }} · {{ config('app.name') }}</title>
     <style>
-        body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0d1318; color: #d4dee8; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 20px; box-sizing: border-box; }
-        .box { max-width: 480px; text-align: center; background: #141c22; border: 1px solid #1f2832; border-radius: 16px; padding: 36px 28px; }
+        body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #ffffff; color: #203c30; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 20px; box-sizing: border-box; }
+        .box { max-width: 480px; text-align: center; background: #ffffff; border: 1px solid #e5f2e6; border-radius: 16px; padding: 36px 28px; }
         .icon { font-size: 44px; }
-        h1 { margin: 12px 0 10px; font-size: 22px; color: #fff; }
-        p { margin: 0 0 22px; line-height: 1.6; color: #a9b9c7; }
-        a, button { display: inline-block; border: 0; cursor: pointer; font-size: 15px; padding: 10px 18px; border-radius: 8px; background: #3f7871; color: #fff; text-decoration: none; font-weight: 600; }
+        h1 { margin: 12px 0 10px; font-size: 22px; color: #203c30; }
+        p { margin: 0 0 22px; line-height: 1.6; color: #203c30; }
+        a, button { display: inline-block; border: 0; cursor: pointer; font-size: 15px; padding: 10px 18px; border-radius: 8px; background: #287b62; color: #fff; text-decoration: none; font-weight: 600; }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
 </head>
 <body>
     <div class="box">

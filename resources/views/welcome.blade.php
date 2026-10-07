@@ -12,16 +12,16 @@
     :root {
         --bg: #f9f9f9;
         --card: #f8f8f8;
-        --muted: #393939;
-        --text: #2e2e2f;
-        --text-dim: #575757;
-        --accent: #3f5193;
+        --muted: #52695f;
+        --text: #52695f;
+        --text-dim: #52695f;
+        --accent: #596ca4;
         /* neon lime */
         --accent-2: #293b8f;
         /* teal-green */
-        --accent-3: #12d1ff;
+        --accent-3: #327f9e;
         /* cyan for subtle touches */
-        --border: #e6e6e6;
+        --border: #cddfd3;
         --ring: 0 0 0 8px #3f51b51a;
         --radius: 14px;
         --shadow: 0 10px 30px rgba(20, 30, 60, .08), 0 2px 8px rgba(20, 30, 60, .06);
@@ -29,27 +29,6 @@
 
     * {
         box-sizing: border-box
-    }
-
-    /* ===== Our Products (homepage) ===== */
-    .home-products { padding: 70px 0; background: #fff; text-align: center; }
-    .home-products .hp-eyebrow { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #2f6b1e; margin-bottom: 8px; }
-    .home-products .hp-title { margin: 0 0 34px; font-size: 32px; color: var(--text); }
-    .home-products .hp-title span { color: #2f6b1e; }
-    .home-products .hp-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; }
-    .home-products .hp-card { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
-    .home-products .hp-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; background: #f3f5f2; border: 1px solid var(--border); box-shadow: 0 6px 18px rgba(0, 0, 0, .08); transition: transform .2s, box-shadow .2s; }
-    .home-products .hp-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
-    .home-products .hp-card:hover .hp-img { transform: translateY(-4px); box-shadow: 0 12px 26px rgba(0, 0, 0, .14); }
-    .home-products .hp-wa { margin-top: -4px; font-size: 12px; font-weight: 600; color: #1f8f4e; }
-    .home-products .hp-card:hover .hp-wa { text-decoration: underline; }
-    .home-products .hp-name { background: #345C01; color: #fff; padding: 6px 12px; border-radius: 5px; font-size: 13px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
-    @media (max-width: 560px) {
-        .home-products { padding: 48px 0; }
-        .home-products .hp-title { font-size: 24px; }
-        .home-products .hp-grid { gap: 14px; }
-        .home-products .hp-card { width: calc(50% - 7px); }
-        .home-products .hp-name { font-size: 11px; padding: 5px 8px; }
     }
 
     @media (max-width: 520px) {
@@ -177,7 +156,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(90deg, var(--accent), #3f5193);
+        background: linear-gradient(90deg, var(--accent), #596ca4);
         color: #ffffff;
         box-shadow: var(--ring);
         position: relative;
@@ -186,29 +165,29 @@
 
     .btn-primary:hover {
         transform: translateY(-1px);
-        box-shadow: 0 0 0 10px #a7ff1e1f, var(--ring)
+        box-shadow: 0 0 0 10px #23845b1f, var(--ring)
     }
 
     .btn-ghost {
-        border-color: #2a323b;
-        color: #dce7f0;
-        background: #131922
+        border-color: #e5f2e6;
+        color: #203c30;
+        background: #ffffff
     }
 
     .btn-ghost:hover {
         border-color: #3a4450;
-        background: #171f2a
+        background: #e5f2e6
     }
 
     .btn-outline {
         border-color: #93ff1e33;
-        color: #ffffffff;
-        background: #10171e;
+        color: #203c30ff;
+        background: #ffffff;
     }
 
     .btn-outline:hover {
-        background: #131e26;
-        border-color: #3f5193;
+        background: #ffffff;
+        border-color: #596ca4;
     }
 
     .nav-cta {
@@ -232,7 +211,7 @@
     }
 
     .burger:hover {
-        background: #f1f3f9
+        background: #e3f3e9
     }
 
     .burger span {
@@ -253,7 +232,7 @@
 
   .burger span {
     height: 3px;
-    background: #000000;
+    background: #142e25;
     border-radius: 99px;
 }
 
@@ -265,7 +244,7 @@
     width: 100%;
     background: #fff;
     box-shadow: 0 16px 30px rgba(20, 30, 60, .12);
-    border-top: 1px solid #121a22;
+    border-top: 1px solid var(--border);
     z-index: 99999;
 }
 
@@ -310,9 +289,6 @@
         color: #fff !important
     }
 
-    nav.mobile-menu .btn-ghost {
-        color: #dce7f0 !important
-    }
 
     /* ---------- Hero ---------- */
     .hero {
@@ -332,9 +308,9 @@
         display: inline-flex;
         gap: 8px;
         align-items: center;
-        color: #a6ffc4;
-        background: #0d1913;
-        border: 1px solid #1a3326;
+        color: #203c30;
+        background: #ffffff;
+        border: 1px solid #e5f2e6;
         padding: 6px 10px;
         border-radius: 999px;
         font-size: 13px
@@ -345,7 +321,7 @@
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: radial-gradient(circle at 30% 30%, #a7ff1e, #2ee6a6)
+        background: radial-gradient(circle at 30% 30%, #23845b, #218c78)
     }
 
     .hero h2 {
@@ -375,8 +351,8 @@
 
     .illustration {
         position: relative;
-        background: radial-gradient(120% 100% at 60% 40%, #1b2330 0%, #131a22 55%, #0e141c 100%);
-        border: 1px solid #1e2834;
+        background: radial-gradient(120% 100% at 60% 40%, #e5f2e6 0%, #ffffff 55%, #ffffff 100%);
+        border: 1px solid #e5f2e6;
         border-radius: 22px;
         padding: 26px;
         box-shadow: var(--shadow)
@@ -387,7 +363,7 @@
         inset: -30px;
         border-radius: 26px;
         background: radial-gradient(600px 300px at 70% 20%, #bfff2d1c, transparent 60%),
-            radial-gradient(420px 260px at 20% 90%, #12d1ff18, transparent 60%);
+            radial-gradient(420px 260px at 20% 90%, #327f9e18, transparent 60%);
         pointer-events: none;
         filter: blur(6px)
     }
@@ -397,11 +373,11 @@
         width: 100%;
         aspect-ratio: 16/11;
         border-radius: 16px;
-        border: 1px solid #2a3542;
+        border: 1px solid #e5f2e6;
         background:
-            radial-gradient(120px 60px at 25% 30%, #1e2b39 0%, transparent 70%),
-            radial-gradient(90px 50px at 42% 58%, #1b2937 0%, transparent 70%),
-            linear-gradient(180deg, #0f1720, #0a0f16);
+            radial-gradient(120px 60px at 25% 30%, #e5f2e6 0%, transparent 70%),
+            radial-gradient(90px 50px at 42% 58%, #e5f2e6 0%, transparent 70%),
+            linear-gradient(180deg, #ffffff, #f0f8ef);
         position: relative;
         overflow: hidden
     }
@@ -412,10 +388,10 @@
         inset: auto 14px 14px auto;
         padding: 6px 10px;
         border-radius: 999px;
-        border: 1px solid #2a3340;
-        color: #8da3b5;
+        border: 1px solid #e5f2e6;
+        color: #586d63;
         font-size: 12px;
-        background: #0f1620
+        background: #ffffff
     }
 
     .chart-line {
@@ -425,16 +401,16 @@
         top: 18px;
         height: 58%;
         background:
-            radial-gradient(circle at 30% 70%, #a7ff1e 3px, transparent 4px) 0 18px/48px 22px repeat,
-            linear-gradient(120deg, #2ee6a6, #a7ff1e 50%, #12d1ff);
+            radial-gradient(circle at 30% 70%, #23845b 3px, transparent 4px) 0 18px/48px 22px repeat,
+            linear-gradient(120deg, #218c78, #23845b 50%, #327f9e);
         -webkit-mask:
-            linear-gradient(#000 0 0) top/100% 2px no-repeat,
-            linear-gradient(#000 0 0) bottom/100% 2px no-repeat,
-            repeating-linear-gradient(transparent 0 18px, #000 18px 20px);
+            linear-gradient(#f0f8ef 0 0) top/100% 2px no-repeat,
+            linear-gradient(#f0f8ef 0 0) bottom/100% 2px no-repeat,
+            repeating-linear-gradient(transparent 0 18px, #f0f8ef 18px 20px);
         mask:
-            linear-gradient(#000 0 0) top/100% 2px no-repeat,
-            linear-gradient(#000 0 0) bottom/100% 2px no-repeat,
-            repeating-linear-gradient(transparent 0 18px, #000 18px 20px);
+            linear-gradient(#f0f8ef 0 0) top/100% 2px no-repeat,
+            linear-gradient(#f0f8ef 0 0) bottom/100% 2px no-repeat,
+            repeating-linear-gradient(transparent 0 18px, #f0f8ef 18px 20px);
         border-radius: 8px;
         opacity: .85;
         filter: drop-shadow(0 0 12px #bfff2d55)
@@ -446,8 +422,8 @@
         width: 12px;
         height: 12px;
         rotate: 45deg;
-        background: radial-gradient(#a7ff1e, #76ff00 45%, transparent 46%);
-        filter: drop-shadow(0 0 12px #a7ff1e88)
+        background: radial-gradient(#23845b, #76ff00 45%, transparent 46%);
+        filter: drop-shadow(0 0 12px #23845b88)
     }
 
     .star.s1 {
@@ -490,10 +466,10 @@
 
     /* ---------- About ---------- */
     .about {
-        background: radial-gradient(900px 380px at 20% 20%, #0f1d19 0%, transparent 60%),
-            radial-gradient(900px 380px at 90% 0%, #0f1626 0%, transparent 60%);
-        border-top: 1px solid #0e151d;
-        border-bottom: 1px solid #0e151d;
+        background: radial-gradient(900px 380px at 20% 20%, #ffffff 0%, transparent 60%),
+            radial-gradient(900px 380px at 90% 0%, #ffffff 0%, transparent 60%);
+        border-top: 1px solid #ffffff;
+        border-bottom: 1px solid #ffffff;
         display: none;
     }
 
@@ -505,8 +481,8 @@
     }
 
     .about-card {
-        border: 1px solid #1d2632;
-        background: linear-gradient(180deg, #101823 0%, #0b1118 100%);
+        border: 1px solid #e5f2e6;
+        background: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
         border-radius: 20px;
         padding: 24px;
         box-shadow: var(--shadow)
@@ -518,10 +494,10 @@
 
     /* Dummy image block */
     .about-illus {
-        border: 1px solid #243142;
+        border: 1px solid #e5f2e6;
         border-radius: 18px;
         padding: 16px;
-        background: #0f1620
+        background: #ffffff
     }
 
     .about-illus .screen {
@@ -561,7 +537,7 @@
     border-radius: 50%;
     display: grid;
     place-items: center;
-    background: radial-gradient(circle at 30% 30%, #14201a0a, #0f181200);
+    background: radial-gradient(circle at 30% 30%, #ffffff0a, #ffffff00);
     border: 1px solid #bdbdbd;
     box-shadow: 0 0 0 8px #6b6c6810;
 }
@@ -645,11 +621,11 @@
         width: 52px;
         height: 52px;
         border-radius: 14px;
-        background: conic-gradient(from 140deg, #2ee6a6, #a7ff1e, #12d1ff, #2ee6a6)
+        background: conic-gradient(from 140deg, #218c78, #23845b, #327f9e, #218c78)
     }
 
     .f-brand p {
-        color: #5f6b75
+        color: #586d63
     }
 
     .f-col h5 {
@@ -684,16 +660,16 @@
         border-radius: 8px;
         display: grid;
         place-items: center;
-        border: 1px solid #273342;
-        background: #0f1620;
-        color: #b7c5d1
+        border: 1px solid #e5f2e6;
+        background: #ffffff;
+        color: #203c30
     }
 
     .copy {
         border-top: 1px solid var(--border);
         margin-top: 24px;
         padding-top: 14px;
-        color: #5f6b75;
+        color: #586d63;
         font-size: 14px;
         display: flex;
         justify-content: space-between;
@@ -1218,7 +1194,7 @@
         width: 26px;
         height: 26px;
         background: var(--accent);
-        color: #ffffff;
+        color: #203c30;
         border-radius: 50%;
         display: grid;
         place-items: center;
@@ -1569,7 +1545,7 @@ padding-top: 20px;
             width: 23px;
             height: 23px;
             background: var(--accent);
-            color: #ffffff;
+            color: #203c30;
             border-radius: 50%;
 
             font-size: 15px;
@@ -1689,7 +1665,7 @@ padding-top: 20px;
 .team-role {
     font-size: 13px;
     text-transform: uppercase;
-    color: #777;
+    color: #586d63;
     letter-spacing: 1px;
 }
 
@@ -1763,8 +1739,8 @@ padding-top: 20px;
     align-items: center;
     justify-content: center;
     padding: 12px 26px;
-    background: #1d3c88;
-    border: 2px solid #1d3c88;
+    background: #08734f;
+    border: 2px solid #08734f;
     color: #fff;
     text-decoration: none;
     border-radius: 8px;
@@ -1773,16 +1749,16 @@ padding-top: 20px;
 }
 
 .pdf-btn:hover {
-    background: #293b8f;
+    background: #056344;
 }
 
 .pdf-btn-outline {
-    background: transparent;
-    color: #1d3c88;
+    background: #fff;
+    color: #066344;
 }
 
 .pdf-btn-outline:hover {
-    background: #1d3c88;
+    background: #08734f;
     color: #fff;
 }
 
@@ -1824,6 +1800,7 @@ padding-top: 20px;
     }
 }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
 </head>
 
 <body>
@@ -1879,7 +1856,13 @@ padding-top: 20px;
 
 
     <main id="home" tabindex="-1">
-    <section class="hero-banner">
+    <section class="hero-banner hero-banner--custom">
+        <div class="hero-stage">
+            <div class="hero-artwork">
+                <img src="{{ asset('images/banners/himalaya-catalog-v3.jpg') }}"
+                    alt="Catalog of Himalaya Trading electronics, home appliances, HimGlow personal care, and Pay Wellness Syrup"
+                    width="1672" height="941" fetchpriority="high" decoding="async">
+            </div>
         <div class="container hero-grid">
 
             <!-- LEFT CONTENT -->
@@ -1903,26 +1886,7 @@ padding-top: 20px;
                 </div>
             </div>
 
-            <!-- RIGHT IMAGE COLLAGE -->
-            <div class="hero-images">
-                <img class="img-main"
-                    {{-- src="/storage/fb.avif" --}}
-                    src="{{ asset('assets/images/fb.avif') }}"
-                    alt="Business team">
-
-                <img class="img-top"
-                    src="https://img.freepik.com/free-photo/business-people-working-team-office_23-2148817065.jpg"
-                    alt="Entrepreneur working">
-
-                <img class="img-bottom"
-                    src="https://img.freepik.com/free-photo/young-businesswoman-working-office_23-2148888852.jpg"
-                    alt="Professional training">
-
-                <div class="hero-badge">
-                    <span>Trusted Growth</span>
-                </div>
-            </div>
-
+        </div>
         </div>
 
         <!-- MARQUEE -->
@@ -2028,16 +1992,28 @@ padding-top: 20px;
     @endphp
     <section class="home-products" id="our-products">
         <div class="container">
-            <span class="hp-eyebrow">OUR PRODUCTS</span>
-            <h2 class="hp-title">Products by <span>Himalaya Trading</span></h2>
+            <div class="hp-heading">
+                <span class="hp-eyebrow"><span class="hp-spark" aria-hidden="true">✦</span> THE HIMALAYA COLLECTION</span>
+                <h2 class="hp-title">Everyday essentials.<br><span>Extraordinary possibilities.</span></h2>
+                <p class="hp-intro">Explore products by Himalaya Trading — from your daily care routine to your home.</p>
+                <span class="hp-hint"><span aria-hidden="true">↗</span> Find your favourite. Enquire directly on WhatsApp.</span>
+            </div>
             <div class="hp-grid">
                 @foreach ($homeProducts as $p)
                     <a class="hp-card" href="https://wa.me/919805032635?text={{ rawurlencode("Hi, I'm interested in " . $p['name']) }}" target="_blank" rel="noopener" aria-label="Enquire about {{ $p['name'] }} on WhatsApp (opens in a new tab)">
                         <div class="hp-img">
-                            <img src="{{ asset('images/products/' . $p['img']) }}" alt="{{ $p['name'] }}" loading="lazy">
+                            <span class="hp-number" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            <img src="{{ asset('images/products/' . $p['img']) }}" alt="{{ $p['name'] }}" loading="lazy" width="400" height="400">
+                            <span class="hp-image-arrow" aria-hidden="true">↗</span>
                         </div>
-                        <span class="hp-name">{{ $p['name'] }}</span>
-                        <span class="hp-wa"><span aria-hidden="true">💬</span> Enquire on WhatsApp</span>
+                        <div class="hp-details">
+                            <span class="hp-card-label">HIMALAYA TRADING</span>
+                            <h3 class="hp-name">{{ $p['name'] }}</h3>
+                            <span class="hp-wa">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-8 8 8.8 8.8 0 0 1-3.5-.7L4 20l1.2-4.5a8.8 8.8 0 0 1-.7-3.5 8 8 0 0 1 8-8 8 8 0 0 1 7.5 7.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8.5c.2 3 2 4.8 5 5l1-1.5-2-1-.8.8a5 5 0 0 1-1.5-1.5l.8-.8-1-2-1.5 1Z" fill="currentColor"/></svg>
+                                Enquire on WhatsApp <span class="hp-cta-arrow" aria-hidden="true">↗</span>
+                            </span>
+                        </div>
                     </a>
                 @endforeach
             </div>
@@ -2710,6 +2686,24 @@ padding-top: 20px;
     </script>
 
 
+
+
+    <script>
+    (() => {
+        const section = document.querySelector('.home-products');
+        if (!section || !('IntersectionObserver' in window) ||
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('hp-entered');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        section.querySelectorAll('.hp-heading, .hp-card').forEach(element => observer.observe(element));
+    })();
+    </script>
 
 </body>
 

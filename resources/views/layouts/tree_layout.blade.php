@@ -8,13 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0a0e14;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg-dark: #f0f8ef;
+            --glass: rgba(40, 100, 65, 0.03);
+            --glass-border: rgba(40, 100, 65, 0.1);
             --accent-blue: #3d5afe;
-            --accent-cyan: #00e5ff;
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
+            --accent-cyan: #327f9e;
+            --text-main: #203c30;
+            --text-muted: #52695f;
         }
 
         body {
@@ -42,6 +42,7 @@
 
         @yield('styles')
     </style>
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
 </head>
 <body>
     <div class="app-container">

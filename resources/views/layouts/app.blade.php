@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,7 +7,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <meta name="theme-color" content="#0b0e12">
+    <meta name="theme-color" content="#f0f8ef">
 
     <title>@hasSection('title')@yield('title') - @endif{{ config('app.name', 'HGNL Pay') }}</title>
 
@@ -25,23 +25,23 @@
         crossorigin="anonymous"></script> 
   <style>
     :root{
-      --bg:#0b0e12;
-      --card:#0f141b;
-      --muted:#8b9aa5;
-      --text:#e9eef3;
-      --accent:#3f7871;
-      --accent-2:#3f7871;
-      --accent-text:#6cc3b7;
-      --focus:#8fd8cd;
-      --border:#1b222b;
+      --bg:#f0f8ef;
+      --card:#ffffff;
+      --muted:#52695f;
+      --text:#203c30;
+      --accent:#287b62;
+      --accent-2:#287b62;
+      --accent-text:#08734f;
+      --focus:#218e65;
+      --border:#cddfd3;
       --radius:14px;
-      --shadow:0 10px 30px rgba(0,0,0,.45);
+      --shadow:0 10px 30px rgba(13,77,51,.12);
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family:"Inter",-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      background:radial-gradient(900px 600px at 30% -10%,#0f1a12 0%,transparent 70%),var(--bg);
+      background:radial-gradient(900px 600px at 30% -10%,#ffffff 0%,transparent 70%),var(--bg);
       color:var(--text);
       line-height:1.5;
       -webkit-font-smoothing:antialiased;
@@ -61,7 +61,7 @@
 .custom-row label {
     text-align: start !important;
     font-size: 16px !important;
-    color: #fff !important;
+    color: #203c30 !important;
 }
 .input-custom select,
 .input-custom input {
@@ -75,8 +75,8 @@
 }
    .common-section  .container {
     width: 63%;
-    background: linear-gradient(180deg, #0f1620, #0b1117);
-    border: 1px solid #1f2832;
+    background: #ffffff;
+    border: 1px solid #e5f2e6;
     border-radius: 20px;
     padding: 35px;
 }
@@ -86,7 +86,7 @@
     justify-content: center;
     min-height: 100vh;
     padding: 24px 16px;
-    background: radial-gradient(900px 600px at 30% -10%, #0f1a12 0%, transparent 70%), var(--bg);
+    background: radial-gradient(900px 600px at 30% -10%, #ffffff 0%, transparent 70%), var(--bg);
 }
 .reg-section{
   height: 100%  !important;
@@ -94,8 +94,8 @@
   padding-bottom:50px;
 }
     .login-container{
-      background:linear-gradient(180deg,#0f1620,#0b1117);
-      border:1px solid #1f2832;
+      background:#ffffff;
+      border:1px solid #e5f2e6;
       border-radius:20px;
       padding:40px 35px;
       width:100%;
@@ -109,14 +109,14 @@
       position:absolute;
       inset:-40px;
       background:radial-gradient(circle at 50% 0%,#bfff2d22,transparent 60%),
-                 radial-gradient(circle at 0% 80%,#12d1ff1b,transparent 60%);
+                 radial-gradient(circle at 0% 80%,#327f9e1b,transparent 60%);
       filter:blur(8px);
       z-index:-1;
     }
     .logo{
       width:56px;height:56px;margin:0 auto 14px;border-radius:50%;
    
-      display:grid;place-items:center;font-weight:900;color:#000;box-shadow:0 0 0 3px #0f141b;
+      display:grid;place-items:center;font-weight:900;color:#000;box-shadow:0 0 0 3px #cddfd3;
     }
     h1{
       font-size:24px;
@@ -124,7 +124,7 @@
       text-align:center;
     }
     p.subtitle{
-      color:#b2bec7;
+      color:#203c30;
       margin-bottom:30px;
       font-size:14px;
     }
@@ -137,16 +137,16 @@
     display: block;
     font-weight: 600;
     margin-bottom: 6px;
-    color: #b9c6cf;
+    color: #203c30;
     font-size: 16px;
 }
     input{
       width:100%;
       padding:12px 14px;
       border-radius:10px;
-      border:1px solid #24303f;
-      background:#0f1620;
-      color:#fff;
+      border:1px solid #cddfd3;
+      background:#ffffff;
+      color:#203c30;
       font-size:15px;
       transition:border .25s;
     }
@@ -154,19 +154,19 @@
     input:focus{
       outline:none;
       border-color:var(--accent-text);
-      box-shadow:0 0 0 3px rgba(108,195,183,.25);
+      box-shadow:0 0 0 3px rgba(8,115,79,.15);
     }
     .btn {
     width: 100%;
     padding: 12px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(90deg,var(--accent),#3f7871);
+    background: linear-gradient(90deg,var(--accent),#287b62);
     color: #ffffffff;
     font-weight: 700;
     font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 0 0 6px rgba(63,120,113,.15);
+    box-shadow: 0 0 0 6px rgba(35,132,91,.08);
     transition: all .25s;
     font-size: 18px;
     padding: 12px;
@@ -174,7 +174,7 @@
     .btn:hover{
       transform:translateY(-1px);
       filter:brightness(1.1);
-      box-shadow:0 0 0 8px rgba(63,120,113,.25);
+      box-shadow:0 0 0 8px rgba(35,132,91,.15);
     }
     .extra-links{
       margin-top:20px;
@@ -195,6 +195,8 @@
       }
     }
   </style>
+
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
 
 </head>
 <body>

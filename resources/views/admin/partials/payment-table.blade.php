@@ -35,7 +35,7 @@
             <button class="btn-action btn-view"
               onclick="viewAttachment('{{ asset($row->attachment) }}')">View</button>
           @else
-            <span style="color:#777;">No File</span>
+            <span style="color:#586d63;">No File</span>
           @endif
         </td>
 
@@ -91,7 +91,7 @@
 
             <button type="button"
                     class="btn-action"
-                    style="background:#6c757d; color:#fff;"
+                    style="background:#6c757d; color:#203c30;"
                     onclick="hidePaymentRejectBox({{ $row->id }})">
                 Cancel
             </button>

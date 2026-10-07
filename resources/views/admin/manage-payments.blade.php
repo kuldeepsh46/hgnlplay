@@ -16,7 +16,7 @@ body {
 
 .card {
     background: var(--card);
-    border: 1px solid #1f2832;
+    border: 1px solid #e5f2e6;
     border-radius: var(--radius);
     padding: 20px;
     margin-bottom: 24px;
@@ -53,19 +53,19 @@ table {
 
 th,
 td {
-    border: 1px solid #1e2b36;
+    border: 1px solid #e5f2e6;
     padding: 10px;
     text-align: center;
     font-size: 14px;
 }
 
 th {
-    background: #161f29;
-    color: #a9b9c7;
+    background: #e5f2e6;
+    color: #203c30;
 }
 
 td {
-    color: #d4dee8;
+    color: #203c30;
 }
 
 .btn-action {
@@ -96,9 +96,9 @@ td {
 input[type=date] {
     padding: 8px;
     border-radius: 6px;
-    background: #141c22;
-    border: 1px solid #1f2832;
-    color: #fff;
+    background: #ffffff;
+    border: 1px solid #e5f2e6;
+    color: #203c30;
 }
 
 /* ===== Attachment View Modal ===== */
@@ -146,7 +146,7 @@ input[type=date] {
 }
 
 .btn-view {
-    background: #2ee6a6;
+    background: #218c78;
     color: #000;
 }
 
@@ -211,9 +211,9 @@ input[type=date] {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #2a3442;
-    background: #0f1620;
-    color: #fff;
+    border: 1px solid #e5f2e6;
+    background: #ffffff;
+    color: #203c30;
 }
 
 td form button {
@@ -243,7 +243,7 @@ td form button {
         <div><label>From:</label><input type="date" name="from" value="{{ $r->from }}"></div>
         <div><label>To:</label><input type="date" name="to" value="{{ $r->to }}"></div>
         <button class="tab-btn active" type="submit">Filter</button>
-        <a href="{{ route('admin.payments') }}" class="tab-btn" style="background:#333;color:#fff;">Reset</a>
+        <a href="{{ route('admin.payments') }}" class="tab-btn" style="background:#e5f2e6;color:#203c30;">Reset</a>
     </form>
 
     <div class="tabs">
@@ -284,7 +284,7 @@ td form button {
             <button type="submit" class="btn btn-copy" style="width:100%;">Update Password</button>
         </form>
         @if (session('success'))
-        <p style="color:#a7ff1e; text-align:center;">{{ session('success') }}</p>
+        <p style="color:#23845b; text-align:center;">{{ session('success') }}</p>
         @endif
         @if (session('error'))
         <p style="color:#ff5555; text-align:center;">{{ session('error') }}</p>

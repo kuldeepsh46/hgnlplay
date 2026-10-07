@@ -8,7 +8,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
                 <h2 style="margin: 0;">Manage Packages</h2>
                 <a href="{{ route('packages.create') }}"
-                    style="background-color: #a7ff1e; 
+                    style="background-color: #23845b;
           color: #000; 
           font-weight: 800; 
           padding: 10px 20px; 
@@ -26,7 +26,7 @@
             {{-- Success Message --}}
             @if (session('success'))
                 <div
-                    style="background: rgba(167, 255, 30, 0.1); border: 1px solid #a7ff1e; color: #a7ff1e; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                    style="background: rgba(167, 255, 30, 0.1); border: 1px solid #23845b; color: #23845b; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
                     ✅ {{ session('success') }}
                 </div>
             @endif
@@ -35,7 +35,7 @@
                 <table style="width: 100%; border-collapse: collapse; text-align: left;">
                     <thead>
                         <tr
-                            style="border-bottom: 2px solid #1b222b; color: #a0acb3; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            style="border-bottom: 2px solid #e5f2e6; color: #586d63; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
                             <th style="padding: 15px;">Package Name</th>
                             <th style="padding: 15px;">Amount</th>
                             <th style="padding: 15px;">PV</th>
@@ -46,18 +46,18 @@
                             <th style="padding: 15px; text-align: right;">Actions</th>
                         </tr>
                     </thead>
-                    <tbody style="color: #fff;">
+                    <tbody style="color: #203c30;">
                         @foreach ($packages as $package)
-                            <tr style="border-bottom: 1px solid #1b222b; transition: 0.3s;"
+                            <tr style="border-bottom: 1px solid #e5f2e6; transition: 0.3s;"
                                 onmouseover="this.style.backgroundColor='#161d26'"
                                 onmouseout="this.style.backgroundColor='transparent'">
                                 <td style="padding: 15px; font-weight: bold;">{{ $package->name }}</td>
-                                <td style="padding: 15px; color: #a7ff1e;">₹ {{ number_format($package->amount, 2) }}</td>
+                                <td style="padding: 15px; color: #23845b;">₹ {{ number_format($package->amount, 2) }}</td>
                                 <td style="padding: 15px;">{{ $package->pv }}</td>
                                 <td style="padding: 15px;">{{ \App\Models\Package::formatBonus($package->direct_bonus, $package->direct_bonus_type) }}</td>
                                 <td style="padding: 15px;">{{ \App\Models\Package::formatBonus($package->pair_bonus, $package->pair_bonus_type) }}</td>
                                 <td style="padding: 15px;">{{ $package->charges_registration_fee ? '₹100' : 'No' }}</td>
-                                <td style="padding: 15px; color: #a0acb3; font-size: 13px;">
+                                <td style="padding: 15px; color: #586d63; font-size: 13px;">
                                     @if (\App\Models\Package::isStarter($package))
                                         <div>₹{{ number_format($package->actual_amount) }} first purchase: {{ $package->pairingSummary('first') ?: '—' }}</div>
                                         <div style="margin-top: 4px;">₹{{ number_format($package->discounted_amount ?: 1000) }} repurchase: {{ $package->pairingSummary('repeat') ?: '—' }}</div>
@@ -68,14 +68,14 @@
                                 <td style="padding: 15px; text-align: right;">
                                     <div style="display: flex; gap: 15px; justify-content: flex-end;">
                                         <a href="{{ route('packages.edit', $package->id) }}"
-                                            style="color: #a0acb3; text-decoration: none; font-size: 14px;">Edit</a>
+                                            style="color: #586d63; text-decoration: none; font-size: 14px;">Edit</a>
 
                                         <form action="{{ route('packages.destroy', $package->id) }}" method="POST"
                                             onsubmit="return confirm('Delete this package?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                style="background: none; border: none; color: #e84e6d; cursor: pointer; font-size: 14px; padding: 0;">Delete</button>
+                                                style="background: none; border: none; color: #b64f70; cursor: pointer; font-size: 14px; padding: 0;">Delete</button>
                                         </form>
                                     </div>
                                 </td>

@@ -1,11 +1,11 @@
 {{-- Self-styled pagination (the site has no Tailwind/Bootstrap, so Laravel's default view renders huge arrows) --}}
 @if ($paginator->hasPages())
 <style>
-.pgn { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px; font-size: 13px; color: #a9b9c7; }
+.pgn { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px; font-size: 13px; color: #203c30; }
 .pgn ul { display: flex; flex-wrap: wrap; gap: 4px; list-style: none; margin: 0; padding: 0; }
-.pgn li a, .pgn li span { display: inline-block; min-width: 34px; padding: 7px 10px; border-radius: 6px; text-align: center; background: #141c22; border: 1px solid #1f2832; color: #d4dee8; text-decoration: none; line-height: 1; }
-.pgn li a:hover { border-color: var(--accent, #3f7871); color: #fff; }
-.pgn li.on span { background: var(--accent, #3f7871); border-color: var(--accent, #3f7871); color: #fff; font-weight: 600; }
+.pgn li a, .pgn li span { display: inline-block; min-width: 34px; padding: 7px 10px; border-radius: 6px; text-align: center; background: #ffffff; border: 1px solid #e5f2e6; color: #203c30; text-decoration: none; line-height: 1; }
+.pgn li a:hover { border-color: var(--accent, #287b62); color: #203c30; }
+.pgn li.on span { background: var(--accent, #287b62); border-color: var(--accent, #287b62); color: #203c30; font-weight: 600; }
 .pgn li.off span { opacity: .4; }
 </style>
 <nav class="pgn" aria-label="Pagination">
