@@ -447,7 +447,7 @@
                     <div class="grid">
                         <div>
                             <label id="amount-label">Request Amount (INR)</label>
-                            <input type="number" name="amount" required min="1" step="0.01"
+                            <input type="number" name="amount" required min="1" step="0.01" value="{{ old('amount', request('amount')) }}"
                                 placeholder="Enter amount">
                         </div>
                         <div>

@@ -370,6 +370,63 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     transition:background .2s;
 }
 .btn-view:hover{background:var(--accent-strong)}
+
+/* ===== PAYMENT DUE ALERT ===== */
+.pay-alert{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:16px 20px;
+    padding:16px 20px;
+    margin-bottom:20px;
+    border-radius:14px;
+    border:1px solid #f0c77a;
+    border-left:6px solid #d99211;
+    background:#fff8e8;
+    color:#3d2a05;
+    box-shadow:0 8px 24px rgba(13,77,51,.06);
+}
+.pay-alert--overdue{border-color:#efb9c5;border-left-color:#b9304b;background:#fff4f6;color:#4d1020}
+.pay-alert--upcoming{border-color:#b3c8ec;border-left-color:#3759a3;background:#f3f7ff;color:#1b2c52}
+.pay-alert__icon{font-size:28px;line-height:1}
+.pay-alert__body{flex:1 1 320px;min-width:0}
+.pay-alert__title{margin:0 0 8px;font-size:17px;color:inherit}
+.pay-alert__facts{display:flex;flex-wrap:wrap;gap:6px 24px;margin:0}
+.pay-alert__facts div{display:flex;flex-direction:column}
+.pay-alert__facts dt{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.75}
+.pay-alert__facts dd{margin:0;font-weight:700;font-size:15px}
+.pay-alert__note{margin:8px 0 0;font-size:13px;opacity:.85}
+.pay-alert__actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.pay-alert__btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:42px;padding:9px 16px;border-radius:10px;
+    border:2px solid currentColor;background:#fff;color:inherit;
+    font-weight:700;font-size:14px;text-decoration:none;white-space:nowrap;
+}
+.pay-alert__btn--primary{background:#08734f;border-color:#08734f;color:#fff}
+.pay-alert--overdue .pay-alert__btn--primary{background:#b9304b;border-color:#b9304b}
+.pay-alert__btn:hover{filter:brightness(.95)}
+.pay-alert__close{
+    width:36px;height:36px;border-radius:50%;border:0;
+    background:transparent;color:inherit;font-size:16px;cursor:pointer;
+}
+.pay-alert__close:hover{background:rgba(0,0,0,.06)}
+@media (max-width:768px){
+    .pay-alert__actions{width:100%}
+    .pay-alert__btn{flex:1}
+}
+
+.nav-badge{
+    margin-left:auto;
+    min-width:22px;
+    padding:2px 7px;
+    border-radius:99px;
+    background:#b9304b;
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    text-align:center;
+}
 </style>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -389,6 +446,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
 {{-- MAIN CONTENT --}}
 <main class="main" id="main-content" tabindex="-1">
+    @unless (request()->routeIs('payments.due'))
+        @include('partials.payment-due-alert')
+    @endunless
     @yield('main')
 </main>
 

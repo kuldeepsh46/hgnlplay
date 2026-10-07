@@ -79,6 +79,15 @@
                     </a>
                 </li>
 
+                <li class="{{ Request::routeIs('payments.due') ? 'active' : '' }}">
+                    <a href="{{ route('payments.due') }}" {{ $current(Request::routeIs('payments.due')) }}>
+                        <span class="nav-icon" aria-hidden="true">🧾</span> <span>Payment Dues</span>
+                        @if (!empty($paymentDue['due_count']))
+                            <span class="nav-badge">{{ $paymentDue['due_count'] }}<span class="sr-only"> pending</span></span>
+                        @endif
+                    </a>
+                </li>
+
                 <li class="{{ Request::routeIs('withdraw.index') ? 'active' : '' }}">
                     <a href="{{ route('withdraw.index') }}" {{ $current(Request::routeIs('withdraw.index')) }}>
                         <span class="nav-icon" aria-hidden="true">💸</span> <span>Withdraw</span>
