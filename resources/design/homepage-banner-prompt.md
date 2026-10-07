@@ -1,0 +1,12 @@
+# Homepage banner generation brief
+
+Generated using the built-in image generation tool.
+
+Use case: ads-marketing
+Asset type: photorealistic premium website homepage hero banner, wide 16:9 landscape.
+Primary request: Create a beautiful bespoke banner for Himalaya Trading, an Indian business focused on community entrepreneurship, team training, network marketing, and HimGlow herbal personal-care products. The website uses bright mint green, rich emerald, restrained lavender and warm amber.
+Scene: A sophisticated sunlit terrace and modern light sandstone workspace overlooking lush Himalayan foothills, forested ridges and distant softly snow-capped mountains. The image blends credible human collaboration, natural botanical personal care and opportunity in one coherent real photographic scene.
+Subject: On the RIGHT HALF, three Indian young adult professionals, two women and a man, in stylish smart casual cream, sage and emerald clothes, collaboratively discussing a laptop and notebook at a curved light stone table. Natural engaging expressions and candid gestures, realistic anatomy. A small tasteful foreground display on the lower far right includes two dark amber botanical-care bottles with rich emerald labels and black pumps/caps, a small cream soap and fresh amla leaves, echoing the site's green herbal product packaging. Packaging is understated and no lettering is readable.
+Composition: Ultra-wide cinematic environmental photograph. LEFT 45% is intentionally quiet spacious pale mint/ivory wall and softly blurred landscape, with minimal detail, suitable for dark live webpage headline overlay. People and product details stay within the right 50%, away from edges. Mountain ridge extends across the upper-middle background. Enough safe margin above and below all important subjects for responsive cropping. Clear elegant visual depth, unforced luxury editorial composition, photo-real lens and materials, not a collage.
+Lighting: Beautiful morning sunlight, airy but rich, emerald greenery, soft golden rim light, refined contrast and high detail.
+Constraints: NO text, lettering, slogans, watermark, UI, charts, floating icons, fake dashboard, financial guarantees, coins, piles of money or exaggerated success symbols. Do not reproduce the actual logo. Keep left overlay area uncluttered and very pale, not flat blank white. No artificial blue tech aesthetic. Finished publication-quality marketing photograph.

@@ -31,27 +31,6 @@
         box-sizing: border-box
     }
 
-    /* ===== Our Products (homepage) ===== */
-    .home-products { padding: 70px 0; background: #fff; text-align: center; }
-    .home-products .hp-eyebrow { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #2f6b1e; margin-bottom: 8px; }
-    .home-products .hp-title { margin: 0 0 34px; font-size: 32px; color: var(--text); }
-    .home-products .hp-title span { color: #2f6b1e; }
-    .home-products .hp-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; }
-    .home-products .hp-card { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
-    .home-products .hp-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; background: #f3f5f2; border: 1px solid var(--border); box-shadow: 0 6px 18px rgba(0, 0, 0, .08); transition: transform .2s, box-shadow .2s; }
-    .home-products .hp-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
-    .home-products .hp-card:hover .hp-img { transform: translateY(-4px); box-shadow: 0 12px 26px rgba(0, 0, 0, .14); }
-    .home-products .hp-wa { margin-top: -4px; font-size: 12px; font-weight: 600; color: #1f8f4e; }
-    .home-products .hp-card:hover .hp-wa { text-decoration: underline; }
-    .home-products .hp-name { background: #345C01; color: #203c30; padding: 6px 12px; border-radius: 5px; font-size: 13px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
-    @media (max-width: 560px) {
-        .home-products { padding: 48px 0; }
-        .home-products .hp-title { font-size: 24px; }
-        .home-products .hp-grid { gap: 14px; }
-        .home-products .hp-card { width: calc(50% - 7px); }
-        .home-products .hp-name { font-size: 11px; padding: 5px 8px; }
-    }
-
     @media (max-width: 520px) {
         .img-main img {
             height: 310px !important;
@@ -1704,7 +1683,13 @@ padding-top: 20px;
 
 
 
-    <section class="hero-banner">
+    <section class="hero-banner hero-banner--custom">
+        <div class="hero-stage">
+            <div class="hero-artwork">
+                <img src="{{ asset('images/banners/himalaya-catalog-v3.jpg') }}"
+                    alt="Catalog of Himalaya Trading electronics, home appliances, HimGlow personal care, and Pay Wellness Syrup"
+                    width="1672" height="941" fetchpriority="high" decoding="async">
+            </div>
         <div class="container hero-grid">
 
             <!-- LEFT CONTENT -->
@@ -1728,26 +1713,7 @@ padding-top: 20px;
                 </div>
             </div>
 
-            <!-- RIGHT IMAGE COLLAGE -->
-            <div class="hero-images">
-                <img class="img-main"
-                    {{-- src="/storage/fb.avif" --}}
-                    src="{{ asset('assets/images/fb.avif') }}"
-                    alt="Business team">
-
-                <img class="img-top"
-                    src="https://img.freepik.com/free-photo/business-people-working-team-office_23-2148817065.jpg"
-                    alt="Entrepreneur working">
-
-                <img class="img-bottom"
-                    src="https://img.freepik.com/free-photo/young-businesswoman-working-office_23-2148888852.jpg"
-                    alt="Professional training">
-
-                <div class="hero-badge">
-                    <span>Trusted Growth</span>
-                </div>
-            </div>
-
+        </div>
         </div>
 
         <!-- MARQUEE -->
@@ -1853,16 +1819,28 @@ padding-top: 20px;
     @endphp
     <section class="home-products" id="our-products">
         <div class="container">
-            <span class="hp-eyebrow">OUR PRODUCTS</span>
-            <h2 class="hp-title">Products by <span>Himalaya Trading</span></h2>
+            <div class="hp-heading">
+                <span class="hp-eyebrow"><span class="hp-spark" aria-hidden="true">✦</span> THE HIMALAYA COLLECTION</span>
+                <h2 class="hp-title">Everyday essentials.<br><span>Extraordinary possibilities.</span></h2>
+                <p class="hp-intro">Explore products by Himalaya Trading — from your daily care routine to your home.</p>
+                <span class="hp-hint"><span aria-hidden="true">↗</span> Find your favourite. Enquire directly on WhatsApp.</span>
+            </div>
             <div class="hp-grid">
                 @foreach ($homeProducts as $p)
                     <a class="hp-card" href="https://wa.me/919805032635?text={{ rawurlencode("Hi, I'm interested in " . $p['name']) }}" target="_blank" rel="noopener" title="Enquire on WhatsApp">
                         <div class="hp-img">
-                            <img src="{{ asset('images/products/' . $p['img']) }}" alt="{{ $p['name'] }}" loading="lazy">
+                            <span class="hp-number" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            <img src="{{ asset('images/products/' . $p['img']) }}" alt="{{ $p['name'] }}" loading="lazy" width="400" height="400">
+                            <span class="hp-image-arrow" aria-hidden="true">↗</span>
                         </div>
-                        <span class="hp-name">{{ $p['name'] }}</span>
-                        <span class="hp-wa">💬 Enquire on WhatsApp</span>
+                        <div class="hp-details">
+                            <span class="hp-card-label">HIMALAYA TRADING</span>
+                            <h3 class="hp-name">{{ $p['name'] }}</h3>
+                            <span class="hp-wa">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-8 8 8.8 8.8 0 0 1-3.5-.7L4 20l1.2-4.5a8.8 8.8 0 0 1-.7-3.5 8 8 0 0 1 8-8 8 8 0 0 1 7.5 7.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8.5c.2 3 2 4.8 5 5l1-1.5-2-1-.8.8a5 5 0 0 1-1.5-1.5l.8-.8-1-2-1.5 1Z" fill="currentColor"/></svg>
+                                Enquire on WhatsApp <span class="hp-cta-arrow" aria-hidden="true">↗</span>
+                            </span>
+                        </div>
                     </a>
                 @endforeach
             </div>
@@ -2491,6 +2469,24 @@ padding-top: 20px;
     </script>
 
 
+
+
+    <script>
+    (() => {
+        const section = document.querySelector('.home-products');
+        if (!section || !('IntersectionObserver' in window) ||
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('hp-entered');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        section.querySelectorAll('.hp-heading, .hp-card').forEach(element => observer.observe(element));
+    })();
+    </script>
 
 </body>
 
