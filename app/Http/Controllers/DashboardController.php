@@ -13,6 +13,11 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+
+        // Admins use the new admin dashboard; customers (including admins who are also customers) stay here
+        if ($user->hasRole('admin') && !$user->hasRole('customer')) {
+            return redirect()->route('admin.dashboard.new');
+        }
         // =============================
         // 🔹 Global Admin Dashboard Data
         // =============================

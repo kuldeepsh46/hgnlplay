@@ -173,7 +173,7 @@ Route::post('/reverse-all-user', [ManageUsersRolesController::class, 'reverseAll
 // The Panic Button
 Route::post('/panic-nuke', [ManageUsersRolesController::class, 'systemPanic'])->name('admin.panic');
 
-// New admin dashboard (preview — the current one at /dashboard is unchanged)
+// Admin dashboard — /dashboard redirects admins here
 Route::get('/admin/dashboard-new', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])
     ->middleware(['auth'])
     ->name('admin.dashboard.new');

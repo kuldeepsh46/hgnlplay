@@ -1735,39 +1735,93 @@ padding-top: 20px;
         padding-top:0px;
     }
 }
-.desktop-pdf {
-    display: block;
+.pdf-container {
+    margin-top: 40px;
 }
 
-.mobile-pdf {
-    display: none;
-    text-align: center;
-    padding-top:20px; 
+.pdf-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.pdf-head h3 {
+    margin: 0;
+}
+
+.pdf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .pdf-btn {
-    display: inline-block;
-    padding: 14px 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 26px;
     background: #1d3c88;
+    border: 2px solid #1d3c88;
     color: #fff;
     text-decoration: none;
     border-radius: 8px;
     font-weight: 600;
+    transition: background .2s, color .2s;
 }
 
-/* Mobile */
+.pdf-btn:hover {
+    background: #293b8f;
+}
+
+.pdf-btn-outline {
+    background: transparent;
+    color: #1d3c88;
+}
+
+.pdf-btn-outline:hover {
+    background: #1d3c88;
+    color: #fff;
+}
+
+.desktop-pdf iframe {
+    display: block;
+    width: 100%;
+    height: 820px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #f3f4f6;
+    box-shadow: var(--shadow);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Phones can't show PDFs inline reliably, so they get the buttons only */
 @media (max-width: 768px) {
     .desktop-pdf {
         display: none;
     }
 
-    .mobile-pdf {
-        display: block;
+    .pdf-actions,
+    .pdf-btn {
+        width: 100%;
     }
-}
 
-.pdf-container {
-    padding-top:20px;
+    .pdf-btn {
+        flex: 1;
+    }
 }
     </style>
 </head>
@@ -2366,25 +2420,28 @@ padding-top: 20px;
                     <p>Scale up and become leader.</p>
                 </div>
             </div>
-<div class="pdf-container  container"  id="plan">
+            <!-- Business plan PDF: buttons on every screen, inline viewer on desktop -->
+            <div class="pdf-container" id="plan">
+                <div class="pdf-head">
+                    <div>
+                        <div class="title-eyebrow">Business Plan</div>
+                        <h3>Our Business Plan</h3>
+                    </div>
+                    <div class="pdf-actions">
+                        <a href="{{ asset('assets/HGNLPAY.pdf') }}" target="_blank" rel="noopener" class="pdf-btn">
+                            Open PDF <span class="sr-only">(opens in a new tab)</span>
+                        </a>
+                        <a href="{{ asset('assets/HGNLPAY.pdf') }}" download class="pdf-btn pdf-btn-outline">
+                            Download
+                        </a>
+                    </div>
+                </div>
 
-    <!-- Desktop View -->
-    <div class="desktop-pdf">
-    {{-- <iframe 
-        src="{{ asset('assets/HGNLPAY.pdf') }}"
-        width="100%"
-        height="800"
-        style="border:none;border-radius:10px; background-color:#fff;">
-    </iframe> --}}
-</div>
-
-<div class="mobile-pdf">
-    <a href="{{ asset('assets/HGNLPAY.pdf') }}" target="_blank" class="pdf-btn">
-        Open PDF
-    </a>
-</div>
-
-</div>
+                <div class="desktop-pdf">
+                    <iframe src="{{ asset('assets/HGNLPAY.pdf') }}#view=FitH" title="Himalaya Trading business plan (PDF)"
+                        loading="lazy"></iframe>
+                </div>
+            </div>
             <!-- CTA band -->
             <div class="cta-band reveal" style="margin-top:34px">
                 <div class="inner">

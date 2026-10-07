@@ -3,11 +3,14 @@
     $teamOpen = request()->routeIs('tree', 'team.list', 'team.direct', 'team.total', 'team.level');
     $settingsOpen = request()->is('admin/settings/qr*');
     $current = fn (bool $active) => $active ? 'aria-current=page' : '';
+    $homeUrl = Auth::user()->hasRole('admin') && !Auth::user()->hasRole('customer')
+        ? route('admin.dashboard.new')
+        : url('/dashboard');
 @endphp
 
 <!-- Mobile top bar -->
 <div class="mobile-header">
-    <a class="logo" href="{{ url('/dashboard') }}">
+    <a class="logo" href="{{ $homeUrl }}">
         <img src="{{ asset('assets/images/logo.jpeg') }}" alt="Himalaya Pay – dashboard">
     </a>
     <button type="button" class="toggle-btn" id="toggleBtn" aria-controls="sidebar" aria-expanded="false"
@@ -106,7 +109,7 @@
             @if (Auth::user()->hasRole('admin'))
                 @php
                     $adminLinks = [
-                        ['url' => url('/dashboard'), 'active' => Request::is('dashboard'), 'icon' => '🧭', 'label' => 'Admin Console'],
+                        ['url' => route('admin.dashboard.new'), 'active' => Request::routeIs('admin.dashboard.new'), 'icon' => '🧭', 'label' => 'Admin Console'],
                         ['url' => route('admin.users'), 'active' => Request::routeIs('admin.users'), 'icon' => '👥', 'label' => 'Manage Users'],
                         ['url' => route('packages.index'), 'active' => Request::routeIs('packages.*'), 'icon' => '📦', 'label' => 'Manage Packages'],
                         ['url' => route('admin.payments'), 'active' => Request::routeIs('admin.payments'), 'icon' => '💳', 'label' => 'Manage Payments'],
