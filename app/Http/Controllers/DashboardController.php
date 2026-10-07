@@ -18,6 +18,11 @@ class DashboardController extends Controller
         if ($user->hasRole('admin') && !$user->hasRole('customer')) {
             return redirect()->route('admin.dashboard.new');
         }
+
+        // Members get their own dashboard (and skip the site-wide stats below)
+        if ($user->hasRole('customer')) {
+            return $this->memberDashboard($user);
+        }
         // =============================
         // 🔹 Global Admin Dashboard Data
         // =============================
@@ -228,123 +233,6 @@ $allTimePackageTotals = [
     'qty'    => $allTimePackageStats->sum('qty'),
     'amount' => $allTimePackageStats->sum('amount'),
 ];
-        if ($user->hasRole('customer')) {
-            // 1️⃣ Payouts
-            // dd($user->id);
-            $progress = \App\Models\UserMatrixProgress::where('user_id', $user->id)->first();
-            // dd($progress);
-            $payoutReceived = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'completed')->count();
-            $payoutPending = DB::table('withdraw_requests')->where('user_id', $user->id)->where('status', 'pending')->count();
-
-            // 2️⃣ Incomes
-            // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Direct 10% Commission%')->sum('amount');
-            // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', '%Commission%')->sum('amount');
-            // $pairIncome = DB::table('transactions')->where('user_id', $user->id)->where('remarks', 'like', 'Pair Completion Bonus%')->sum('amount');
-            // $directIncome = DB::table('transactions')->where('user_id', $user->id)->where('bonus_type', BonusType::DirectIncome->value)->sum('amount');
-
-            // $pairIncome = DB::table('transactions')
-            //     ->where('user_id', $user->id)
-            //     ->whereIn('bonus_type', [
-            //         BonusType::PairBonusNormal->value,
-            //         // BonusType::PairBonus2000->value,
-            //         BonusType::PairBonus->value,
-            //     ])
-            //     ->sum('amount');
-
-            $directIncome = DB::table('transactions')
-    ->where('user_id', $user->id)
-    ->where('bonus_type', BonusType::DirectIncome->value)
-    ->sum('amount');
-
-$pairIncome = DB::table('transactions')
-    ->where('user_id', $user->id)
-    ->whereIn('bonus_type', [
-        BonusType::PairBonusNormal->value,
-        BonusType::PairBonusStarter->value,
-        // BonusType::PairBonus2000->value,
-        BonusType::PairBonus->value,
-    ])
-    ->sum('amount');
-
-$sponsorBinaryIncome = DB::table('transactions')
-    ->where('user_id', $user->id)
-    ->where('bonus_type', BonusType::SponsorBinaryBonus->value)
-    ->sum('amount');
-
-$rankRewardIncome = DB::table('transactions')
-    ->where('user_id', $user->id)
-    ->where('bonus_type', BonusType::RankReward->value)
-    ->sum('amount');
-
-$rankProgress = \App\Services\RankRewardService::progressFor($user->id);
-$rankLadder = \App\Services\RankRewardService::ladder();
-
-            // 3️⃣ Wallet & Earnings
-            $walletBalance = DB::table('wallets')->where('user_id', $user->id)->value('balance') ?? 0;
-            $repurchaseBalance = \App\Services\WalletService::repurchaseBalance($user->id);
-            $totalEarning = $directIncome + $pairIncome + $sponsorBinaryIncome + $rankRewardIncome;
-
-            // 4️⃣ Total Downline (Global)
-            // $totalDownline = DB::table('users')->where('sponsor_id', $user->id)->orWhere('placement_id', $user->id)->count();
-            $allDownliners = [];
-
-            // 1. MANUALLY FIND THE TWO GATEKEEPERS
-            $leftBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first();
-
-            $rightBranchRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first();
-
-            // 2. FORCE THE LEFT SIDE
-            if ($leftRoot = $leftBranchRoot) {
-                $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
-            }
-
-            // 3. FORCE THE RIGHT SIDE
-            if ($rightRoot = $rightBranchRoot) {
-                $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
-            }
-
-            // 4. PREPARE THE COLLECTION
-            $teamMembers = collect($allDownliners)->reject(fn($m) => $m->id == 27)->sortBy('created_at');
-            // dd($teamMembers);
-            $totalDownline = $teamMembers->count();
-
-            $leftDownline = $teamMembers->where('position', 'left')->count();
-
-            $rightDownline = $teamMembers->where('position', 'right')->count();
-            // dd($totalDownline, $leftDownline, $rightDownline);
-
-            // 6️⃣ Lucky Cycle Logic (Your existing code)
-            $cycle = DB::table('lucky_cycles')
-                ->where('user_id', auth()->id())
-                ->first();
-            $totalVouchers = 0;
-            $unusedVouchers = 0;
-            $rewardStatus = 'Not Eligible';
-            $rewardText = '-';
-            $voucherGroups = [];
-            $rewards = [];
-
-            if ($cycle) {
-                $totalVouchers = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->count();
-                $unusedVouchers = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->where('status', 'unused')->count();
-
-                if ($cycle->status === 'won') {
-                    $rewardStatus = '🎉 Winner';
-                    $rewardText = 'Congratulations! You won a reward';
-                } elseif ($cycle->status === 'completed') {
-                    $rewardStatus = '🏆 Gold Reward';
-                    $rewardText = $cycle->package_id == 4 ? 'Gold worth ₹65,000' : 'Gold worth ₹1,30,000';
-                } else {
-                    $rewardStatus = '⏳ Active';
-                    $rewardText = 'Lucky draw ongoing';
-                }
-                $voucherGroups = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->orderBy('month_no')->get()->groupBy('month_no');
-                $rewards = DB::table('lucky_rewards')->where('cycle_id', $cycle->id)->get();
-            }
-            // dd($totalDownline, $leftDownline, $rightDownline);
-            return view('dashboard', compact('user', 'payoutReceived', 'payoutPending', 'directIncome', 'pairIncome', 'sponsorBinaryIncome', 'rankRewardIncome', 'rankProgress', 'rankLadder', 'walletBalance', 'repurchaseBalance', 'totalDownline', 'leftDownline', 'rightDownline', 'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups', 'rewards', 'totalEarning', 'progress', 'totalLevelIncome'));
-        }
-
         // Admin dashboard view
         // return view('dashboard', compact('user', 'totalUsers', 'totalWallet', 'pendingWithdraws', 'completedWithdraws', 'totalTopups', 'labels', 'userData', 'fundData', 'starterTotal', 'sevenTotal', 'thirteenTotal', 'fiftyKTotal', 'oneLakhTotal', 'packageUsers', 'todaysData'));
         return view('dashboard', compact(
@@ -354,6 +242,134 @@ $rankLadder = \App\Services\RankRewardService::ladder();
     'todayPackageStats', 'allTimePackageStats', 'todayPackageTotals', 'allTimePackageTotals'
 ));
     }
+    /*
+    |--------------------------------------------------------------------------
+    | Member dashboard
+    |--------------------------------------------------------------------------
+    | Every income figure reads `transactions` credits by bonus_type, i.e. the
+    | full amount earned (before the 90/10 main / Repurchase Wallet split).
+    |--------------------------------------------------------------------------
+    */
+    private const MEMBER_INCOME_GROUPS = [
+        'Direct Income' => [BonusType::DirectIncome],
+        'Pair Income' => [BonusType::PairBonusNormal, BonusType::PairBonusStarter, BonusType::PairBonus],
+        'Level Income' => [BonusType::LevelIncome],
+        'Sponsor Binary Bonus' => [BonusType::SponsorBinaryBonus],
+        'Rank Reward' => [BonusType::RankReward],
+        'Rewards & Other' => [BonusType::RewardAfterFullEmi, BonusType::reward, BonusType::commission, BonusType::PairBonus2000],
+    ];
+
+    private function memberDashboard($user)
+    {
+        $incomeTypes = collect(self::MEMBER_INCOME_GROUPS)->flatten()->map(fn ($t) => $t->value)->all();
+        $credits = fn () => DB::table('transactions')
+            ->where('user_id', $user->id)
+            ->whereRaw('LOWER(type) = ?', ['credit'])
+            ->whereIn('bonus_type', $incomeTypes);
+
+        // Income: lifetime by type, today, this month, last 30 days
+        $byType = $credits()->groupBy('bonus_type')->selectRaw('bonus_type, SUM(amount) as total')->pluck('total', 'bonus_type');
+        $incomeBreakdown = collect(self::MEMBER_INCOME_GROUPS)->map(
+            fn ($types) => (float) collect($types)->sum(fn ($t) => $byType[$t->value] ?? 0)
+        );
+        $totalEarning = $incomeBreakdown->sum();
+        $todayEarning = (float) $credits()->where('created_at', '>=', now()->startOfDay())->sum('amount');
+        $monthEarning = (float) $credits()->where('created_at', '>=', now()->startOfMonth())->sum('amount');
+        $lastMonthEarning = (float) $credits()
+            ->whereBetween('created_at', [now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()->endOfMonth()])
+            ->sum('amount');
+
+        $daily = $credits()->where('created_at', '>=', now()->subDays(29)->startOfDay())
+            ->selectRaw('DATE(created_at) as d, SUM(amount) as total')->groupBy('d')->pluck('total', 'd');
+        $trend = collect(range(29, 0))->map(function ($ago) use ($daily) {
+            $day = now()->subDays($ago);
+            return ['date' => $day->format('d M'), 'amount' => round((float) ($daily[$day->toDateString()] ?? 0), 2)];
+        })->values();
+
+        // Wallets & withdrawals
+        $wallet = DB::table('wallets')->where('user_id', $user->id)->first();
+        $walletBalance = (float) ($wallet->balance ?? 0);
+        $repurchaseBalance = (float) ($wallet->repurchase_balance ?? 0);
+        $withdrawals = DB::table('withdraw_requests')->where('user_id', $user->id)
+            ->selectRaw("COALESCE(SUM(CASE WHEN status = 'completed' THEN amount END), 0) as withdrawn")
+            ->selectRaw("COALESCE(SUM(CASE WHEN status = 'pending' THEN amount END), 0) as pending_amount")
+            ->selectRaw("COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_count")
+            ->selectRaw("COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_count")
+            ->first();
+
+        // Team: binary legs (same crawl as before), direct referrals
+        $allDownliners = [];
+        if ($leftRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'left')->first()) {
+            $this->crawlAndForceSide($leftRoot, 'left', $allDownliners);
+        }
+        if ($rightRoot = \App\Models\User::where('placement_id', $user->id)->where('position', 'right')->first()) {
+            $this->crawlAndForceSide($rightRoot, 'right', $allDownliners);
+        }
+        $teamMembers = collect($allDownliners)->reject(fn ($m) => $m->id == 27);
+        $leftDownline = $teamMembers->where('position', 'left')->count();
+        $rightDownline = $teamMembers->where('position', 'right')->count();
+        $totalDownline = $leftDownline + $rightDownline;
+        $newThisMonth = $teamMembers->filter(fn ($m) => $m->created_at && $m->created_at->gte(now()->startOfMonth()))->count();
+
+        $directIds = DB::table('users')->where('sponsor_id', $user->id)->pluck('id');
+        $directReferrals = $directIds->count();
+        $activeDirects = $directIds->isEmpty() ? 0 : DB::table('orders')
+            ->whereIn('user_id', $directIds)->where('status', 'completed')->distinct()->count('user_id');
+
+        // Account: package, sponsor, EMI, KYC
+        $firstOrder = DB::table('orders as o')->leftJoin('packages as p', 'p.id', '=', 'o.package_id')
+            ->where('o.user_id', $user->id)->where('o.status', 'completed')
+            ->orderBy('o.created_at')->first(['o.created_at', 'p.name as package']);
+        $latestOrder = DB::table('orders as o')->leftJoin('packages as p', 'p.id', '=', 'o.package_id')
+            ->where('o.user_id', $user->id)->where('o.status', 'completed')
+            ->orderByDesc('o.created_at')->first(['o.created_at', 'o.amount', 'p.name as package']);
+        $sponsor = $user->sponsor_id ? DB::table('users')->where('id', $user->sponsor_id)->first(['name', 'member_id']) : null;
+        $paymentDue = \App\Services\PaymentDueService::forUser($user);
+
+        $kycChecklist = [
+            'ID proof' => !empty($user->id_proof),
+            'Address proof' => !empty($user->address_proof),
+            'Bank proof' => !empty($user->account_proof),
+            'Bank details' => !empty($user->account_number) && !empty($user->ifsc_code),
+            'Nominee' => !empty($user->nominee_name),
+        ];
+
+        $recentTransactions = DB::table('transactions')->where('user_id', $user->id)
+            ->orderByDesc('created_at')->orderByDesc('id')->limit(8)
+            ->get(['amount', 'type', 'bonus_type', 'remarks', 'created_at', 'main_wallet_amount', 'repurchase_wallet_amount']);
+
+        // Matrix, rank, lucky draw (unchanged rules)
+        $progress = \App\Models\UserMatrixProgress::where('user_id', $user->id)->first();
+        $rankProgress = \App\Services\RankRewardService::progressFor($user->id);
+        $rankLadder = \App\Services\RankRewardService::ladder();
+
+        $cycle = DB::table('lucky_cycles')->where('user_id', $user->id)->first();
+        $totalVouchers = 0;
+        $unusedVouchers = 0;
+        $rewardStatus = 'Not Eligible';
+        $rewardText = '-';
+        $voucherGroups = [];
+        if ($cycle) {
+            $totalVouchers = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->count();
+            $unusedVouchers = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->where('status', 'unused')->count();
+            [$rewardStatus, $rewardText] = match ($cycle->status) {
+                'won' => ['🎉 Winner', 'Congratulations! You won a reward'],
+                'completed' => ['🏆 Gold Reward', $cycle->package_id == 4 ? 'Gold worth ₹65,000' : 'Gold worth ₹1,30,000'],
+                default => ['⏳ Active', 'Lucky draw ongoing'],
+            };
+            $voucherGroups = DB::table('lucky_vouchers')->where('cycle_id', $cycle->id)->orderBy('month_no')->get()->groupBy('month_no');
+        }
+
+        return view('member.dashboard', compact(
+            'user', 'incomeBreakdown', 'totalEarning', 'todayEarning', 'monthEarning', 'lastMonthEarning', 'trend',
+            'walletBalance', 'repurchaseBalance', 'withdrawals',
+            'leftDownline', 'rightDownline', 'totalDownline', 'newThisMonth', 'directReferrals', 'activeDirects',
+            'firstOrder', 'latestOrder', 'sponsor', 'paymentDue', 'kycChecklist', 'recentTransactions',
+            'progress', 'rankProgress', 'rankLadder',
+            'cycle', 'totalVouchers', 'unusedVouchers', 'rewardStatus', 'rewardText', 'voucherGroups'
+        ));
+    }
+
     private function crawlAndForceSide($node, $side, &$list)
     {
         // We overwrite the 'position' property in the object memory
