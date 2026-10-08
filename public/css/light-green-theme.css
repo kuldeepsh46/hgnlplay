@@ -380,14 +380,14 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
 .hero-banner--custom .hero-grid {
     position: static;
     display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
     align-items: center;
-    gap: clamp(24px, 4.5vw, 72px);
+    gap: clamp(24px, 3.6vw, 56px);
     min-height: 0;
-    padding-top: clamp(28px, 6vw, 88px);
-    padding-bottom: clamp(28px, 6vw, 88px);
+    padding-top: clamp(28px, 4.2vw, 64px);
+    padding-bottom: clamp(28px, 4.2vw, 64px);
 }
-.hero-banner--custom .hero-content { width: auto; min-width: 0; max-width: 660px; }
+.hero-banner--custom .hero-content { width: auto; min-width: 0; max-width: 600px; }
 .hero-banner--custom .hero-eyebrow {
     display: inline-flex;
     align-items: center;
@@ -401,7 +401,7 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
     letter-spacing: .3px;
 }
 .hero-banner--custom .hero-content h1 {
-    font-size: clamp(26px, 3.6vw, 52px);
+    font-size: clamp(26px, 3.4vw, 50px);
     letter-spacing: -0.03em;
     line-height: 1.08;
     margin: clamp(14px, 1.6vw, 24px) 0 clamp(12px, 1.4vw, 20px);
@@ -453,7 +453,7 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
     position: relative;
     justify-self: end;
     width: 100%;
-    max-width: 620px;
+    max-width: none;
     border-radius: clamp(16px, 1.8vw, 26px);
     overflow: hidden;
     background: #fff;
@@ -466,7 +466,7 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
     width: 100%;
     height: auto;
     max-width: 100%;
-    aspect-ratio: 1120 / 940;
+    aspect-ratio: 1250 / 940;
     object-fit: cover;
     object-position: right center;
 }
@@ -474,13 +474,14 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
 
 /* Landscape phones: short screens, keep the whole hero compact */
 @media (max-height: 500px) and (orientation: landscape) and (min-width: 601px) {
-    .hero-banner--custom .hero-grid { padding-top: 22px; padding-bottom: 22px; gap: 24px; }
+    .hero-banner--custom .hero-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); padding-top: 18px; padding-bottom: 18px; gap: 24px; }
+    .hero-banner--custom .hero-content p { font-size: 13px; line-height: 1.55; }
     .hero-banner--custom .hero-content h1 { font-size: clamp(24px, 3.6vw, 32px); margin: 10px 0; }
     .hero-banner--custom .hero-eyebrow { padding: 6px 12px; }
     .hero-banner--custom .hero-actions { margin-top: 14px; }
     .hero-banner--custom .hero-actions .btn { padding: 10px 14px; font-size: 14px; }
     .hero-banner--custom .hero-trust { display: none; }
-    .hero-banner--custom .hero-artwork img { max-height: 78vh; }
+    .hero-banner--custom .hero-artwork img { max-height: 64vh; }
 }
 
 /* Phones: stacked */

@@ -73,7 +73,7 @@
 
     /* ---------- Layout ---------- */
     .container {
-        width: min(1200px, 92vw);
+        width: min(1320px, 92vw);
         margin: 0 auto
     }
 
@@ -1596,7 +1596,7 @@ padding-top: 20px;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1320px;
     margin: 0 auto;
 }
 
