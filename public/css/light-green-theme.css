@@ -364,122 +364,134 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
 }
 
 /* Homepage banner (hero-banner--custom)
-   Three layouts, one image (1673 x 940; its left third is empty backdrop):
-   - >= 1300px  overlay: image is a full-bleed backdrop on the right, copy on a soft fade.
-   - 601-1299px two columns: copy | image card (empty backdrop trimmed, never stretched).
-   - <= 600px   stacked: copy, then the image card.                                      */
+   One image (1673 x 940; its left third is empty backdrop, trimmed via object-fit).
+   - >= 601px  two columns: copy | framed image card, balanced widths.
+   - <= 600px  stacked: copy, then the image card.                                  */
 .hero-banner--custom { padding-top: 0; background: #f3f7f1; }
-.hero-banner--custom .hero-stage { position: relative; isolation: isolate; overflow: hidden; background: #f3f7f1; }
-.hero-banner--custom .hero-grid { position: static; }
-.hero-banner--custom .hero-content { min-width: 0; }
+.hero-banner--custom .hero-stage {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+        radial-gradient(60% 80% at 0% 0%, #cfeedb 0%, transparent 60%),
+        radial-gradient(50% 70% at 100% 100%, #e7def7 0%, transparent 60%),
+        #f3f7f1;
+}
+.hero-banner--custom .hero-grid {
+    position: static;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+    align-items: center;
+    gap: clamp(24px, 4.5vw, 72px);
+    min-height: 0;
+    padding-top: clamp(28px, 6vw, 88px);
+    padding-bottom: clamp(28px, 6vw, 88px);
+}
+.hero-banner--custom .hero-content { width: auto; min-width: 0; max-width: 660px; }
 .hero-banner--custom .hero-eyebrow {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 9px 14px;
+    padding: 8px 14px;
     border-radius: 999px;
-    background: #ffffffc9;
+    background: #ffffffd9;
     border: 1px solid #aacfb8;
     color: #086344;
-    font-size: 12px;
+    font-size: clamp(11px, 1vw, 13px);
     letter-spacing: .3px;
 }
 .hero-banner--custom .hero-content h1 {
-    letter-spacing: -1.2px;
-    line-height: 1.1;
+    font-size: clamp(26px, 3.6vw, 52px);
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    margin: clamp(14px, 1.6vw, 24px) 0 clamp(12px, 1.4vw, 20px);
     color: #123c2a;
 }
-.hero-banner--custom .hero-content p { color: #284c38; }
-.hero-banner--custom .hero-actions { display: flex; flex-direction: row; flex-wrap: wrap; gap: 12px; }
-.hero-banner--custom .hero-actions .btn { justify-content: center; white-space: nowrap; }
-.hero-banner--custom .hero-artwork img { display: block; }
+.hero-banner--custom .hero-content p {
+    color: #33584a;
+    font-size: clamp(14px, 1.35vw, 18px);
+    line-height: 1.65;
+    max-width: 540px;
+}
+.hero-banner--custom .hero-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: clamp(18px, 2.4vw, 32px);
+}
+.hero-banner--custom .hero-actions .btn {
+    justify-content: center;
+    white-space: nowrap;
+    padding: clamp(10px, 1vw, 14px) clamp(16px, 1.8vw, 26px);
+    font-size: clamp(14px, 1.1vw, 16px);
+}
+.hero-banner--custom .hero-trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin: clamp(18px, 2.4vw, 32px) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: clamp(12px, 1vw, 14px);
+    font-weight: 600;
+    color: #33584a;
+}
+.hero-banner--custom .hero-trust li { display: inline-flex; align-items: center; gap: 7px; }
+.hero-banner--custom .hero-trust__icon {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #08734f;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+}
+.hero-banner--custom .hero-artwork {
+    position: relative;
+    justify-self: end;
+    width: 100%;
+    max-width: 620px;
+    border-radius: clamp(16px, 1.8vw, 26px);
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(13, 77, 51, .06), 0 24px 60px rgba(13, 77, 51, .14);
+    outline: 1px solid rgba(13, 77, 51, .06);
+}
+.hero-banner--custom .hero-artwork img {
+    display: block;
+    position: static;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    aspect-ratio: 1120 / 940;
+    object-fit: cover;
+    object-position: right center;
+}
 .hero-banner--custom .hero-marquee { margin-top: 0; }
 
-/* ---------- >= 1300px: overlay ---------- */
-@media (min-width: 1300px) {
-    .hero-banner--custom .hero-stage::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        pointer-events: none;
-        background: linear-gradient(90deg, #edf7f1 0%, #edf7f1cc 25%, transparent 44%);
-    }
-    .hero-banner--custom .hero-grid {
-        display: flex;
-        align-items: center;
-        min-height: clamp(600px, 46vw, 780px);
-        padding-top: 72px;
-        padding-bottom: 80px;
-    }
-    .hero-banner--custom .hero-content { width: 50%; max-width: 600px; }
-    .hero-banner--custom .hero-content h1 { font-size: clamp(38px, 3vw, 48px); margin: 22px 0; }
-    .hero-banner--custom .hero-content p { max-width: 460px; font-size: 16px; }
-    .hero-banner--custom .hero-actions { margin-top: 28px; }
-    .hero-banner--custom .hero-artwork { position: absolute; inset: 0; z-index: -2; }
-    .hero-banner--custom .hero-artwork img {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: auto;
-        height: 100%;
-        max-width: none;
-        object-fit: contain;
-    }
-}
-
-/* ---------- 601-1299px: two columns ---------- */
-@media (max-width: 1299px) {
-    .hero-banner--custom .hero-stage { background: linear-gradient(160deg, #e3f3e9 0%, #f3f7f1 60%); }
-    .hero-banner--custom .hero-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-        align-items: center;
-        gap: clamp(20px, 3.5vw, 48px);
-        min-height: 0;
-        padding-top: clamp(28px, 5vw, 56px);
-        padding-bottom: clamp(28px, 5vw, 56px);
-    }
-    .hero-banner--custom .hero-content { width: auto; max-width: 560px; }
-    .hero-banner--custom .hero-content h1 { font-size: clamp(28px, 3.9vw, 46px); margin: 16px 0 14px; }
-    .hero-banner--custom .hero-content p { font-size: clamp(14px, 1.5vw, 16px); max-width: none; }
-    .hero-banner--custom .hero-actions { margin-top: clamp(18px, 2.4vw, 26px); }
-    .hero-banner--custom .hero-artwork {
-        position: static;
-        border-radius: 20px;
-        overflow: hidden;
-        background: #fff;
-        box-shadow: 0 18px 40px rgba(13, 77, 51, .12);
-    }
-    .hero-banner--custom .hero-artwork img {
-        position: static;
-        width: 100%;
-        height: auto;
-        max-width: 100%;
-        aspect-ratio: 1120 / 940;
-        object-fit: cover;
-        object-position: right center;
-    }
-}
-
 /* Landscape phones: short screens, keep the whole hero compact */
-@media (max-width: 1299px) and (max-height: 500px) and (orientation: landscape) {
-    .hero-banner--custom .hero-grid { padding-top: 22px; padding-bottom: 22px; }
+@media (max-height: 500px) and (orientation: landscape) and (min-width: 601px) {
+    .hero-banner--custom .hero-grid { padding-top: 22px; padding-bottom: 22px; gap: 24px; }
     .hero-banner--custom .hero-content h1 { font-size: clamp(24px, 3.6vw, 32px); margin: 10px 0; }
     .hero-banner--custom .hero-eyebrow { padding: 6px 12px; }
     .hero-banner--custom .hero-actions { margin-top: 14px; }
     .hero-banner--custom .hero-actions .btn { padding: 10px 14px; font-size: 14px; }
+    .hero-banner--custom .hero-trust { display: none; }
     .hero-banner--custom .hero-artwork img { max-height: 78vh; }
 }
 
-/* ---------- <= 600px: stacked ---------- */
+/* Phones: stacked */
 @media (max-width: 600px) {
     .hero-banner--custom .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-top: 28px; padding-bottom: 28px; }
     .hero-banner--custom .hero-content { max-width: none; }
     .hero-banner--custom .hero-content h1 { font-size: clamp(27px, 8.2vw, 36px); margin: 16px 0 12px; }
     .hero-banner--custom .hero-content p { font-size: 15px; }
     .hero-banner--custom .hero-actions { margin-top: 20px; }
-    .hero-banner--custom .hero-artwork { border-radius: 16px; }
+    .hero-banner--custom .hero-trust { margin-top: 18px; gap: 8px 14px; }
+    .hero-banner--custom .hero-artwork { max-width: none; border-radius: 16px; }
     .hero-banner--custom .hero-artwork img { aspect-ratio: 1180 / 940; }
 }
 @media (max-width: 480px) {

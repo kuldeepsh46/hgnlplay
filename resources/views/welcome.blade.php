@@ -1958,6 +1958,12 @@ padding-top: 20px;
                     <a href="/#plan" class="btn btn-primary">Explore Now</a>
                     <a href="/#our-products" class="btn btn-outline">View All Services</a>
                 </div>
+
+                <ul class="hero-trust" aria-label="Company credentials">
+                    <li><span class="hero-trust__icon" aria-hidden="true">✓</span> ISO 9001:2015 Certified</li>
+                    <li><span class="hero-trust__icon" aria-hidden="true">✓</span> MCA Registered</li>
+                    <li><span class="hero-trust__icon" aria-hidden="true">✓</span> Secure Wallet &amp; Payouts</li>
+                </ul>
             </div>
 
             <!-- Product artwork: full-bleed backdrop on large screens, its own column/card below 1300px -->
