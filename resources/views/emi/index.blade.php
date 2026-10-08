@@ -21,7 +21,7 @@ th{background:#e5f2e6;color:#203c30;}
 .pagination li a,.pagination li span{padding:8px 12px;border:1px solid #e5f2e6;border-radius:6px;background:#ffffff;color:var(--accent);text-decoration:none;}
 .pagination li.active span{background:var(--accent);color:#000;}
 </style>
-    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}?v={{ filemtime(public_path('css/light-green-theme.css')) }}">
 </head>
 
 <body>

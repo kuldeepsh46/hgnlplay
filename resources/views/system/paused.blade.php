@@ -12,7 +12,7 @@
         p { margin: 0 0 22px; line-height: 1.6; color: #203c30; }
         a, button { display: inline-block; border: 0; cursor: pointer; font-size: 15px; padding: 10px 18px; border-radius: 8px; background: #287b62; color: #fff; text-decoration: none; font-weight: 600; }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}?v={{ filemtime(public_path('css/light-green-theme.css')) }}">
 </head>
 <body>
     <div class="box">

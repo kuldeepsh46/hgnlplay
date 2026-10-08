@@ -431,7 +431,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
+<link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}?v={{ filemtime(public_path('css/light-green-theme.css')) }}">
 </head>
 
 <body>

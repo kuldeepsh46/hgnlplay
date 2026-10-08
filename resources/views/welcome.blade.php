@@ -1879,7 +1879,7 @@ padding-top: 20px;
     }
 }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}?v={{ filemtime(public_path('css/light-green-theme.css')) }}">
 </head>
 
 <body>
@@ -1937,11 +1937,6 @@ padding-top: 20px;
     <main id="home" tabindex="-1">
     <section class="hero-banner hero-banner--custom">
         <div class="hero-stage">
-            <div class="hero-artwork">
-                <img src="{{ asset('images/banners/himalaya-catalog-v3.jpg') }}"
-                    alt="Catalog of Himalaya Trading electronics, home appliances, HimGlow personal care, and Pay Wellness Syrup"
-                    width="1672" height="941" fetchpriority="high" decoding="async">
-            </div>
         <div class="container hero-grid">
 
             <!-- LEFT CONTENT -->
@@ -1963,6 +1958,13 @@ padding-top: 20px;
                     <a href="/#plan" class="btn btn-primary">Explore Now</a>
                     <a href="/#our-products" class="btn btn-outline">View All Services</a>
                 </div>
+            </div>
+
+            <!-- Product artwork: full-bleed backdrop on large screens, its own column/card below 1300px -->
+            <div class="hero-artwork">
+                <img src="{{ asset('images/banners/himalaya-catalog-v3.jpg') }}"
+                    alt="Catalog of Himalaya Trading electronics, home appliances, HimGlow personal care, and Pay Wellness Syrup"
+                    width="1673" height="940" fetchpriority="high" decoding="async">
             </div>
 
         </div>

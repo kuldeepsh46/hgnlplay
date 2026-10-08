@@ -364,38 +364,14 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
 }
 
 /* Homepage banner (hero-banner--custom)
-   - Wide screens (> 1024px): the catalog image fills the right side and the
-     copy sits on a soft fade on the left.
-   - Tablets & phones: copy first, then the whole image at its natural aspect
-     ratio (never stretched or cropped), then the marquee. */
+   Three layouts, one image (1673 x 940; its left third is empty backdrop):
+   - >= 1300px  overlay: image is a full-bleed backdrop on the right, copy on a soft fade.
+   - 601-1299px two columns: copy | image card (empty backdrop trimmed, never stretched).
+   - <= 600px   stacked: copy, then the image card.                                      */
 .hero-banner--custom { padding-top: 0; background: #f3f7f1; }
 .hero-banner--custom .hero-stage { position: relative; isolation: isolate; overflow: hidden; background: #f3f7f1; }
-.hero-banner--custom .hero-artwork { position: absolute; inset: 0; z-index: -2; }
-.hero-banner--custom .hero-artwork img {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: auto;
-    height: 100%;
-    max-width: none;
-    object-fit: contain;
-}
-.hero-banner--custom .hero-stage::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: linear-gradient(90deg, #edf7f1 0%, #edf7f1cc 25%, transparent 44%);
-}
-.hero-banner--custom .hero-grid {
-    display: flex;
-    align-items: center;
-    min-height: clamp(600px, 49vw, 780px);
-    padding-top: 72px;
-    padding-bottom: 80px;
-}
-.hero-banner--custom .hero-content { width: 42%; max-width: 500px; }
+.hero-banner--custom .hero-grid { position: static; }
+.hero-banner--custom .hero-content { min-width: 0; }
 .hero-banner--custom .hero-eyebrow {
     display: inline-flex;
     align-items: center;
@@ -409,43 +385,105 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
     letter-spacing: .3px;
 }
 .hero-banner--custom .hero-content h1 {
-    font-size: clamp(34px, 3.4vw, 50px);
-    letter-spacing: -1.5px;
+    letter-spacing: -1.2px;
     line-height: 1.1;
-    margin: 22px 0;
     color: #123c2a;
 }
-.hero-banner--custom .hero-content p { color: #284c38; max-width: 460px; font-size: 16px; }
-.hero-banner--custom .hero-actions { display: flex; flex-direction: row; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-.hero-banner--custom .hero-actions .btn { justify-content: center; }
+.hero-banner--custom .hero-content p { color: #284c38; }
+.hero-banner--custom .hero-actions { display: flex; flex-direction: row; flex-wrap: wrap; gap: 12px; }
+.hero-banner--custom .hero-actions .btn { justify-content: center; white-space: nowrap; }
+.hero-banner--custom .hero-artwork img { display: block; }
 .hero-banner--custom .hero-marquee { margin-top: 0; }
 
-@media (max-width: 1024px) {
-    .hero-banner--custom .hero-stage { display: flex; flex-direction: column; background: linear-gradient(180deg, #e3f3e9, #f3f7f1); }
-    .hero-banner--custom .hero-stage::after { display: none; }
-    .hero-banner--custom .hero-grid { order: 0; min-height: 0; padding-top: 40px; padding-bottom: 28px; }
-    .hero-banner--custom .hero-content { width: 100%; max-width: 640px; }
-    .hero-banner--custom .hero-content h1 { font-size: clamp(30px, 6vw, 44px); letter-spacing: -1px; margin: 18px 0 14px; }
-    .hero-banner--custom .hero-content p { font-size: 15px; max-width: none; }
-    .hero-banner--custom .hero-artwork { position: static; order: 1; z-index: 0; }
+/* ---------- >= 1300px: overlay ---------- */
+@media (min-width: 1300px) {
+    .hero-banner--custom .hero-stage::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(90deg, #edf7f1 0%, #edf7f1cc 25%, transparent 44%);
+    }
+    .hero-banner--custom .hero-grid {
+        display: flex;
+        align-items: center;
+        min-height: clamp(600px, 46vw, 780px);
+        padding-top: 72px;
+        padding-bottom: 80px;
+    }
+    .hero-banner--custom .hero-content { width: 50%; max-width: 600px; }
+    .hero-banner--custom .hero-content h1 { font-size: clamp(38px, 3vw, 48px); margin: 22px 0; }
+    .hero-banner--custom .hero-content p { max-width: 460px; font-size: 16px; }
+    .hero-banner--custom .hero-actions { margin-top: 28px; }
+    .hero-banner--custom .hero-artwork { position: absolute; inset: 0; z-index: -2; }
     .hero-banner--custom .hero-artwork img {
-        position: static;
-        display: block;
-        width: 100%;
-        height: auto;
-        max-width: 100%;
-        aspect-ratio: 1673 / 940;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: auto;
+        height: 100%;
+        max-width: none;
         object-fit: contain;
     }
 }
-@media (max-width: 760px) {
-    /* The artwork's left third is empty backdrop; trim it so the products fill the width (crop, never stretch) */
-    .hero-banner--custom .hero-artwork img { aspect-ratio: 1180 / 940; object-fit: cover; object-position: right center; }
+
+/* ---------- 601-1299px: two columns ---------- */
+@media (max-width: 1299px) {
+    .hero-banner--custom .hero-stage { background: linear-gradient(160deg, #e3f3e9 0%, #f3f7f1 60%); }
+    .hero-banner--custom .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+        align-items: center;
+        gap: clamp(20px, 3.5vw, 48px);
+        min-height: 0;
+        padding-top: clamp(28px, 5vw, 56px);
+        padding-bottom: clamp(28px, 5vw, 56px);
+    }
+    .hero-banner--custom .hero-content { width: auto; max-width: 560px; }
+    .hero-banner--custom .hero-content h1 { font-size: clamp(28px, 3.9vw, 46px); margin: 16px 0 14px; }
+    .hero-banner--custom .hero-content p { font-size: clamp(14px, 1.5vw, 16px); max-width: none; }
+    .hero-banner--custom .hero-actions { margin-top: clamp(18px, 2.4vw, 26px); }
+    .hero-banner--custom .hero-artwork {
+        position: static;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 18px 40px rgba(13, 77, 51, .12);
+    }
+    .hero-banner--custom .hero-artwork img {
+        position: static;
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        aspect-ratio: 1120 / 940;
+        object-fit: cover;
+        object-position: right center;
+    }
+}
+
+/* Landscape phones: short screens, keep the whole hero compact */
+@media (max-width: 1299px) and (max-height: 500px) and (orientation: landscape) {
+    .hero-banner--custom .hero-grid { padding-top: 22px; padding-bottom: 22px; }
+    .hero-banner--custom .hero-content h1 { font-size: clamp(24px, 3.6vw, 32px); margin: 10px 0; }
+    .hero-banner--custom .hero-eyebrow { padding: 6px 12px; }
+    .hero-banner--custom .hero-actions { margin-top: 14px; }
+    .hero-banner--custom .hero-actions .btn { padding: 10px 14px; font-size: 14px; }
+    .hero-banner--custom .hero-artwork img { max-height: 78vh; }
+}
+
+/* ---------- <= 600px: stacked ---------- */
+@media (max-width: 600px) {
+    .hero-banner--custom .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-top: 28px; padding-bottom: 28px; }
+    .hero-banner--custom .hero-content { max-width: none; }
+    .hero-banner--custom .hero-content h1 { font-size: clamp(27px, 8.2vw, 36px); margin: 16px 0 12px; }
+    .hero-banner--custom .hero-content p { font-size: 15px; }
+    .hero-banner--custom .hero-actions { margin-top: 20px; }
+    .hero-banner--custom .hero-artwork { border-radius: 16px; }
+    .hero-banner--custom .hero-artwork img { aspect-ratio: 1180 / 940; }
 }
 @media (max-width: 480px) {
-    .hero-banner--custom .hero-grid { padding-top: 32px; padding-bottom: 24px; }
-    .hero-banner--custom .hero-content h1 { font-size: clamp(28px, 8.4vw, 34px); }
     .hero-banner--custom .hero-content h1 br { display: none; }
-    .hero-banner--custom .hero-actions { flex-direction: column; gap: 10px; margin-top: 22px; }
+    .hero-banner--custom .hero-actions { flex-direction: column; gap: 10px; }
     .hero-banner--custom .hero-actions .btn { width: 100%; padding: 13px 16px; font-size: 15px; }
 }
