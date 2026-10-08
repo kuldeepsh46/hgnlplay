@@ -242,17 +242,17 @@ body{
 <div class="form-grid">
   <div class="form-group">
     <label>ID Proof *</label>
-    <input type="file" name="id_proof">
+    <input type="file" name="id_proof" accept="image/jpeg,image/png,image/webp,application/pdf">
   </div>
 
   <div class="form-group">
     <label>Address Proof</label>
-    <input type="file" name="address_proof">
+    <input type="file" name="address_proof" accept="image/jpeg,image/png,image/webp,application/pdf">
   </div>
 
   <div class="form-group">
     <label>Account Proof</label>
-    <input type="file" name="account_proof">
+    <input type="file" name="account_proof" accept="image/jpeg,image/png,image/webp,application/pdf">
   </div>
 </div>
 

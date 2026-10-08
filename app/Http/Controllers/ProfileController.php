@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\SafeUpload;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -86,32 +88,20 @@ $walletBalance = DB::table('wallets')
         // dd($user->getFillable());
 
         $r->validate([
-            'id_proof' => 'nullable|file',
-            'address_proof' => 'nullable|file',
-            'account_proof' => 'nullable|file',
+            'id_proof' => 'nullable|' . SafeUpload::DOCUMENT_RULE,
+            'address_proof' => 'nullable|' . SafeUpload::DOCUMENT_RULE,
+            'account_proof' => 'nullable|' . SafeUpload::DOCUMENT_RULE,
+        ], [
+            '*.mimes' => 'KYC documents must be images (JPG, PNG, WEBP) or PDFs.',
+            '*.max' => 'Each KYC document must be 5 MB or smaller.',
         ]);
 
         $data = [];
-        // ✅ Store each file if uploaded
-        if ($r->hasFile('id_proof')) {
-            $file = $r->file('id_proof');
-            $filename = time() . '_id_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/kyc/id_proof'), $filename);
-            $data['id_proof'] = 'uploads/kyc/id_proof/' . $filename;
-        }
-
-        if ($r->hasFile('address_proof')) {
-            $file = $r->file('address_proof');
-            $filename = time() . '_address_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/kyc/address_proof'), $filename);
-            $data['address_proof'] = 'uploads/kyc/address_proof/' . $filename;
-        }
-
-        if ($r->hasFile('account_proof')) {
-            $file = $r->file('account_proof');
-            $filename = time() . '_account_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/kyc/account_proof'), $filename);
-            $data['account_proof'] = 'uploads/kyc/account_proof/' . $filename;
+        // ✅ Store each file if uploaded (random name, type checked from contents)
+        foreach (['id_proof' => 'id', 'address_proof' => 'address', 'account_proof' => 'account'] as $field => $prefix) {
+            if ($r->hasFile($field)) {
+                $data[$field] = SafeUpload::store($r->file($field), 'uploads/kyc/' . $field, $prefix);
+            }
         }
 
         $user->update($data);
@@ -161,7 +151,10 @@ $walletBalance = DB::table('wallets')
             'bank_name' => 'nullable|string',
             'account_number' => 'nullable|string',
             'transaction_remark' => 'nullable|string',
-            'attachment' => 'nullable|file',
+            'attachment' => 'nullable|' . SafeUpload::DOCUMENT_RULE,
+        ], [
+            'attachment.mimes' => 'Upload the payment proof as an image (JPG, PNG, WEBP) or a PDF.',
+            'attachment.max' => 'The payment proof must be 5 MB or smaller.',
         ]);
 
         $user = Auth::user();
@@ -170,17 +163,10 @@ $walletBalance = DB::table('wallets')
         $bankName = $r->filled('bank_name') ? $r->bank_name : $user->bank_name;
         $accountNumber = $r->filled('account_number') ? $r->account_number : $user->account_number;
 
-        // upload file to public/uploads/fund_requests
+        // upload file to public/uploads/fund_requests (random name, type checked from contents)
         $path = null;
         if ($r->hasFile('attachment')) {
-            $dir = public_path('uploads/fund_requests');
-            if (!is_dir($dir)) {
-                @mkdir($dir, 0755, true);
-            }
-            $file = $r->file('attachment');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move($dir, $filename);
-            $path = 'public/uploads/fund_requests/' . $filename;
+            $path = 'public/' . SafeUpload::store($r->file('attachment'), 'uploads/fund_requests');
         }
 
         DB::table('fund_requests')->insert([
