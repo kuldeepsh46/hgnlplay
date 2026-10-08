@@ -2087,7 +2087,7 @@ padding-top: 20px;
             </div>
             <div class="hp-grid">
                 @foreach ($homeProducts as $p)
-                    <a class="hp-card" href="https://wa.me/919805032635?text={{ rawurlencode("Hi, I'm interested in " . $p['name']) }}" target="_blank" rel="noopener" aria-label="Enquire about {{ $p['name'] }} on WhatsApp (opens in a new tab)">
+                    <a class="hp-card" href="https://wa.me/916230190097?text={{ rawurlencode("Hi, I'm interested in " . $p['name']) }}" target="_blank" rel="noopener" aria-label="Enquire about {{ $p['name'] }} on WhatsApp (opens in a new tab)">
                         <div class="hp-img">
                             <span class="hp-number" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                             <img src="{{ asset('images/products/' . $p['img']) }}" alt="{{ $p['name'] }}" loading="lazy" width="400" height="400">
@@ -2619,8 +2619,8 @@ padding-top: 20px;
                 <h5>Contact Us</h5>
                 <ul>
                     
-                    <li><a href="mailto:info@hgnl.co.in">info@hgnl.co.in</a></li>
-                    <li><a href="tel:+916230714902">+91 62307 14902</a></li>
+                    <li><a href="mailto:primehimalaya1@gmail.com">primehimalaya1@gmail.com</a></li>
+                    <li><a href="tel:+916230190097">+91 6230 190 097</a></li>
                 </ul>
             </div>
         </div>

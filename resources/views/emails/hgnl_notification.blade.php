@@ -80,7 +80,7 @@
 <body style="margin:0; padding:0; background:#eef4fb; font-family:Arial, Helvetica, sans-serif; color:#111827;">
 
 @php
-    $supportEmail = config('mail.support.address') ?: env('MAIL_SUPPORT_ADDRESS') ?: 'support@hgnlpay.com';
+    $supportEmail = config('mail.support.address') ?: env('MAIL_SUPPORT_ADDRESS') ?: 'primehimalaya1@gmail.com';
 
     $subject = $mailData['subject'] ?? 'HGNL Pay Notification';
     $title = $mailData['title'] ?? 'Notification';
