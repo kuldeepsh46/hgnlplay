@@ -363,18 +363,30 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
     .home-products *, .home-products::before, .home-products::after { animation: none !important; transition: none !important; }
 }
 
-/* Bespoke generated homepage banner; live copy and existing links remain accessible. */
-.hero-banner--custom { padding-top: 0; background: #eaf4ed; }
-.hero-banner--custom .hero-stage { position: relative; isolation: isolate; overflow: hidden; }
+/* Homepage banner (hero-banner--custom)
+   - Wide screens (> 1024px): the catalog image fills the right side and the
+     copy sits on a soft fade on the left.
+   - Tablets & phones: copy first, then the whole image at its natural aspect
+     ratio (never stretched or cropped), then the marquee. */
+.hero-banner--custom { padding-top: 0; background: #f3f7f1; }
+.hero-banner--custom .hero-stage { position: relative; isolation: isolate; overflow: hidden; background: #f3f7f1; }
 .hero-banner--custom .hero-artwork { position: absolute; inset: 0; z-index: -2; }
-.hero-banner--custom .hero-artwork img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.hero-banner--custom .hero-artwork img {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: auto;
+    height: 100%;
+    max-width: none;
+    object-fit: contain;
+}
 .hero-banner--custom .hero-stage::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: linear-gradient(90deg, rgba(240, 249, 241, .96), rgba(240, 249, 241, .82) 30%, rgba(240, 249, 241, .15) 53%, transparent 65%);
+    background: linear-gradient(90deg, #edf7f1 0%, #edf7f1cc 25%, transparent 44%);
 }
 .hero-banner--custom .hero-grid {
     display: flex;
@@ -383,9 +395,11 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
     padding-top: 72px;
     padding-bottom: 80px;
 }
-.hero-banner--custom .hero-content { width: 49%; max-width: 570px; }
+.hero-banner--custom .hero-content { width: 42%; max-width: 500px; }
 .hero-banner--custom .hero-eyebrow {
     display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 9px 14px;
     border-radius: 999px;
     background: #ffffffc9;
@@ -394,34 +408,44 @@ body .hgnl-btn-primary, body .hgnl-btn-secondary { border-radius: 12px; letter-s
     font-size: 12px;
     letter-spacing: .3px;
 }
-.hero-banner--custom .hero-content h1 { font-size: clamp(34px, 3.7vw, 56px); letter-spacing: -1.5px; line-height: 1.1; margin: 22px 0; color: #123c2a; }
+.hero-banner--custom .hero-content h1 {
+    font-size: clamp(34px, 3.4vw, 50px);
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin: 22px 0;
+    color: #123c2a;
+}
 .hero-banner--custom .hero-content p { color: #284c38; max-width: 460px; font-size: 16px; }
-.hero-banner--custom .hero-actions { flex-wrap: wrap; gap: 12px; }
+.hero-banner--custom .hero-actions { display: flex; flex-direction: row; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.hero-banner--custom .hero-actions .btn { justify-content: center; }
 .hero-banner--custom .hero-marquee { margin-top: 0; }
+
 @media (max-width: 1024px) {
-    .hero-banner--custom .hero-content { width: 52%; }
-    .hero-banner--custom .hero-grid { min-height: 560px; }
-}
-@media (max-width: 760px) {
-    .hero-banner--custom .hero-stage { display: flex; flex-direction: column; background: linear-gradient(135deg, #daf0e1, #f5faf5); }
+    .hero-banner--custom .hero-stage { display: flex; flex-direction: column; background: linear-gradient(180deg, #e3f3e9, #f3f7f1); }
     .hero-banner--custom .hero-stage::after { display: none; }
-    .hero-banner--custom .hero-grid { order: 0; min-height: 0; padding-top: 45px; padding-bottom: 35px; }
-    .hero-banner--custom .hero-content { width: 100%; max-width: 580px; }
-    .hero-banner--custom .hero-content h1 { font-size: clamp(32px, 6.5vw, 44px); letter-spacing: -1px; }
-    .hero-banner--custom .hero-content p { font-size: 15px; }
-    .hero-banner--custom .hero-artwork { position: relative; order: 1; z-index: 0; height: clamp(280px, 65vw, 460px); }
-    .hero-banner--custom .hero-artwork img { object-position: right center; }
-    .hero-banner--custom .hero-actions { flex-direction: row; }
-    .hero-banner--custom .hero-actions .btn { font-size: 13px; padding: 12px 16px; }
+    .hero-banner--custom .hero-grid { order: 0; min-height: 0; padding-top: 40px; padding-bottom: 28px; }
+    .hero-banner--custom .hero-content { width: 100%; max-width: 640px; }
+    .hero-banner--custom .hero-content h1 { font-size: clamp(30px, 6vw, 44px); letter-spacing: -1px; margin: 18px 0 14px; }
+    .hero-banner--custom .hero-content p { font-size: 15px; max-width: none; }
+    .hero-banner--custom .hero-artwork { position: static; order: 1; z-index: 0; }
+    .hero-banner--custom .hero-artwork img {
+        position: static;
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        aspect-ratio: 1673 / 940;
+        object-fit: contain;
+    }
 }
-/* Neutral catalog composition preserves the complete lineup without vertical cropping. */
-.hero-banner--custom .hero-stage { background: #f3f7f1; }
-.hero-banner--custom .hero-artwork img { position: absolute; right: 0; top: 0; width: auto; max-width: none; height: 100%; object-fit: contain; }
-.hero-banner--custom .hero-stage::after { background: linear-gradient(90deg, #edf7f1 0%, #edf7f1cc 25%, transparent 44%); }
-.hero-banner--custom .hero-content { width: 42%; max-width: 500px; }
-.hero-banner--custom .hero-content h1 { font-size: clamp(34px, 3.4vw, 50px); }
 @media (max-width: 760px) {
-    .hero-banner--custom .hero-content { width: 100%; max-width: 580px; }
-    .hero-banner--custom .hero-content h1 { font-size: clamp(32px, 6.5vw, 44px); }
-    .hero-banner--custom .hero-artwork { overflow: hidden; background: #f3f7f1; }
+    /* The artwork's left third is empty backdrop; trim it so the products fill the width (crop, never stretch) */
+    .hero-banner--custom .hero-artwork img { aspect-ratio: 1180 / 940; object-fit: cover; object-position: right center; }
+}
+@media (max-width: 480px) {
+    .hero-banner--custom .hero-grid { padding-top: 32px; padding-bottom: 24px; }
+    .hero-banner--custom .hero-content h1 { font-size: clamp(28px, 8.4vw, 34px); }
+    .hero-banner--custom .hero-content h1 br { display: none; }
+    .hero-banner--custom .hero-actions { flex-direction: column; gap: 10px; margin-top: 22px; }
+    .hero-banner--custom .hero-actions .btn { width: 100%; padding: 13px 16px; font-size: 15px; }
 }
