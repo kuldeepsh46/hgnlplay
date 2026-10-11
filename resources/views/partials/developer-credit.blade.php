@@ -7,14 +7,13 @@
         'phone_display' => '+91 98882 73036',
         'phone' => '+919888273036',
     ];
-    $waText = rawurlencode('Hi Kuldeep, I saw your work on the Himalaya Pay website and would like to discuss a website / app project.');
+    $waText = rawurlencode('Hello Kuldeep, I would like to discuss a website / app project.');
     $services = ['Business websites', 'Web apps & portals', 'Mobile apps', 'E-commerce', 'Dashboards & admin panels', 'Payments & wallets'];
 @endphp
 
 <div class="dev-credit">
     Designed &amp; developed by
     <button type="button" class="dev-credit__btn" aria-haspopup="dialog" aria-controls="devCard">{{ $dev['name'] }}</button>
-    <span class="dev-credit__tease">· Need a website or app?</span>
 </div>
 
 <dialog id="devCard" class="dev-card" aria-labelledby="devCardTitle">
@@ -27,15 +26,14 @@
         </div>
     </div>
     <p class="dev-card__pitch">
-        <strong>Liked this platform? I built it</strong> — from the member dashboard to wallets, payouts and team trees.
-        Whatever you have in mind, I can design and build it for you.
+        I design and develop custom websites, web applications and mobile apps for businesses of all sizes.
     </p>
     <ul class="dev-card__services" aria-label="Services">
         @foreach ($services as $service)
             <li>{{ $service }}</li>
         @endforeach
     </ul>
-    <p class="dev-card__cta">Tell me about your idea — let's build it together.</p>
+    <p class="dev-card__cta">Available for new projects.</p>
     <div class="dev-card__actions">
         <a class="dev-card__link dev-card__link--wa" href="https://wa.me/919888273036?text={{ $waText }}" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.5-.3Z"/></svg>
@@ -94,9 +92,8 @@
         padding: 5px 10px; border-radius: 99px; font-size: 12px; font-weight: 600;
         background: #e3f3e9; color: #0b5a3c;
     }
-    .dev-card__cta { margin: 0 0 14px; font-size: 14px; font-weight: 700; color: #123c2a; }
-    .dev-credit__tease { color: #586d63; }
-    @media (max-width: 420px) { .dev-credit__tease { display: none; } }
+    .dev-card__cta { margin: 0 0 14px; font-size: 13px; font-weight: 600; color: #496359; }
+
     .dev-card__actions { display: flex; flex-direction: column; gap: 10px; }
     .dev-card__link {
         display: flex; align-items: center; gap: 12px;
