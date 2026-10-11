@@ -247,6 +247,9 @@ main.main{
     overflow-x:hidden;
 }
 main.main:focus{outline:none}
+/* Keep the footer at the bottom of short pages */
+main.main{display:flex;flex-direction:column;min-height:100vh}
+main.main > .main-body{flex:1 0 auto;min-width:0}
 
 /* ===== OVERLAY ===== */
 #sidebarOverlay{
@@ -449,7 +452,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     @unless (request()->routeIs('payments.due'))
         @include('partials.payment-due-alert')
     @endunless
-    @yield('main')
+    <div class="main-body">
+        @yield('main')
+    </div>
+    @include('partials.site-footer')
 </main>
 
 <script>

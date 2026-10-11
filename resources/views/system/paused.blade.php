@@ -29,5 +29,6 @@
             <a href="{{ url()->previous() !== url()->current() ? url()->previous() : url('/') }}">Go back</a>
         @endif
     </div>
+<div style="max-width:720px;margin:0 auto;padding:0 16px 20px">@include('partials.site-footer')</div>
 </body>
 </html>

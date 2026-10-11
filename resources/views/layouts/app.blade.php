@@ -176,6 +176,8 @@
       filter:brightness(1.1);
       box-shadow:0 0 0 8px rgba(35,132,91,.15);
     }
+    .auth-footer{max-width:1100px;margin:0 auto;padding:0 16px 20px}
+    .auth-footer .site-footer{margin-top:0}
     .extra-links{
       margin-top:20px;
       font-size:14px;
@@ -206,6 +208,9 @@
         <main id="main-content">
             @yield('content')
         </main>
+        <div class="auth-footer">
+            @include('partials.site-footer')
+        </div>
     </div>
 </body>
 </html>

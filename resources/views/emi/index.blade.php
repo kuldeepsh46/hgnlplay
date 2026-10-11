@@ -76,6 +76,7 @@ th{background:#e5f2e6;color:#203c30;}
 
     <div>{{ $emis->links('partials.pagination') }}</div>
   </div>
+@include('partials.site-footer')
 </main>
 
 <script>
