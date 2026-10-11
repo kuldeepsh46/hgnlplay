@@ -740,6 +740,7 @@
 
         <div class="container copy">
             <div>Himalaya <span class="brand-green">Trading</span> © 2026. All Rights Reserved.</div>
+            @include('partials.developer-credit')
             <div><a href="#home">Back to top ↑</a></div>
         </div>
     </footer>
