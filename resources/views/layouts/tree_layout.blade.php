@@ -42,7 +42,7 @@
 
         @yield('styles')
     </style>
-    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}?v={{ filemtime(public_path('css/light-green-theme.css')) }}">
 </head>
 <body>
     <div class="app-container">

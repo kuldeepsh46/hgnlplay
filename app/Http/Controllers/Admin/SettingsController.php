@@ -114,7 +114,7 @@ class SettingsController extends Controller
     public function updateScanner(Request $request, $id)
     {
         $request->validate([
-            'qr_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'qr_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         if ($request->hasFile('qr_image')) {
@@ -123,9 +123,7 @@ class SettingsController extends Controller
             // 1. Fetch current record
             $oldRecord = \Illuminate\Support\Facades\DB::table('settings')->where('id', $id)->first();
 
-            // 2. Prepare file details
-            $name = 'qr_' . $id . '_' . time() . '.' . $image->getClientOriginalExtension();
-            $destinationPath = public_path('assets/images/');
+            // 2. File name and extension come from the server, never the client (see SafeUpload)
 
             // 3. Cleanup: Delete old file ONLY if it exists in DB and on Disk
             if ($oldRecord && !empty($oldRecord->qr_scanner_img)) {
@@ -136,8 +134,7 @@ class SettingsController extends Controller
             }
 
             // 4. Move new file to public/assets/images/
-            $image->move($destinationPath, $name);
-            $dbPath = 'assets/images/' . $name;
+            $dbPath = \App\Support\SafeUpload::store($image, 'assets/images', 'qr_' . (int) $id, \App\Support\SafeUpload::IMAGE_EXTENSIONS);
 
             // 5. Build the data array
             $data = [

@@ -527,7 +527,7 @@
 }
    
     </style>
-    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}?v={{ filemtime(public_path('css/light-green-theme.css')) }}">
 </head>
 
 <body>
@@ -664,8 +664,8 @@
     <div class="info-box">
       <p><strong>Himalaya Trading</strong></p>
     
-      <p>Email: <a href="mailto:info@hgnl.co.in">info@hgnl.co.in</a></p> 
-      <p>Phone: <a href="tel:+91 62307 14902">+91 62307 14902</a></p>
+      <p>Email: <a href="mailto:primehimalaya1@gmail.com">primehimalaya1@gmail.com</a></p> 
+      <p>Phone: <a href="tel:+916230190097">+91 6230 190 097</a></p>
     </div>
 
   </div>
@@ -716,14 +716,15 @@
                 <h5>Contact Us</h5>
                 <ul>
                     
-                    <li><a href="mailto:info@hgnl.co.in">info@hgnl.co.in</a></li>
-                    <li><a href="tel:+91 62307 14902">+91 62307 14902</a></li>
+                    <li><a href="mailto:primehimalaya1@gmail.com">primehimalaya1@gmail.com</a></li>
+                    <li><a href="tel:+916230190097">+91 6230 190 097</a></li>
                 </ul>
             </div>
         </div>
 
         <div class="container copy">
             <div>Himalaya <span class="brand-green">Trading</span> © 2026. All Rights Reserved.</div>
+            @include('partials.developer-credit')
             <div><a href="#home">Back to top ↑</a></div>
         </div>
     </footer>

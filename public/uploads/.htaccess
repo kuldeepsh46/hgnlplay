@@ -1,0 +1,19 @@
+# User uploads: serve as plain files only, never execute anything here.
+# (Apache / LiteSpeed. Uploads are also renamed with a safe extension by App\Support\SafeUpload.)
+Options -Indexes -ExecCGI
+
+<IfModule mod_mime.c>
+    RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phar .pl .py .cgi .sh
+    RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phar
+</IfModule>
+
+# Only images and PDFs may be downloaded from this folder
+<FilesMatch "(?i)^(?!.*\.(jpe?g|png|gif|webp|pdf)$).+$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

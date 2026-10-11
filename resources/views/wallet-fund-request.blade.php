@@ -463,7 +463,7 @@
                         </div>
                         <div>
                             <label>Attach Slip / Screenshot</label>
-                            <input type="file" name="attachment" required>
+                            <input type="file" name="attachment" required accept="image/jpeg,image/png,image/webp,application/pdf">
                         </div>
                     </div>
 

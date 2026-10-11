@@ -247,6 +247,9 @@ main.main{
     overflow-x:hidden;
 }
 main.main:focus{outline:none}
+/* Keep the footer at the bottom of short pages */
+main.main{display:flex;flex-direction:column;min-height:100vh}
+main.main > .main-body{flex:1 0 auto;min-width:0}
 
 /* ===== OVERLAY ===== */
 #sidebarOverlay{
@@ -431,7 +434,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}">
+<link rel="stylesheet" href="{{ asset('css/light-green-theme.css') }}?v={{ filemtime(public_path('css/light-green-theme.css')) }}">
 </head>
 
 <body>
@@ -449,7 +452,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     @unless (request()->routeIs('payments.due'))
         @include('partials.payment-due-alert')
     @endunless
-    @yield('main')
+    <div class="main-body">
+        @yield('main')
+    </div>
+    @include('partials.site-footer')
 </main>
 
 <script>
